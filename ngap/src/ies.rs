@@ -27,6 +27,7 @@ impl AdditionalDluptnlInformationForHoList {
 }
 
 impl PerCodec for AdditionalDluptnlInformationForHoList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AdditionalDluptnlInformationForHoList");
@@ -104,6 +105,7 @@ impl AdditionalDluptnlInformationForHoItem {
 }
 
 impl PerCodec for AdditionalDluptnlInformationForHoItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AdditionalDluptnlInformationForHoItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AdditionalDluptnlInformationForHoItem");
@@ -138,6 +140,7 @@ impl AdditionalQosFlowInformation {
 }
 
 impl PerCodec for AdditionalQosFlowInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AdditionalQosFlowInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AdditionalQosFlowInformation");
@@ -199,6 +202,7 @@ impl AllocationAndRetentionPriority {
 }
 
 impl PerCodec for AllocationAndRetentionPriority {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllocationAndRetentionPriority::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllocationAndRetentionPriority");
@@ -237,6 +241,7 @@ impl AllowedCagListPerPlmn {
 }
 
 impl PerCodec for AllowedCagListPerPlmn {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllowedCagListPerPlmn::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllowedCagListPerPlmn");
@@ -275,6 +280,7 @@ impl AllowedNssai {
 }
 
 impl PerCodec for AllowedNssai {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllowedNssai::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllowedNssai");
@@ -326,6 +332,7 @@ impl AllowedNssaiItem {
 }
 
 impl PerCodec for AllowedNssaiItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllowedNssaiItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllowedNssaiItem");
@@ -364,6 +371,7 @@ impl AllowedPniNpnList {
 }
 
 impl PerCodec for AllowedPniNpnList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllowedPniNpnList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllowedPniNpnList");
@@ -425,6 +433,7 @@ impl AllowedPniNpnItem {
 }
 
 impl PerCodec for AllowedPniNpnItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllowedPniNpnItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllowedPniNpnItem");
@@ -463,6 +472,7 @@ impl AllowedTaCs {
 }
 
 impl PerCodec for AllowedTaCs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AllowedTaCs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AllowedTaCs");
@@ -492,6 +502,7 @@ impl AlternativeQosParaSetIndex {
 }
 
 impl PerCodec for AlternativeQosParaSetIndex {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AlternativeQosParaSetIndex::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AlternativeQosParaSetIndex");
@@ -521,6 +532,7 @@ impl AlternativeQosParaSetNotifyIndex {
 }
 
 impl PerCodec for AlternativeQosParaSetNotifyIndex {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AlternativeQosParaSetNotifyIndex::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AlternativeQosParaSetNotifyIndex");
@@ -559,6 +571,7 @@ impl AlternativeQosParaSetList {
 }
 
 impl PerCodec for AlternativeQosParaSetList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AlternativeQosParaSetList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AlternativeQosParaSetList");
@@ -656,6 +669,7 @@ impl AlternativeQosParaSetItem {
 }
 
 impl PerCodec for AlternativeQosParaSetItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AlternativeQosParaSetItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AlternativeQosParaSetItem");
@@ -688,6 +702,7 @@ impl AmfName {
 }
 
 impl PerCodec for AmfName {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfName::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfName");
@@ -720,6 +735,7 @@ impl AmfNameVisibleString {
 }
 
 impl PerCodec for AmfNameVisibleString {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfNameVisibleString::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfNameVisibleString");
@@ -752,6 +768,7 @@ impl AmfNameUtf8String {
 }
 
 impl PerCodec for AmfNameUtf8String {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfNameUtf8String::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfNameUtf8String");
@@ -802,6 +819,7 @@ impl AmfPagingTarget {
 }
 
 impl PerCodec for AmfPagingTarget {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfPagingTarget::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfPagingTarget");
@@ -834,6 +852,7 @@ impl AmfPointer {
 }
 
 impl PerCodec for AmfPointer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfPointer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfPointer");
@@ -866,6 +885,7 @@ impl AmfRegionId {
 }
 
 impl PerCodec for AmfRegionId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfRegionId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfRegionId");
@@ -898,6 +918,7 @@ impl AmfSetId {
 }
 
 impl PerCodec for AmfSetId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfSetId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfSetId");
@@ -936,6 +957,7 @@ impl AmfTnlAssociationSetupList {
 }
 
 impl PerCodec for AmfTnlAssociationSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationSetupList");
@@ -989,6 +1011,7 @@ impl AmfTnlAssociationSetupItem {
 }
 
 impl PerCodec for AmfTnlAssociationSetupItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationSetupItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationSetupItem");
@@ -1027,6 +1050,7 @@ impl AmfTnlAssociationToAddList {
 }
 
 impl PerCodec for AmfTnlAssociationToAddList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationToAddList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationToAddList");
@@ -1095,6 +1119,7 @@ impl AmfTnlAssociationToAddItem {
 }
 
 impl PerCodec for AmfTnlAssociationToAddItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationToAddItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationToAddItem");
@@ -1133,6 +1158,7 @@ impl AmfTnlAssociationToRemoveList {
 }
 
 impl PerCodec for AmfTnlAssociationToRemoveList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationToRemoveList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationToRemoveList");
@@ -1194,6 +1220,7 @@ impl AmfTnlAssociationToRemoveItem {
 }
 
 impl PerCodec for AmfTnlAssociationToRemoveItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationToRemoveItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationToRemoveItem");
@@ -1232,6 +1259,7 @@ impl AmfTnlAssociationToUpdateList {
 }
 
 impl PerCodec for AmfTnlAssociationToUpdateList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationToUpdateList");
@@ -1307,6 +1335,7 @@ impl AmfTnlAssociationToUpdateItem {
 }
 
 impl PerCodec for AmfTnlAssociationToUpdateItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfTnlAssociationToUpdateItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfTnlAssociationToUpdateItem");
@@ -1343,6 +1372,7 @@ impl AmfUeNgapId {
 }
 
 impl PerCodec for AmfUeNgapId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AmfUeNgapId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AmfUeNgapId");
@@ -1425,6 +1455,7 @@ impl AreaOfInterest {
 }
 
 impl PerCodec for AreaOfInterest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterest");
@@ -1463,6 +1494,7 @@ impl AreaOfInterestCellList {
 }
 
 impl PerCodec for AreaOfInterestCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestCellList");
@@ -1514,6 +1546,7 @@ impl AreaOfInterestCellItem {
 }
 
 impl PerCodec for AreaOfInterestCellItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestCellItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestCellItem");
@@ -1552,6 +1585,7 @@ impl AreaOfInterestList {
 }
 
 impl PerCodec for AreaOfInterestList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestList");
@@ -1609,6 +1643,7 @@ impl AreaOfInterestItem {
 }
 
 impl PerCodec for AreaOfInterestItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestItem");
@@ -1647,6 +1682,7 @@ impl AreaOfInterestRanNodeList {
 }
 
 impl PerCodec for AreaOfInterestRanNodeList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestRanNodeList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestRanNodeList");
@@ -1698,6 +1734,7 @@ impl AreaOfInterestRanNodeItem {
 }
 
 impl PerCodec for AreaOfInterestRanNodeItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestRanNodeItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestRanNodeItem");
@@ -1736,6 +1773,7 @@ impl AreaOfInterestTaiList {
 }
 
 impl PerCodec for AreaOfInterestTaiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestTaiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestTaiList");
@@ -1787,6 +1825,7 @@ impl AreaOfInterestTaiItem {
 }
 
 impl PerCodec for AreaOfInterestTaiItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaOfInterestTaiItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaOfInterestTaiItem");
@@ -1872,6 +1911,7 @@ impl AssistanceDataForPaging {
 }
 
 impl PerCodec for AssistanceDataForPaging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AssistanceDataForPaging::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AssistanceDataForPaging");
@@ -1925,6 +1965,7 @@ impl AssistanceDataForRecommendedCells {
 }
 
 impl PerCodec for AssistanceDataForRecommendedCells {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AssistanceDataForRecommendedCells::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AssistanceDataForRecommendedCells");
@@ -1963,6 +2004,7 @@ impl AssociatedQosFlowList {
 }
 
 impl PerCodec for AssociatedQosFlowList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AssociatedQosFlowList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AssociatedQosFlowList");
@@ -2033,6 +2075,7 @@ impl AssociatedQosFlowItem {
 }
 
 impl PerCodec for AssociatedQosFlowItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AssociatedQosFlowItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AssociatedQosFlowItem");
@@ -2067,6 +2110,7 @@ impl AuthenticatedIndication {
 }
 
 impl PerCodec for AuthenticatedIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AuthenticatedIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AuthenticatedIndication");
@@ -2096,6 +2140,7 @@ impl AveragingWindow {
 }
 
 impl PerCodec for AveragingWindow {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AveragingWindow::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AveragingWindow");
@@ -2158,6 +2203,7 @@ impl AreaScopeOfMdtNr {
 }
 
 impl PerCodec for AreaScopeOfMdtNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaScopeOfMdtNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaScopeOfMdtNr");
@@ -2220,6 +2266,7 @@ impl AreaScopeOfMdtEutra {
 }
 
 impl PerCodec for AreaScopeOfMdtEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaScopeOfMdtEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaScopeOfMdtEutra");
@@ -2258,6 +2305,7 @@ impl AreaScopeOfNeighCellsList {
 }
 
 impl PerCodec for AreaScopeOfNeighCellsList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaScopeOfNeighCellsList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaScopeOfNeighCellsList");
@@ -2322,6 +2370,7 @@ impl AreaScopeOfNeighCellsItem {
 }
 
 impl PerCodec for AreaScopeOfNeighCellsItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AreaScopeOfNeighCellsItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AreaScopeOfNeighCellsItem");
@@ -2358,6 +2407,7 @@ impl BitRate {
 }
 
 impl PerCodec for BitRate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BitRate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BitRate");
@@ -2438,6 +2488,7 @@ impl BroadcastCancelledAreaList {
 }
 
 impl PerCodec for BroadcastCancelledAreaList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BroadcastCancelledAreaList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BroadcastCancelledAreaList");
@@ -2518,6 +2569,7 @@ impl BroadcastCompletedAreaList {
 }
 
 impl PerCodec for BroadcastCompletedAreaList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BroadcastCompletedAreaList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BroadcastCompletedAreaList");
@@ -2556,6 +2608,7 @@ impl BroadcastPlmnList {
 }
 
 impl PerCodec for BroadcastPlmnList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BroadcastPlmnList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BroadcastPlmnList");
@@ -2624,6 +2677,7 @@ impl BroadcastPlmnItem {
 }
 
 impl PerCodec for BroadcastPlmnItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BroadcastPlmnItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BroadcastPlmnItem");
@@ -2699,6 +2753,7 @@ impl BluetoothMeasurementConfiguration {
 }
 
 impl PerCodec for BluetoothMeasurementConfiguration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BluetoothMeasurementConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BluetoothMeasurementConfiguration");
@@ -2737,6 +2792,7 @@ impl BluetoothMeasConfigNameList {
 }
 
 impl PerCodec for BluetoothMeasConfigNameList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BluetoothMeasConfigNameList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BluetoothMeasConfigNameList");
@@ -2788,6 +2844,7 @@ impl BluetoothMeasConfigNameItem {
 }
 
 impl PerCodec for BluetoothMeasConfigNameItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BluetoothMeasConfigNameItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BluetoothMeasConfigNameItem");
@@ -2822,6 +2879,7 @@ impl BluetoothMeasConfig {
 }
 
 impl PerCodec for BluetoothMeasConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BluetoothMeasConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BluetoothMeasConfig");
@@ -2854,6 +2912,7 @@ impl BluetoothName {
 }
 
 impl PerCodec for BluetoothName {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BluetoothName::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BluetoothName");
@@ -2881,6 +2940,7 @@ impl BurstArrivalTime {
 }
 
 impl PerCodec for BurstArrivalTime {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BurstArrivalTime::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BurstArrivalTime");
@@ -2913,6 +2973,7 @@ impl CagId {
 }
 
 impl PerCodec for CagId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CagId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CagId");
@@ -2947,6 +3008,7 @@ impl CancelAllWarningMessages {
 }
 
 impl PerCodec for CancelAllWarningMessages {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelAllWarningMessages::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelAllWarningMessages");
@@ -2985,6 +3047,7 @@ impl CancelledCellsInEaiEutra {
 }
 
 impl PerCodec for CancelledCellsInEaiEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInEaiEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInEaiEutra");
@@ -3042,6 +3105,7 @@ impl CancelledCellsInEaiEutraItem {
 }
 
 impl PerCodec for CancelledCellsInEaiEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInEaiEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInEaiEutraItem");
@@ -3080,6 +3144,7 @@ impl CancelledCellsInEaiNr {
 }
 
 impl PerCodec for CancelledCellsInEaiNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInEaiNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInEaiNr");
@@ -3137,6 +3202,7 @@ impl CancelledCellsInEaiNrItem {
 }
 
 impl PerCodec for CancelledCellsInEaiNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInEaiNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInEaiNrItem");
@@ -3175,6 +3241,7 @@ impl CancelledCellsInTaiEutra {
 }
 
 impl PerCodec for CancelledCellsInTaiEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInTaiEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInTaiEutra");
@@ -3232,6 +3299,7 @@ impl CancelledCellsInTaiEutraItem {
 }
 
 impl PerCodec for CancelledCellsInTaiEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInTaiEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInTaiEutraItem");
@@ -3270,6 +3338,7 @@ impl CancelledCellsInTaiNr {
 }
 
 impl PerCodec for CancelledCellsInTaiNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInTaiNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInTaiNr");
@@ -3327,6 +3396,7 @@ impl CancelledCellsInTaiNrItem {
 }
 
 impl PerCodec for CancelledCellsInTaiNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CancelledCellsInTaiNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CancelledCellsInTaiNrItem");
@@ -3365,6 +3435,7 @@ impl CandidateCellList {
 }
 
 impl PerCodec for CandidateCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CandidateCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CandidateCellList");
@@ -3416,6 +3487,7 @@ impl CandidateCellItem {
 }
 
 impl PerCodec for CandidateCellItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CandidateCellItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CandidateCellItem");
@@ -3466,6 +3538,7 @@ impl CandidateCell {
 }
 
 impl PerCodec for CandidateCell {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CandidateCell::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CandidateCell");
@@ -3517,6 +3590,7 @@ impl CandidateCellId {
 }
 
 impl PerCodec for CandidateCellId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CandidateCellId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CandidateCellId");
@@ -3589,6 +3663,7 @@ impl CandidatePci {
 }
 
 impl PerCodec for CandidatePci {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CandidatePci::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CandidatePci");
@@ -3657,6 +3732,7 @@ impl Cause {
 }
 
 impl PerCodec for Cause {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Cause::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Cause");
@@ -3696,6 +3772,7 @@ impl CauseMisc {
 }
 
 impl PerCodec for CauseMisc {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CauseMisc::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CauseMisc");
@@ -3733,6 +3810,7 @@ impl CauseNas {
 }
 
 impl PerCodec for CauseNas {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CauseNas::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CauseNas");
@@ -3773,6 +3851,7 @@ impl CauseProtocol {
 }
 
 impl PerCodec for CauseProtocol {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CauseProtocol::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CauseProtocol");
@@ -3851,6 +3930,7 @@ impl CauseRadioNetwork {
 }
 
 impl PerCodec for CauseRadioNetwork {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CauseRadioNetwork::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CauseRadioNetwork");
@@ -3886,6 +3966,7 @@ impl CauseTransport {
 }
 
 impl PerCodec for CauseTransport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CauseTransport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CauseTransport");
@@ -3943,6 +4024,7 @@ impl CellCagInformation {
 }
 
 impl PerCodec for CellCagInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellCagInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellCagInformation");
@@ -3981,6 +4063,7 @@ impl CellCagList {
 }
 
 impl PerCodec for CellCagList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellCagList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellCagList");
@@ -4019,6 +4102,7 @@ impl CellIdBroadcastEutra {
 }
 
 impl PerCodec for CellIdBroadcastEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdBroadcastEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdBroadcastEutra");
@@ -4070,6 +4154,7 @@ impl CellIdBroadcastEutraItem {
 }
 
 impl PerCodec for CellIdBroadcastEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdBroadcastEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdBroadcastEutraItem");
@@ -4108,6 +4193,7 @@ impl CellIdBroadcastNr {
 }
 
 impl PerCodec for CellIdBroadcastNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdBroadcastNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdBroadcastNr");
@@ -4159,6 +4245,7 @@ impl CellIdBroadcastNrItem {
 }
 
 impl PerCodec for CellIdBroadcastNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdBroadcastNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdBroadcastNrItem");
@@ -4197,6 +4284,7 @@ impl CellIdCancelledEutra {
 }
 
 impl PerCodec for CellIdCancelledEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdCancelledEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdCancelledEutra");
@@ -4254,6 +4342,7 @@ impl CellIdCancelledEutraItem {
 }
 
 impl PerCodec for CellIdCancelledEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdCancelledEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdCancelledEutraItem");
@@ -4292,6 +4381,7 @@ impl CellIdCancelledNr {
 }
 
 impl PerCodec for CellIdCancelledNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdCancelledNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdCancelledNr");
@@ -4349,6 +4439,7 @@ impl CellIdCancelledNrItem {
 }
 
 impl PerCodec for CellIdCancelledNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdCancelledNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdCancelledNrItem");
@@ -4399,6 +4490,7 @@ impl CellIdListForRestart {
 }
 
 impl PerCodec for CellIdListForRestart {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdListForRestart::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdListForRestart");
@@ -4436,6 +4528,7 @@ impl CellSize {
 }
 
 impl PerCodec for CellSize {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellSize::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellSize");
@@ -4487,6 +4580,7 @@ impl CellType {
 }
 
 impl PerCodec for CellType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellType");
@@ -4521,6 +4615,7 @@ impl CEmodeBSupportIndicator {
 }
 
 impl PerCodec for CEmodeBSupportIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CEmodeBSupportIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CEmodeBSupportIndicator");
@@ -4556,6 +4651,7 @@ impl CEmodeBrestricted {
 }
 
 impl PerCodec for CEmodeBrestricted {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CEmodeBrestricted::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CEmodeBrestricted");
@@ -4616,6 +4712,7 @@ impl CnAssistedRanTuning {
 }
 
 impl PerCodec for CnAssistedRanTuning {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CnAssistedRanTuning::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CnAssistedRanTuning");
@@ -4654,6 +4751,7 @@ impl CnTypeRestrictionsForEquivalent {
 }
 
 impl PerCodec for CnTypeRestrictionsForEquivalent {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CnTypeRestrictionsForEquivalent::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CnTypeRestrictionsForEquivalent");
@@ -4711,6 +4809,7 @@ impl CnTypeRestrictionsForEquivalentItem {
 }
 
 impl PerCodec for CnTypeRestrictionsForEquivalentItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CnTypeRestrictionsForEquivalentItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CnTypeRestrictionsForEquivalentItem");
@@ -4745,6 +4844,7 @@ impl CnTypeRestrictionsForServing {
 }
 
 impl PerCodec for CnTypeRestrictionsForServing {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CnTypeRestrictionsForServing::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CnTypeRestrictionsForServing");
@@ -4772,6 +4872,7 @@ impl CommonNetworkInstance {
 }
 
 impl PerCodec for CommonNetworkInstance {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CommonNetworkInstance::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CommonNetworkInstance");
@@ -4810,6 +4911,7 @@ impl CompletedCellsInEaiEutra {
 }
 
 impl PerCodec for CompletedCellsInEaiEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInEaiEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInEaiEutra");
@@ -4861,6 +4963,7 @@ impl CompletedCellsInEaiEutraItem {
 }
 
 impl PerCodec for CompletedCellsInEaiEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInEaiEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInEaiEutraItem");
@@ -4899,6 +5002,7 @@ impl CompletedCellsInEaiNr {
 }
 
 impl PerCodec for CompletedCellsInEaiNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInEaiNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInEaiNr");
@@ -4950,6 +5054,7 @@ impl CompletedCellsInEaiNrItem {
 }
 
 impl PerCodec for CompletedCellsInEaiNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInEaiNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInEaiNrItem");
@@ -4988,6 +5093,7 @@ impl CompletedCellsInTaiEutra {
 }
 
 impl PerCodec for CompletedCellsInTaiEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInTaiEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInTaiEutra");
@@ -5039,6 +5145,7 @@ impl CompletedCellsInTaiEutraItem {
 }
 
 impl PerCodec for CompletedCellsInTaiEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInTaiEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInTaiEutraItem");
@@ -5077,6 +5184,7 @@ impl CompletedCellsInTaiNr {
 }
 
 impl PerCodec for CompletedCellsInTaiNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInTaiNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInTaiNr");
@@ -5128,6 +5236,7 @@ impl CompletedCellsInTaiNrItem {
 }
 
 impl PerCodec for CompletedCellsInTaiNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CompletedCellsInTaiNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CompletedCellsInTaiNrItem");
@@ -5162,6 +5271,7 @@ impl ConcurrentWarningMessageInd {
 }
 
 impl PerCodec for ConcurrentWarningMessageInd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ConcurrentWarningMessageInd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ConcurrentWarningMessageInd");
@@ -5198,6 +5308,7 @@ impl ConfidentialityProtectionIndication {
 }
 
 impl PerCodec for ConfidentialityProtectionIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ConfidentialityProtectionIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ConfidentialityProtectionIndication");
@@ -5233,6 +5344,7 @@ impl ConfidentialityProtectionResult {
 }
 
 impl PerCodec for ConfidentialityProtectionResult {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ConfidentialityProtectionResult::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ConfidentialityProtectionResult");
@@ -5267,6 +5379,7 @@ impl ConfiguredTacIndication {
 }
 
 impl PerCodec for ConfiguredTacIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ConfiguredTacIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ConfiguredTacIndication");
@@ -5379,6 +5492,7 @@ impl CoreNetworkAssistanceInformationForInactive {
 }
 
 impl PerCodec for CoreNetworkAssistanceInformationForInactive {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CoreNetworkAssistanceInformationForInactive::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -5452,6 +5566,7 @@ impl CountValueForPdcpSn12 {
 }
 
 impl PerCodec for CountValueForPdcpSn12 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CountValueForPdcpSn12::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CountValueForPdcpSn12");
@@ -5523,6 +5638,7 @@ impl CountValueForPdcpSn18 {
 }
 
 impl PerCodec for CountValueForPdcpSn18 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CountValueForPdcpSn18::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CountValueForPdcpSn18");
@@ -5550,6 +5666,7 @@ impl CoverageEnhancementLevel {
 }
 
 impl PerCodec for CoverageEnhancementLevel {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CoverageEnhancementLevel::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CoverageEnhancementLevel");
@@ -5596,6 +5713,7 @@ impl CpTransportLayerInformation {
 }
 
 impl PerCodec for CpTransportLayerInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CpTransportLayerInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CpTransportLayerInformation");
@@ -5689,6 +5807,7 @@ impl CriticalityDiagnostics {
 }
 
 impl PerCodec for CriticalityDiagnostics {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CriticalityDiagnostics::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CriticalityDiagnostics");
@@ -5727,6 +5846,7 @@ impl CriticalityDiagnosticsIeList {
 }
 
 impl PerCodec for CriticalityDiagnosticsIeList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CriticalityDiagnosticsIeList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CriticalityDiagnosticsIeList");
@@ -5788,6 +5908,7 @@ impl CriticalityDiagnosticsIeItem {
 }
 
 impl PerCodec for CriticalityDiagnosticsIeItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CriticalityDiagnosticsIeItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CriticalityDiagnosticsIeItem");
@@ -5841,6 +5962,7 @@ impl CellBasedMdtNr {
 }
 
 impl PerCodec for CellBasedMdtNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellBasedMdtNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellBasedMdtNr");
@@ -5879,6 +6001,7 @@ impl CellIdListforMdtNr {
 }
 
 impl PerCodec for CellIdListforMdtNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdListforMdtNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdListforMdtNr");
@@ -5932,6 +6055,7 @@ impl CellBasedMdtEutra {
 }
 
 impl PerCodec for CellBasedMdtEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellBasedMdtEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellBasedMdtEutra");
@@ -5970,6 +6094,7 @@ impl CellIdListforMdtEutra {
 }
 
 impl PerCodec for CellIdListforMdtEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellIdListforMdtEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellIdListforMdtEutra");
@@ -6002,6 +6127,7 @@ impl DataCodingScheme {
 }
 
 impl PerCodec for DataCodingScheme {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataCodingScheme::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataCodingScheme");
@@ -6036,6 +6162,7 @@ impl DataForwardingAccepted {
 }
 
 impl PerCodec for DataForwardingAccepted {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataForwardingAccepted::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataForwardingAccepted");
@@ -6070,6 +6197,7 @@ impl DataForwardingNotPossible {
 }
 
 impl PerCodec for DataForwardingNotPossible {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataForwardingNotPossible::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataForwardingNotPossible");
@@ -6108,6 +6236,7 @@ impl DataForwardingResponseDrbList {
 }
 
 impl PerCodec for DataForwardingResponseDrbList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataForwardingResponseDrbList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataForwardingResponseDrbList");
@@ -6183,6 +6312,7 @@ impl DataForwardingResponseDrbItem {
 }
 
 impl PerCodec for DataForwardingResponseDrbItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataForwardingResponseDrbItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataForwardingResponseDrbItem");
@@ -6234,6 +6364,7 @@ impl DapsRequestInfo {
 }
 
 impl PerCodec for DapsRequestInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DapsRequestInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DapsRequestInfo");
@@ -6272,6 +6403,7 @@ impl DapsResponseInfoList {
 }
 
 impl PerCodec for DapsResponseInfoList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DapsResponseInfoList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DapsResponseInfoList");
@@ -6329,6 +6461,7 @@ impl DapsResponseInfoItem {
 }
 
 impl PerCodec for DapsResponseInfoItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DapsResponseInfoItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DapsResponseInfoItem");
@@ -6382,6 +6515,7 @@ impl DapsResponseInfo {
 }
 
 impl PerCodec for DapsResponseInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DapsResponseInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DapsResponseInfo");
@@ -6420,6 +6554,7 @@ impl DataForwardingResponseErabList {
 }
 
 impl PerCodec for DataForwardingResponseErabList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataForwardingResponseErabList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataForwardingResponseErabList");
@@ -6477,6 +6612,7 @@ impl DataForwardingResponseErabListItem {
 }
 
 impl PerCodec for DataForwardingResponseErabListItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DataForwardingResponseErabListItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DataForwardingResponseErabListItem");
@@ -6512,6 +6648,7 @@ impl DelayCritical {
 }
 
 impl PerCodec for DelayCritical {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DelayCritical::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DelayCritical");
@@ -6563,6 +6700,7 @@ impl DlCpSecurityInformation {
 }
 
 impl PerCodec for DlCpSecurityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DlCpSecurityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DlCpSecurityInformation");
@@ -6595,6 +6733,7 @@ impl DlNasMac {
 }
 
 impl PerCodec for DlNasMac {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DlNasMac::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DlNasMac");
@@ -6629,6 +6768,7 @@ impl DlForwarding {
 }
 
 impl PerCodec for DlForwarding {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DlForwarding::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DlForwarding");
@@ -6663,6 +6803,7 @@ impl DlNguTnlInformationReused {
 }
 
 impl PerCodec for DlNguTnlInformationReused {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DlNguTnlInformationReused::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DlNguTnlInformationReused");
@@ -6697,6 +6838,7 @@ impl DirectForwardingPathAvailability {
 }
 
 impl PerCodec for DirectForwardingPathAvailability {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DirectForwardingPathAvailability::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DirectForwardingPathAvailability");
@@ -6726,6 +6868,7 @@ impl DrbId {
 }
 
 impl PerCodec for DrbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbId");
@@ -6764,6 +6907,7 @@ impl DrbsSubjectToStatusTransferList {
 }
 
 impl PerCodec for DrbsSubjectToStatusTransferList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsSubjectToStatusTransferList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsSubjectToStatusTransferList");
@@ -6833,6 +6977,7 @@ impl DrbsSubjectToStatusTransferItem {
 }
 
 impl PerCodec for DrbsSubjectToStatusTransferItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsSubjectToStatusTransferItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsSubjectToStatusTransferItem");
@@ -6883,6 +7028,7 @@ impl DrbStatusDl {
 }
 
 impl PerCodec for DrbStatusDl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbStatusDl::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbStatusDl");
@@ -6934,6 +7080,7 @@ impl DrbStatusDl12 {
 }
 
 impl PerCodec for DrbStatusDl12 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbStatusDl12::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbStatusDl12");
@@ -6985,6 +7132,7 @@ impl DrbStatusDl18 {
 }
 
 impl PerCodec for DrbStatusDl18 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbStatusDl18::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbStatusDl18");
@@ -7035,6 +7183,7 @@ impl DrbStatusUl {
 }
 
 impl PerCodec for DrbStatusUl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbStatusUl::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbStatusUl");
@@ -7099,6 +7248,7 @@ impl DrbStatusUl12 {
 }
 
 impl PerCodec for DrbStatusUl12 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbStatusUl12::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbStatusUl12");
@@ -7168,6 +7318,7 @@ impl DrbStatusUl18 {
 }
 
 impl PerCodec for DrbStatusUl18 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbStatusUl18::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbStatusUl18");
@@ -7206,6 +7357,7 @@ impl DrbsToQosFlowsMappingList {
 }
 
 impl PerCodec for DrbsToQosFlowsMappingList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsToQosFlowsMappingList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsToQosFlowsMappingList");
@@ -7267,6 +7419,7 @@ impl DrbsToQosFlowsMappingItem {
 }
 
 impl PerCodec for DrbsToQosFlowsMappingItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsToQosFlowsMappingItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsToQosFlowsMappingItem");
@@ -7391,6 +7544,7 @@ impl Dynamic5qiDescriptor {
 }
 
 impl PerCodec for Dynamic5qiDescriptor {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Dynamic5qiDescriptor::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Dynamic5qiDescriptor");
@@ -7442,6 +7596,7 @@ impl EarlyStatusTransferTransparentContainer {
 }
 
 impl PerCodec for EarlyStatusTransferTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EarlyStatusTransferTransparentContainer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -7488,6 +7643,7 @@ impl ProcedureStageChoice {
 }
 
 impl PerCodec for ProcedureStageChoice {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ProcedureStageChoice::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ProcedureStageChoice");
@@ -7542,6 +7698,7 @@ impl FirstDlCount {
 }
 
 impl PerCodec for FirstDlCount {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FirstDlCount::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FirstDlCount");
@@ -7580,6 +7737,7 @@ impl DrbsSubjectToEarlyStatusTransferList {
 }
 
 impl PerCodec for DrbsSubjectToEarlyStatusTransferList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsSubjectToEarlyStatusTransferList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsSubjectToEarlyStatusTransferList");
@@ -7637,6 +7795,7 @@ impl DrbsSubjectToEarlyStatusTransferItem {
 }
 
 impl PerCodec for DrbsSubjectToEarlyStatusTransferItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsSubjectToEarlyStatusTransferItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsSubjectToEarlyStatusTransferItem");
@@ -7671,6 +7830,7 @@ impl EdtSession {
 }
 
 impl PerCodec for EdtSession {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EdtSession::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EdtSession");
@@ -7703,6 +7863,7 @@ impl EmergencyAreaId {
 }
 
 impl PerCodec for EmergencyAreaId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaId");
@@ -7741,6 +7902,7 @@ impl EmergencyAreaIdBroadcastEutra {
 }
 
 impl PerCodec for EmergencyAreaIdBroadcastEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdBroadcastEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdBroadcastEutra");
@@ -7798,6 +7960,7 @@ impl EmergencyAreaIdBroadcastEutraItem {
 }
 
 impl PerCodec for EmergencyAreaIdBroadcastEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdBroadcastEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdBroadcastEutraItem");
@@ -7836,6 +7999,7 @@ impl EmergencyAreaIdBroadcastNr {
 }
 
 impl PerCodec for EmergencyAreaIdBroadcastNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdBroadcastNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdBroadcastNr");
@@ -7893,6 +8057,7 @@ impl EmergencyAreaIdBroadcastNrItem {
 }
 
 impl PerCodec for EmergencyAreaIdBroadcastNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdBroadcastNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdBroadcastNrItem");
@@ -7931,6 +8096,7 @@ impl EmergencyAreaIdCancelledEutra {
 }
 
 impl PerCodec for EmergencyAreaIdCancelledEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdCancelledEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdCancelledEutra");
@@ -7988,6 +8154,7 @@ impl EmergencyAreaIdCancelledEutraItem {
 }
 
 impl PerCodec for EmergencyAreaIdCancelledEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdCancelledEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdCancelledEutraItem");
@@ -8026,6 +8193,7 @@ impl EmergencyAreaIdCancelledNr {
 }
 
 impl PerCodec for EmergencyAreaIdCancelledNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdCancelledNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdCancelledNr");
@@ -8083,6 +8251,7 @@ impl EmergencyAreaIdCancelledNrItem {
 }
 
 impl PerCodec for EmergencyAreaIdCancelledNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdCancelledNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdCancelledNrItem");
@@ -8121,6 +8290,7 @@ impl EmergencyAreaIdList {
 }
 
 impl PerCodec for EmergencyAreaIdList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdList");
@@ -8159,6 +8329,7 @@ impl EmergencyAreaIdListForRestart {
 }
 
 impl PerCodec for EmergencyAreaIdListForRestart {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyAreaIdListForRestart::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyAreaIdListForRestart");
@@ -8223,6 +8394,7 @@ impl EmergencyFallbackIndicator {
 }
 
 impl PerCodec for EmergencyFallbackIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyFallbackIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyFallbackIndicator");
@@ -8257,6 +8429,7 @@ impl EmergencyFallbackRequestIndicator {
 }
 
 impl PerCodec for EmergencyFallbackRequestIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyFallbackRequestIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyFallbackRequestIndicator");
@@ -8292,6 +8465,7 @@ impl EmergencyServiceTargetCn {
 }
 
 impl PerCodec for EmergencyServiceTargetCn {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EmergencyServiceTargetCn::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EmergencyServiceTargetCn");
@@ -8374,6 +8548,7 @@ impl EnbId {
 }
 
 impl PerCodec for EnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EnbId");
@@ -8408,6 +8583,7 @@ impl EnhancedCoverageRestriction {
 }
 
 impl PerCodec for EnhancedCoverageRestriction {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EnhancedCoverageRestriction::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EnhancedCoverageRestriction");
@@ -8437,6 +8613,7 @@ impl ExtendedConnectedTime {
 }
 
 impl PerCodec for ExtendedConnectedTime {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedConnectedTime::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedConnectedTime");
@@ -8464,6 +8641,7 @@ impl EnDcsonConfigurationTransfer {
 }
 
 impl PerCodec for EnDcsonConfigurationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EnDcsonConfigurationTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EnDcsonConfigurationTransfer");
@@ -8521,6 +8699,7 @@ impl EndpointIpAddressAndPort {
 }
 
 impl PerCodec for EndpointIpAddressAndPort {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EndpointIpAddressAndPort::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EndpointIpAddressAndPort");
@@ -8556,6 +8735,7 @@ impl EndIndication {
 }
 
 impl PerCodec for EndIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EndIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EndIndication");
@@ -8594,6 +8774,7 @@ impl EquivalentPlmns {
 }
 
 impl PerCodec for EquivalentPlmns {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EquivalentPlmns::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EquivalentPlmns");
@@ -8626,6 +8807,7 @@ impl EpsTac {
 }
 
 impl PerCodec for EpsTac {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EpsTac::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EpsTac");
@@ -8683,6 +8865,7 @@ impl EpsTai {
 }
 
 impl PerCodec for EpsTai {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EpsTai::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EpsTai");
@@ -8712,6 +8895,7 @@ impl ERabId {
 }
 
 impl PerCodec for ERabId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ERabId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ERabId");
@@ -8750,6 +8934,7 @@ impl ERabInformationList {
 }
 
 impl PerCodec for ERabInformationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ERabInformationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ERabInformationList");
@@ -8814,6 +8999,7 @@ impl ERabInformationItem {
 }
 
 impl PerCodec for ERabInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ERabInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ERabInformationItem");
@@ -8846,6 +9032,7 @@ impl EutraCellIdentity {
 }
 
 impl PerCodec for EutraCellIdentity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EutraCellIdentity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EutraCellIdentity");
@@ -8903,6 +9090,7 @@ impl EutraCgi {
 }
 
 impl PerCodec for EutraCgi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EutraCgi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EutraCgi");
@@ -8941,6 +9129,7 @@ impl EutraCgiList {
 }
 
 impl PerCodec for EutraCgiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EutraCgiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EutraCgiList");
@@ -8979,6 +9168,7 @@ impl EutraCgiListForWarning {
 }
 
 impl PerCodec for EutraCgiListForWarning {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EutraCgiListForWarning::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EutraCgiListForWarning");
@@ -9011,6 +9201,7 @@ impl EutrAencryptionAlgorithms {
 }
 
 impl PerCodec for EutrAencryptionAlgorithms {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EutrAencryptionAlgorithms::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EutrAencryptionAlgorithms");
@@ -9043,6 +9234,7 @@ impl EutrAintegrityProtectionAlgorithms {
 }
 
 impl PerCodec for EutrAintegrityProtectionAlgorithms {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EutrAintegrityProtectionAlgorithms::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EutrAintegrityProtectionAlgorithms");
@@ -9082,6 +9274,7 @@ impl EventType {
 }
 
 impl PerCodec for EventType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EventType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EventType");
@@ -9111,6 +9304,7 @@ impl ExpectedActivityPeriod {
 }
 
 impl PerCodec for ExpectedActivityPeriod {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedActivityPeriod::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedActivityPeriod");
@@ -9151,6 +9345,7 @@ impl ExpectedHoInterval {
 }
 
 impl PerCodec for ExpectedHoInterval {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedHoInterval::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedHoInterval");
@@ -9180,6 +9375,7 @@ impl ExpectedIdlePeriod {
 }
 
 impl PerCodec for ExpectedIdlePeriod {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedIdlePeriod::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedIdlePeriod");
@@ -9262,6 +9458,7 @@ impl ExpectedUeActivityBehaviour {
 }
 
 impl PerCodec for ExpectedUeActivityBehaviour {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedUeActivityBehaviour::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedUeActivityBehaviour");
@@ -9355,6 +9552,7 @@ impl ExpectedUeBehaviour {
 }
 
 impl PerCodec for ExpectedUeBehaviour {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedUeBehaviour::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedUeBehaviour");
@@ -9390,6 +9588,7 @@ impl ExpectedUeMobility {
 }
 
 impl PerCodec for ExpectedUeMobility {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedUeMobility::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedUeMobility");
@@ -9428,6 +9627,7 @@ impl ExpectedUeMovingTrajectory {
 }
 
 impl PerCodec for ExpectedUeMovingTrajectory {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedUeMovingTrajectory::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedUeMovingTrajectory");
@@ -9492,6 +9692,7 @@ impl ExpectedUeMovingTrajectoryItem {
 }
 
 impl PerCodec for ExpectedUeMovingTrajectoryItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExpectedUeMovingTrajectoryItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExpectedUeMovingTrajectoryItem");
@@ -9563,6 +9764,7 @@ impl ExtendedAmfName {
 }
 
 impl PerCodec for ExtendedAmfName {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedAmfName::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedAmfName");
@@ -9592,6 +9794,7 @@ impl ExtendedPacketDelayBudget {
 }
 
 impl PerCodec for ExtendedPacketDelayBudget {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedPacketDelayBudget::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedPacketDelayBudget");
@@ -9663,6 +9866,7 @@ impl ExtendedRanNodeName {
 }
 
 impl PerCodec for ExtendedRanNodeName {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedRanNodeName::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedRanNodeName");
@@ -9734,6 +9938,7 @@ impl ExtendedRatRestrictionInformation {
 }
 
 impl PerCodec for ExtendedRatRestrictionInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedRatRestrictionInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedRatRestrictionInformation");
@@ -9763,6 +9968,7 @@ impl ExtendedRncId {
 }
 
 impl PerCodec for ExtendedRncId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedRncId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedRncId");
@@ -9801,6 +10007,7 @@ impl ExtendedSliceSupportList {
 }
 
 impl PerCodec for ExtendedSliceSupportList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedSliceSupportList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedSliceSupportList");
@@ -9833,6 +10040,7 @@ impl ExtendedUeIdentityIndexValue {
 }
 
 impl PerCodec for ExtendedUeIdentityIndexValue {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ExtendedUeIdentityIndexValue::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ExtendedUeIdentityIndexValue");
@@ -9885,6 +10093,7 @@ impl EventTrigger {
 }
 
 impl PerCodec for EventTrigger {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EventTrigger::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EventTrigger");
@@ -9946,6 +10155,7 @@ impl EventL1LoggedMdtConfig {
 }
 
 impl PerCodec for EventL1LoggedMdtConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EventL1LoggedMdtConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EventL1LoggedMdtConfig");
@@ -9996,6 +10206,7 @@ impl MeasurementThresholdL1LoggedMdt {
 }
 
 impl PerCodec for MeasurementThresholdL1LoggedMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MeasurementThresholdL1LoggedMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MeasurementThresholdL1LoggedMdt");
@@ -10049,6 +10260,7 @@ impl FailureIndication {
 }
 
 impl PerCodec for FailureIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FailureIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FailureIndication");
@@ -10110,6 +10322,7 @@ impl FiveGSTmsi {
 }
 
 impl PerCodec for FiveGSTmsi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FiveGSTmsi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FiveGSTmsi");
@@ -10142,6 +10355,7 @@ impl FiveGTmsi {
 }
 
 impl PerCodec for FiveGTmsi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FiveGTmsi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FiveGTmsi");
@@ -10171,6 +10385,7 @@ impl FiveQi {
 }
 
 impl PerCodec for FiveQi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FiveQi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FiveQi");
@@ -10209,6 +10424,7 @@ impl ForbiddenAreaInformation {
 }
 
 impl PerCodec for ForbiddenAreaInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ForbiddenAreaInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ForbiddenAreaInformation");
@@ -10266,6 +10482,7 @@ impl ForbiddenAreaInformationItem {
 }
 
 impl PerCodec for ForbiddenAreaInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ForbiddenAreaInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ForbiddenAreaInformationItem");
@@ -10304,6 +10521,7 @@ impl ForbiddenTaCs {
 }
 
 impl PerCodec for ForbiddenTaCs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ForbiddenTaCs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ForbiddenTaCs");
@@ -10361,6 +10579,7 @@ impl FromEutranToNgran {
 }
 
 impl PerCodec for FromEutranToNgran {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FromEutranToNgran::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FromEutranToNgran");
@@ -10418,6 +10637,7 @@ impl FromNgranToEutran {
 }
 
 impl PerCodec for FromNgranToEutran {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         FromNgranToEutran::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("FromNgranToEutran");
@@ -10523,6 +10743,7 @@ impl GbrQosInformation {
 }
 
 impl PerCodec for GbrQosInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GbrQosInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GbrQosInformation");
@@ -10550,6 +10771,7 @@ impl GlobalCableId {
 }
 
 impl PerCodec for GlobalCableId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalCableId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalCableId");
@@ -10607,6 +10829,7 @@ impl GlobalEnbId {
 }
 
 impl PerCodec for GlobalEnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalEnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalEnbId");
@@ -10664,6 +10887,7 @@ impl GlobalGnbId {
 }
 
 impl PerCodec for GlobalGnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalGnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalGnbId");
@@ -10721,6 +10945,7 @@ impl GlobalN3IwfId {
 }
 
 impl PerCodec for GlobalN3IwfId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalN3IwfId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalN3IwfId");
@@ -10785,6 +11010,7 @@ impl GlobalLineId {
 }
 
 impl PerCodec for GlobalLineId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalLineId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalLineId");
@@ -10812,6 +11038,7 @@ impl GlobalLineIdentity {
 }
 
 impl PerCodec for GlobalLineIdentity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalLineIdentity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalLineIdentity");
@@ -10869,6 +11096,7 @@ impl GlobalNgEnbId {
 }
 
 impl PerCodec for GlobalNgEnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalNgEnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalNgEnbId");
@@ -10925,6 +11153,7 @@ impl GlobalRanNodeId {
 }
 
 impl PerCodec for GlobalRanNodeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalRanNodeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalRanNodeId");
@@ -10982,6 +11211,7 @@ impl GlobalTngfId {
 }
 
 impl PerCodec for GlobalTngfId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalTngfId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalTngfId");
@@ -11039,6 +11269,7 @@ impl GlobalTwifId {
 }
 
 impl PerCodec for GlobalTwifId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalTwifId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalTwifId");
@@ -11096,6 +11327,7 @@ impl GlobalWAgfId {
 }
 
 impl PerCodec for GlobalWAgfId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GlobalWAgfId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GlobalWAgfId");
@@ -11145,6 +11377,7 @@ impl GnbId {
 }
 
 impl PerCodec for GnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbId");
@@ -11177,6 +11410,7 @@ impl GtpTeid {
 }
 
 impl PerCodec for GtpTeid {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GtpTeid::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GtpTeid");
@@ -11234,6 +11468,7 @@ impl GtpTunnel {
 }
 
 impl PerCodec for GtpTunnel {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GtpTunnel::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GtpTunnel");
@@ -11299,6 +11534,7 @@ impl Guami {
 }
 
 impl PerCodec for Guami {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Guami::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Guami");
@@ -11334,6 +11570,7 @@ impl GuamiType {
 }
 
 impl PerCodec for GuamiType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GuamiType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GuamiType");
@@ -11447,6 +11684,7 @@ impl HandoverCommandTransfer {
 }
 
 impl PerCodec for HandoverCommandTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverCommandTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HandoverCommandTransfer");
@@ -11481,6 +11719,7 @@ impl HandoverFlag {
 }
 
 impl PerCodec for HandoverFlag {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverFlag::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HandoverFlag");
@@ -11532,6 +11771,7 @@ impl HandoverPreparationUnsuccessfulTransfer {
 }
 
 impl PerCodec for HandoverPreparationUnsuccessfulTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverPreparationUnsuccessfulTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -11684,6 +11924,7 @@ impl HandoverRequestAcknowledgeTransfer {
 }
 
 impl PerCodec for HandoverRequestAcknowledgeTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverRequestAcknowledgeTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HandoverRequestAcknowledgeTransfer");
@@ -11744,6 +11985,7 @@ impl HandoverRequiredTransfer {
 }
 
 impl PerCodec for HandoverRequiredTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverRequiredTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HandoverRequiredTransfer");
@@ -11808,6 +12050,7 @@ impl HandoverResourceAllocationUnsuccessfulTransfer {
 }
 
 impl PerCodec for HandoverResourceAllocationUnsuccessfulTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverResourceAllocationUnsuccessfulTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -11846,6 +12089,7 @@ impl HandoverType {
 }
 
 impl PerCodec for HandoverType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HandoverType");
@@ -11873,6 +12117,7 @@ impl HfcNodeId {
 }
 
 impl PerCodec for HfcNodeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HfcNodeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HfcNodeId");
@@ -11993,6 +12238,7 @@ impl HoReport {
 }
 
 impl PerCodec for HoReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HoReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HoReport");
@@ -12022,6 +12268,7 @@ impl Hysteresis {
 }
 
 impl PerCodec for Hysteresis {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Hysteresis::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Hysteresis");
@@ -12057,6 +12304,7 @@ impl IabAuthorized {
 }
 
 impl PerCodec for IabAuthorized {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabAuthorized::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabAuthorized");
@@ -12091,6 +12339,7 @@ impl IabSupported {
 }
 
 impl PerCodec for IabSupported {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabSupported::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabSupported");
@@ -12125,6 +12374,7 @@ impl IabNodeIndication {
 }
 
 impl PerCodec for IabNodeIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabNodeIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabNodeIndication");
@@ -12160,6 +12410,7 @@ impl ImsVoiceSupportIndicator {
 }
 
 impl PerCodec for ImsVoiceSupportIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ImsVoiceSupportIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ImsVoiceSupportIndicator");
@@ -12189,6 +12440,7 @@ impl IndexToRfsp {
 }
 
 impl PerCodec for IndexToRfsp {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IndexToRfsp::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IndexToRfsp");
@@ -12246,6 +12498,7 @@ impl InfoOnRecommendedCellsAndRanNodesForPaging {
 }
 
 impl PerCodec for InfoOnRecommendedCellsAndRanNodesForPaging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InfoOnRecommendedCellsAndRanNodesForPaging::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -12284,6 +12537,7 @@ impl IntegrityProtectionIndication {
 }
 
 impl PerCodec for IntegrityProtectionIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntegrityProtectionIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntegrityProtectionIndication");
@@ -12319,6 +12573,7 @@ impl IntegrityProtectionResult {
 }
 
 impl PerCodec for IntegrityProtectionResult {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntegrityProtectionResult::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntegrityProtectionResult");
@@ -12348,6 +12603,7 @@ impl IntendedNumberOfPagingAttempts {
 }
 
 impl PerCodec for IntendedNumberOfPagingAttempts {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntendedNumberOfPagingAttempts::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntendedNumberOfPagingAttempts");
@@ -12380,6 +12636,7 @@ impl InterfacesToTrace {
 }
 
 impl PerCodec for InterfacesToTrace {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InterfacesToTrace::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InterfacesToTrace");
@@ -12532,6 +12789,7 @@ impl ImmediateMdtNr {
 }
 
 impl PerCodec for ImmediateMdtNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ImmediateMdtNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ImmediateMdtNr");
@@ -12592,6 +12850,7 @@ impl InterSystemFailureIndication {
 }
 
 impl PerCodec for InterSystemFailureIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InterSystemFailureIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InterSystemFailureIndication");
@@ -12649,6 +12908,7 @@ impl IntersystemSonConfigurationTransfer {
 }
 
 impl PerCodec for IntersystemSonConfigurationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemSonConfigurationTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemSonConfigurationTransfer");
@@ -12699,6 +12959,7 @@ impl IntersystemSonTransferType {
 }
 
 impl PerCodec for IntersystemSonTransferType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemSonTransferType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemSonTransferType");
@@ -12756,6 +13017,7 @@ impl IntersystemSonEnbId {
 }
 
 impl PerCodec for IntersystemSonEnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemSonEnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemSonEnbId");
@@ -12813,6 +13075,7 @@ impl IntersystemSonNgranNodeId {
 }
 
 impl PerCodec for IntersystemSonNgranNodeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemSonNgranNodeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemSonNgranNodeId");
@@ -12859,6 +13122,7 @@ impl IntersystemSonInformation {
 }
 
 impl PerCodec for IntersystemSonInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemSonInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemSonInformation");
@@ -12913,6 +13177,7 @@ impl IntersystemSonInformationReport {
 }
 
 impl PerCodec for IntersystemSonInformationReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemSonInformationReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemSonInformationReport");
@@ -12966,6 +13231,7 @@ impl InterSystemHoReport {
 }
 
 impl PerCodec for InterSystemHoReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InterSystemHoReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InterSystemHoReport");
@@ -13020,6 +13286,7 @@ impl InterSystemHandoverReportType {
 }
 
 impl PerCodec for InterSystemHandoverReportType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InterSystemHandoverReportType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InterSystemHandoverReportType");
@@ -13085,6 +13352,7 @@ impl IntersystemUnnecessaryHo {
 }
 
 impl PerCodec for IntersystemUnnecessaryHo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IntersystemUnnecessaryHo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IntersystemUnnecessaryHo");
@@ -13117,6 +13385,7 @@ impl Lac {
 }
 
 impl PerCodec for Lac {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Lac::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Lac");
@@ -13171,6 +13440,7 @@ impl Lai {
 }
 
 impl PerCodec for Lai {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Lai::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Lai");
@@ -13241,6 +13511,7 @@ impl LastVisitedCellInformation {
 }
 
 impl PerCodec for LastVisitedCellInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LastVisitedCellInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LastVisitedCellInformation");
@@ -13294,6 +13565,7 @@ impl LastVisitedCellItem {
 }
 
 impl PerCodec for LastVisitedCellItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LastVisitedCellItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LastVisitedCellItem");
@@ -13321,6 +13593,7 @@ impl LastVisitedEutranCellInformation {
 }
 
 impl PerCodec for LastVisitedEutranCellInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LastVisitedEutranCellInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LastVisitedEutranCellInformation");
@@ -13348,6 +13621,7 @@ impl LastVisitedGeranCellInformation {
 }
 
 impl PerCodec for LastVisitedGeranCellInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LastVisitedGeranCellInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LastVisitedGeranCellInformation");
@@ -13431,6 +13705,7 @@ impl LastVisitedNgranCellInformation {
 }
 
 impl PerCodec for LastVisitedNgranCellInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LastVisitedNgranCellInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LastVisitedNgranCellInformation");
@@ -13458,6 +13733,7 @@ impl LastVisitedUtranCellInformation {
 }
 
 impl PerCodec for LastVisitedUtranCellInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LastVisitedUtranCellInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LastVisitedUtranCellInformation");
@@ -13493,6 +13769,7 @@ impl LineType {
 }
 
 impl PerCodec for LineType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LineType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LineType");
@@ -13527,6 +13804,7 @@ impl LocationReportingAdditionalInfo {
 }
 
 impl PerCodec for LocationReportingAdditionalInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LocationReportingAdditionalInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LocationReportingAdditionalInfo");
@@ -13556,6 +13834,7 @@ impl LocationReportingReferenceId {
 }
 
 impl PerCodec for LocationReportingReferenceId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LocationReportingReferenceId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LocationReportingReferenceId");
@@ -13645,6 +13924,7 @@ impl LocationReportingRequestType {
 }
 
 impl PerCodec for LocationReportingRequestType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LocationReportingRequestType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LocationReportingRequestType");
@@ -13750,6 +14030,7 @@ impl LoggedMdtNr {
 }
 
 impl PerCodec for LoggedMdtNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LoggedMdtNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LoggedMdtNr");
@@ -13794,6 +14075,7 @@ impl LoggingInterval {
 }
 
 impl PerCodec for LoggingInterval {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LoggingInterval::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LoggingInterval");
@@ -13833,6 +14115,7 @@ impl LoggingDuration {
 }
 
 impl PerCodec for LoggingDuration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LoggingDuration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LoggingDuration");
@@ -13869,6 +14152,7 @@ impl LinksToLog {
 }
 
 impl PerCodec for LinksToLog {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LinksToLog::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LinksToLog");
@@ -13919,6 +14203,7 @@ impl LoggedMdtTrigger {
 }
 
 impl PerCodec for LoggedMdtTrigger {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LoggedMdtTrigger::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LoggedMdtTrigger");
@@ -13953,6 +14238,7 @@ impl LtemIndication {
 }
 
 impl PerCodec for LtemIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LtemIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LtemIndication");
@@ -13980,6 +14266,7 @@ impl LteUeRlfReportContainer {
 }
 
 impl PerCodec for LteUeRlfReportContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LteUeRlfReportContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LteUeRlfReportContainer");
@@ -14051,6 +14338,7 @@ impl Ltev2xServicesAuthorized {
 }
 
 impl PerCodec for Ltev2xServicesAuthorized {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ltev2xServicesAuthorized::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Ltev2xServicesAuthorized");
@@ -14104,6 +14392,7 @@ impl LteUeSidelinkAggregateMaximumBitrate {
 }
 
 impl PerCodec for LteUeSidelinkAggregateMaximumBitrate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         LteUeSidelinkAggregateMaximumBitrate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("LteUeSidelinkAggregateMaximumBitrate");
@@ -14136,6 +14425,7 @@ impl MaskedImeisv {
 }
 
 impl PerCodec for MaskedImeisv {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MaskedImeisv::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MaskedImeisv");
@@ -14165,6 +14455,7 @@ impl MaximumDataBurstVolume {
 }
 
 impl PerCodec for MaximumDataBurstVolume {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MaximumDataBurstVolume::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MaximumDataBurstVolume");
@@ -14197,6 +14488,7 @@ impl MessageIdentifier {
 }
 
 impl PerCodec for MessageIdentifier {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MessageIdentifier::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MessageIdentifier");
@@ -14232,6 +14524,7 @@ impl MaximumIntegrityProtectedDataRate {
 }
 
 impl PerCodec for MaximumIntegrityProtectedDataRate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MaximumIntegrityProtectedDataRate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MaximumIntegrityProtectedDataRate");
@@ -14266,6 +14559,7 @@ impl MicoModeIndication {
 }
 
 impl PerCodec for MicoModeIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MicoModeIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MicoModeIndication");
@@ -14298,6 +14592,7 @@ impl MobilityInformation {
 }
 
 impl PerCodec for MobilityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MobilityInformation");
@@ -14417,6 +14712,7 @@ impl MobilityRestrictionList {
 }
 
 impl PerCodec for MobilityRestrictionList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MobilityRestrictionList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MobilityRestrictionList");
@@ -14455,6 +14751,7 @@ impl MdtPlmnList {
 }
 
 impl PerCodec for MdtPlmnList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtPlmnList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtPlmnList");
@@ -14526,6 +14823,7 @@ impl MdtConfiguration {
 }
 
 impl PerCodec for MdtConfiguration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtConfiguration");
@@ -14598,6 +14896,7 @@ impl MdtConfigurationNr {
 }
 
 impl PerCodec for MdtConfigurationNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtConfigurationNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtConfigurationNr");
@@ -14670,6 +14969,7 @@ impl MdtConfigurationEutra {
 }
 
 impl PerCodec for MdtConfigurationEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtConfigurationEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtConfigurationEutra");
@@ -14706,6 +15006,7 @@ impl MdtActivation {
 }
 
 impl PerCodec for MdtActivation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtActivation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtActivation");
@@ -14756,6 +15057,7 @@ impl MdtModeNr {
 }
 
 impl PerCodec for MdtModeNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtModeNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtModeNr");
@@ -14783,6 +15085,7 @@ impl MdtModeEutra {
 }
 
 impl PerCodec for MdtModeEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtModeEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtModeEutra");
@@ -14815,6 +15118,7 @@ impl MeasurementsToActivate {
 }
 
 impl PerCodec for MeasurementsToActivate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MeasurementsToActivate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MeasurementsToActivate");
@@ -14890,6 +15194,7 @@ impl M1Configuration {
 }
 
 impl PerCodec for M1Configuration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M1Configuration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M1Configuration");
@@ -14926,6 +15231,7 @@ impl M1ReportingTrigger {
 }
 
 impl PerCodec for M1ReportingTrigger {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M1ReportingTrigger::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M1ReportingTrigger");
@@ -14977,6 +15283,7 @@ impl M1ThresholdEventA2 {
 }
 
 impl PerCodec for M1ThresholdEventA2 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M1ThresholdEventA2::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M1ThresholdEventA2");
@@ -15033,6 +15340,7 @@ impl M1ThresholdType {
 }
 
 impl PerCodec for M1ThresholdType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M1ThresholdType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M1ThresholdType");
@@ -15090,6 +15398,7 @@ impl M1PeriodicReporting {
 }
 
 impl PerCodec for M1PeriodicReporting {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M1PeriodicReporting::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M1PeriodicReporting");
@@ -15147,6 +15456,7 @@ impl M4Configuration {
 }
 
 impl PerCodec for M4Configuration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M4Configuration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M4Configuration");
@@ -15185,6 +15495,7 @@ impl M4period {
 }
 
 impl PerCodec for M4period {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M4period::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M4period");
@@ -15242,6 +15553,7 @@ impl M5Configuration {
 }
 
 impl PerCodec for M5Configuration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M5Configuration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M5Configuration");
@@ -15280,6 +15592,7 @@ impl M5period {
 }
 
 impl PerCodec for M5period {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M5period::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M5period");
@@ -15337,6 +15650,7 @@ impl M6Configuration {
 }
 
 impl PerCodec for M6Configuration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M6Configuration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M6Configuration");
@@ -15384,6 +15698,7 @@ impl M6reportInterval {
 }
 
 impl PerCodec for M6reportInterval {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M6reportInterval::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M6reportInterval");
@@ -15441,6 +15756,7 @@ impl M7Configuration {
 }
 
 impl PerCodec for M7Configuration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M7Configuration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M7Configuration");
@@ -15470,6 +15786,7 @@ impl M7period {
 }
 
 impl PerCodec for M7period {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         M7period::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("M7period");
@@ -15523,6 +15840,7 @@ impl MdtLocationInfo {
 }
 
 impl PerCodec for MdtLocationInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtLocationInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtLocationInfo");
@@ -15555,6 +15873,7 @@ impl MdtLocationInformation {
 }
 
 impl PerCodec for MdtLocationInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         MdtLocationInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("MdtLocationInformation");
@@ -15604,6 +15923,7 @@ impl N3IwfId {
 }
 
 impl PerCodec for N3IwfId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         N3IwfId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("N3IwfId");
@@ -15631,6 +15951,7 @@ impl NasPdu {
 }
 
 impl PerCodec for NasPdu {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NasPdu::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NasPdu");
@@ -15658,6 +15979,7 @@ impl NasSecurityParametersFromNgran {
 }
 
 impl PerCodec for NasSecurityParametersFromNgran {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NasSecurityParametersFromNgran::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NasSecurityParametersFromNgran");
@@ -15695,6 +16017,7 @@ impl NbIotDefaultPagingDrx {
 }
 
 impl PerCodec for NbIotDefaultPagingDrx {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NbIotDefaultPagingDrx::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NbIotDefaultPagingDrx");
@@ -15734,6 +16057,7 @@ impl NbIotPagingDrx {
 }
 
 impl PerCodec for NbIotPagingDrx {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NbIotPagingDrx::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NbIotPagingDrx");
@@ -15781,6 +16105,7 @@ impl NbIotPagingEDrxCycle {
 }
 
 impl PerCodec for NbIotPagingEDrxCycle {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NbIotPagingEDrxCycle::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NbIotPagingEDrxCycle");
@@ -15830,6 +16155,7 @@ impl NbIotPagingTimeWindow {
 }
 
 impl PerCodec for NbIotPagingTimeWindow {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NbIotPagingTimeWindow::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NbIotPagingTimeWindow");
@@ -15894,6 +16220,7 @@ impl NbIotPagingEDrxInfo {
 }
 
 impl PerCodec for NbIotPagingEDrxInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NbIotPagingEDrxInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NbIotPagingEDrxInfo");
@@ -15923,6 +16250,7 @@ impl NbIotUePriority {
 }
 
 impl PerCodec for NbIotUePriority {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NbIotUePriority::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NbIotUePriority");
@@ -15952,6 +16280,7 @@ impl NetworkInstance {
 }
 
 impl PerCodec for NetworkInstance {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NetworkInstance::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NetworkInstance");
@@ -15986,6 +16315,7 @@ impl NewSecurityContextInd {
 }
 
 impl PerCodec for NewSecurityContextInd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NewSecurityContextInd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NewSecurityContextInd");
@@ -16015,6 +16345,7 @@ impl NextHopChainingCount {
 }
 
 impl PerCodec for NextHopChainingCount {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NextHopChainingCount::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NextHopChainingCount");
@@ -16050,6 +16381,7 @@ impl NextPagingAreaScope {
 }
 
 impl PerCodec for NextPagingAreaScope {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NextPagingAreaScope::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NextPagingAreaScope");
@@ -16121,6 +16453,7 @@ impl NgEnbId {
 }
 
 impl PerCodec for NgEnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NgEnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NgEnbId");
@@ -16155,6 +16488,7 @@ impl NotifySourceNgranNode {
 }
 
 impl PerCodec for NotifySourceNgranNode {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NotifySourceNgranNode::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NotifySourceNgranNode");
@@ -16205,6 +16539,7 @@ impl NgranCgi {
 }
 
 impl PerCodec for NgranCgi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NgranCgi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NgranCgi");
@@ -16243,6 +16578,7 @@ impl NgranTnlAssociationToRemoveList {
 }
 
 impl PerCodec for NgranTnlAssociationToRemoveList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NgranTnlAssociationToRemoveList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NgranTnlAssociationToRemoveList");
@@ -16307,6 +16643,7 @@ impl NgranTnlAssociationToRemoveItem {
 }
 
 impl PerCodec for NgranTnlAssociationToRemoveItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NgranTnlAssociationToRemoveItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NgranTnlAssociationToRemoveItem");
@@ -16339,6 +16676,7 @@ impl NgranTraceId {
 }
 
 impl PerCodec for NgranTraceId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NgranTraceId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NgranTraceId");
@@ -16371,6 +16709,7 @@ impl Nid {
 }
 
 impl PerCodec for Nid {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Nid::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Nid");
@@ -16469,6 +16808,7 @@ impl NonDynamic5qiDescriptor {
 }
 
 impl PerCodec for NonDynamic5qiDescriptor {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NonDynamic5qiDescriptor::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NonDynamic5qiDescriptor");
@@ -16507,6 +16847,7 @@ impl NotAllowedTaCs {
 }
 
 impl PerCodec for NotAllowedTaCs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NotAllowedTaCs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NotAllowedTaCs");
@@ -16542,6 +16883,7 @@ impl NotificationCause {
 }
 
 impl PerCodec for NotificationCause {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NotificationCause::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NotificationCause");
@@ -16576,6 +16918,7 @@ impl NotificationControl {
 }
 
 impl PerCodec for NotificationControl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NotificationControl::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NotificationControl");
@@ -16620,6 +16963,7 @@ impl NpnAccessInformation {
 }
 
 impl PerCodec for NpnAccessInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NpnAccessInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NpnAccessInformation");
@@ -16674,6 +17018,7 @@ impl NpnMobilityInformation {
 }
 
 impl PerCodec for NpnMobilityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NpnMobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NpnMobilityInformation");
@@ -16720,6 +17065,7 @@ impl NpnPagingAssistanceInformation {
 }
 
 impl PerCodec for NpnPagingAssistanceInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NpnPagingAssistanceInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NpnPagingAssistanceInformation");
@@ -16764,6 +17110,7 @@ impl NpnSupport {
 }
 
 impl PerCodec for NpnSupport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NpnSupport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NpnSupport");
@@ -16796,6 +17143,7 @@ impl NrCellIdentity {
 }
 
 impl PerCodec for NrCellIdentity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrCellIdentity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrCellIdentity");
@@ -16853,6 +17201,7 @@ impl NrCgi {
 }
 
 impl PerCodec for NrCgi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrCgi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrCgi");
@@ -16891,6 +17240,7 @@ impl NrCgiList {
 }
 
 impl PerCodec for NrCgiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrCgiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrCgiList");
@@ -16929,6 +17279,7 @@ impl NrCgiListForWarning {
 }
 
 impl PerCodec for NrCgiListForWarning {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrCgiListForWarning::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrCgiListForWarning");
@@ -16961,6 +17312,7 @@ impl NrEncryptionAlgorithms {
 }
 
 impl PerCodec for NrEncryptionAlgorithms {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrEncryptionAlgorithms::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrEncryptionAlgorithms");
@@ -16993,6 +17345,7 @@ impl NrIntegrityProtectionAlgorithms {
 }
 
 impl PerCodec for NrIntegrityProtectionAlgorithms {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrIntegrityProtectionAlgorithms::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrIntegrityProtectionAlgorithms");
@@ -17020,6 +17373,7 @@ impl NrMobilityHistoryReport {
 }
 
 impl PerCodec for NrMobilityHistoryReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrMobilityHistoryReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrMobilityHistoryReport");
@@ -17047,6 +17401,7 @@ impl NrPPaPdu {
 }
 
 impl PerCodec for NrPPaPdu {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrPPaPdu::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrPPaPdu");
@@ -17074,6 +17429,7 @@ impl NrUeRlfReportContainer {
 }
 
 impl PerCodec for NrUeRlfReportContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrUeRlfReportContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrUeRlfReportContainer");
@@ -17103,6 +17459,7 @@ impl NumberOfBroadcasts {
 }
 
 impl PerCodec for NumberOfBroadcasts {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NumberOfBroadcasts::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NumberOfBroadcasts");
@@ -17132,6 +17489,7 @@ impl NumberOfBroadcastsRequested {
 }
 
 impl PerCodec for NumberOfBroadcastsRequested {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NumberOfBroadcastsRequested::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NumberOfBroadcastsRequested");
@@ -17161,6 +17519,7 @@ impl NrArfcn {
 }
 
 impl PerCodec for NrArfcn {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrArfcn::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrArfcn");
@@ -17190,6 +17549,7 @@ impl NrFrequencyBand {
 }
 
 impl PerCodec for NrFrequencyBand {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrFrequencyBand::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrFrequencyBand");
@@ -17228,6 +17588,7 @@ impl NrFrequencyBandList {
 }
 
 impl PerCodec for NrFrequencyBandList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrFrequencyBandList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrFrequencyBandList");
@@ -17279,6 +17640,7 @@ impl NrFrequencyBandItem {
 }
 
 impl PerCodec for NrFrequencyBandItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrFrequencyBandItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrFrequencyBandItem");
@@ -17336,6 +17698,7 @@ impl NrFrequencyInfo {
 }
 
 impl PerCodec for NrFrequencyInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrFrequencyInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrFrequencyInfo");
@@ -17365,6 +17728,7 @@ impl NrPci {
 }
 
 impl PerCodec for NrPci {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrPci::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrPci");
@@ -17436,6 +17800,7 @@ impl NrV2xServicesAuthorized {
 }
 
 impl PerCodec for NrV2xServicesAuthorized {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrV2xServicesAuthorized::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrV2xServicesAuthorized");
@@ -17471,6 +17836,7 @@ impl VehicleUe {
 }
 
 impl PerCodec for VehicleUe {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         VehicleUe::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("VehicleUe");
@@ -17506,6 +17872,7 @@ impl PedestrianUe {
 }
 
 impl PerCodec for PedestrianUe {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PedestrianUe::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PedestrianUe");
@@ -17559,6 +17926,7 @@ impl NrUeSidelinkAggregateMaximumBitrate {
 }
 
 impl PerCodec for NrUeSidelinkAggregateMaximumBitrate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrUeSidelinkAggregateMaximumBitrate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrUeSidelinkAggregateMaximumBitrate");
@@ -17596,6 +17964,7 @@ impl OverloadAction {
 }
 
 impl PerCodec for OverloadAction {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         OverloadAction::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("OverloadAction");
@@ -17640,6 +18009,7 @@ impl OverloadResponse {
 }
 
 impl PerCodec for OverloadResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         OverloadResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("OverloadResponse");
@@ -17678,6 +18048,7 @@ impl OverloadStartNssaiList {
 }
 
 impl PerCodec for OverloadStartNssaiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         OverloadStartNssaiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("OverloadStartNssaiList");
@@ -17753,6 +18124,7 @@ impl OverloadStartNssaiItem {
 }
 
 impl PerCodec for OverloadStartNssaiItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         OverloadStartNssaiItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("OverloadStartNssaiItem");
@@ -17782,6 +18154,7 @@ impl PacketDelayBudget {
 }
 
 impl PerCodec for PacketDelayBudget {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PacketDelayBudget::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PacketDelayBudget");
@@ -17846,6 +18219,7 @@ impl PacketErrorRate {
 }
 
 impl PerCodec for PacketErrorRate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PacketErrorRate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PacketErrorRate");
@@ -17875,6 +18249,7 @@ impl PacketLossRate {
 }
 
 impl PerCodec for PacketLossRate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PacketLossRate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PacketLossRate");
@@ -17932,6 +18307,7 @@ impl PagingAssisDataforCEcapabUe {
 }
 
 impl PerCodec for PagingAssisDataforCEcapabUe {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingAssisDataforCEcapabUe::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingAssisDataforCEcapabUe");
@@ -18000,6 +18376,7 @@ impl PagingAttemptInformation {
 }
 
 impl PerCodec for PagingAttemptInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingAttemptInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingAttemptInformation");
@@ -18029,6 +18406,7 @@ impl PagingAttemptCount {
 }
 
 impl PerCodec for PagingAttemptCount {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingAttemptCount::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingAttemptCount");
@@ -18066,6 +18444,7 @@ impl PagingDrx {
 }
 
 impl PerCodec for PagingDrx {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingDrx::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingDrx");
@@ -18100,6 +18479,7 @@ impl PagingOrigin {
 }
 
 impl PerCodec for PagingOrigin {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingOrigin::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingOrigin");
@@ -18141,6 +18521,7 @@ impl PagingPriority {
 }
 
 impl PerCodec for PagingPriority {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingPriority::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingPriority");
@@ -18205,6 +18586,7 @@ impl PagingeDrxInformation {
 }
 
 impl PerCodec for PagingeDrxInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingeDrxInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingeDrxInformation");
@@ -18252,6 +18634,7 @@ impl PagingEDrxCycle {
 }
 
 impl PerCodec for PagingEDrxCycle {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingEDrxCycle::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingEDrxCycle");
@@ -18301,6 +18684,7 @@ impl PagingTimeWindow {
 }
 
 impl PerCodec for PagingTimeWindow {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingTimeWindow::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingTimeWindow");
@@ -18355,6 +18739,7 @@ impl PagingProbabilityInformation {
 }
 
 impl PerCodec for PagingProbabilityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingProbabilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingProbabilityInformation");
@@ -18454,6 +18839,7 @@ impl PathSwitchRequestAcknowledgeTransfer {
 }
 
 impl PerCodec for PathSwitchRequestAcknowledgeTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PathSwitchRequestAcknowledgeTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PathSwitchRequestAcknowledgeTransfer");
@@ -18505,6 +18891,7 @@ impl PathSwitchRequestSetupFailedTransfer {
 }
 
 impl PerCodec for PathSwitchRequestSetupFailedTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PathSwitchRequestSetupFailedTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PathSwitchRequestSetupFailedTransfer");
@@ -18625,6 +19012,7 @@ impl PathSwitchRequestTransfer {
 }
 
 impl PerCodec for PathSwitchRequestTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PathSwitchRequestTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PathSwitchRequestTransfer");
@@ -18676,6 +19064,7 @@ impl PathSwitchRequestUnsuccessfulTransfer {
 }
 
 impl PerCodec for PathSwitchRequestUnsuccessfulTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PathSwitchRequestUnsuccessfulTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PathSwitchRequestUnsuccessfulTransfer");
@@ -18740,6 +19129,7 @@ impl Pc5QosParameters {
 }
 
 impl PerCodec for Pc5QosParameters {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Pc5QosParameters::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Pc5QosParameters");
@@ -18778,6 +19168,7 @@ impl Pc5QosFlowList {
 }
 
 impl PerCodec for Pc5QosFlowList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Pc5QosFlowList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Pc5QosFlowList");
@@ -18853,6 +19244,7 @@ impl Pc5QosFlowItem {
 }
 
 impl PerCodec for Pc5QosFlowItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Pc5QosFlowItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Pc5QosFlowItem");
@@ -18910,6 +19302,7 @@ impl Pc5FlowBitRates {
 }
 
 impl PerCodec for Pc5FlowBitRates {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Pc5FlowBitRates::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Pc5FlowBitRates");
@@ -18948,6 +19341,7 @@ impl PciListForMdt {
 }
 
 impl PerCodec for PciListForMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PciListForMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PciListForMdt");
@@ -18983,6 +19377,7 @@ impl PrivacyIndicator {
 }
 
 impl PerCodec for PrivacyIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PrivacyIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PrivacyIndicator");
@@ -19042,6 +19437,7 @@ impl PduSessionAggregateMaximumBitRate {
 }
 
 impl PerCodec for PduSessionAggregateMaximumBitRate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionAggregateMaximumBitRate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionAggregateMaximumBitRate");
@@ -19071,6 +19467,7 @@ impl PduSessionId {
 }
 
 impl PerCodec for PduSessionId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionId");
@@ -19109,6 +19506,7 @@ impl PduSessionResourceAdmittedList {
 }
 
 impl PerCodec for PduSessionResourceAdmittedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceAdmittedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceAdmittedList");
@@ -19174,6 +19572,7 @@ impl PduSessionResourceAdmittedItem {
 }
 
 impl PerCodec for PduSessionResourceAdmittedItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceAdmittedItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceAdmittedItem");
@@ -19214,6 +19613,7 @@ impl PduSessionResourceFailedToModifyListModCfm {
 }
 
 impl PerCodec for PduSessionResourceFailedToModifyListModCfm {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToModifyListModCfm::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19281,6 +19681,7 @@ impl PduSessionResourceFailedToModifyItemModCfm {
 }
 
 impl PerCodec for PduSessionResourceFailedToModifyItemModCfm {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToModifyItemModCfm::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19323,6 +19724,7 @@ impl PduSessionResourceFailedToModifyListModRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToModifyListModRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToModifyListModRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19390,6 +19792,7 @@ impl PduSessionResourceFailedToModifyItemModRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToModifyItemModRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToModifyItemModRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19432,6 +19835,7 @@ impl PduSessionResourceFailedToResumeListResReq {
 }
 
 impl PerCodec for PduSessionResourceFailedToResumeListResReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToResumeListResReq::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19491,6 +19895,7 @@ impl PduSessionResourceFailedToResumeItemResReq {
 }
 
 impl PerCodec for PduSessionResourceFailedToResumeItemResReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToResumeItemResReq::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19533,6 +19938,7 @@ impl PduSessionResourceFailedToResumeListResRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToResumeListResRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToResumeListResRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19592,6 +19998,7 @@ impl PduSessionResourceFailedToResumeItemResRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToResumeItemResRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToResumeItemResRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19634,6 +20041,7 @@ impl PduSessionResourceFailedToSetupListCxtFail {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupListCxtFail {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupListCxtFail::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19701,6 +20109,7 @@ impl PduSessionResourceFailedToSetupItemCxtFail {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupItemCxtFail {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupItemCxtFail::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19743,6 +20152,7 @@ impl PduSessionResourceFailedToSetupListCxtRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupListCxtRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupListCxtRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19810,6 +20220,7 @@ impl PduSessionResourceFailedToSetupItemCxtRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupItemCxtRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupItemCxtRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19852,6 +20263,7 @@ impl PduSessionResourceFailedToSetupListHoAck {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupListHoAck {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupListHoAck::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19919,6 +20331,7 @@ impl PduSessionResourceFailedToSetupItemHoAck {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupItemHoAck {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupItemHoAck::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -19961,6 +20374,7 @@ impl PduSessionResourceFailedToSetupListPsReq {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupListPsReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupListPsReq::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -20028,6 +20442,7 @@ impl PduSessionResourceFailedToSetupItemPsReq {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupItemPsReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupItemPsReq::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -20070,6 +20485,7 @@ impl PduSessionResourceFailedToSetupListSuRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupListSuRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupListSuRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -20137,6 +20553,7 @@ impl PduSessionResourceFailedToSetupItemSuRes {
 }
 
 impl PerCodec for PduSessionResourceFailedToSetupItemSuRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceFailedToSetupItemSuRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -20177,6 +20594,7 @@ impl PduSessionResourceHandoverList {
 }
 
 impl PerCodec for PduSessionResourceHandoverList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceHandoverList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceHandoverList");
@@ -20241,6 +20659,7 @@ impl PduSessionResourceHandoverItem {
 }
 
 impl PerCodec for PduSessionResourceHandoverItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceHandoverItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceHandoverItem");
@@ -20279,6 +20698,7 @@ impl PduSessionResourceInformationList {
 }
 
 impl PerCodec for PduSessionResourceInformationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceInformationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceInformationList");
@@ -20347,6 +20767,7 @@ impl PduSessionResourceInformationItem {
 }
 
 impl PerCodec for PduSessionResourceInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceInformationItem");
@@ -20385,6 +20806,7 @@ impl PduSessionResourceListCxtRelCpl {
 }
 
 impl PerCodec for PduSessionResourceListCxtRelCpl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceListCxtRelCpl::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceListCxtRelCpl");
@@ -20445,6 +20867,7 @@ impl PduSessionResourceItemCxtRelCpl {
 }
 
 impl PerCodec for PduSessionResourceItemCxtRelCpl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceItemCxtRelCpl::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceItemCxtRelCpl");
@@ -20483,6 +20906,7 @@ impl PduSessionResourceListCxtRelReq {
 }
 
 impl PerCodec for PduSessionResourceListCxtRelReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceListCxtRelReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceListCxtRelReq");
@@ -20534,6 +20958,7 @@ impl PduSessionResourceItemCxtRelReq {
 }
 
 impl PerCodec for PduSessionResourceItemCxtRelReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceItemCxtRelReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceItemCxtRelReq");
@@ -20572,6 +20997,7 @@ impl PduSessionResourceListHoRqd {
 }
 
 impl PerCodec for PduSessionResourceListHoRqd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceListHoRqd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceListHoRqd");
@@ -20636,6 +21062,7 @@ impl PduSessionResourceItemHoRqd {
 }
 
 impl PerCodec for PduSessionResourceItemHoRqd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceItemHoRqd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceItemHoRqd");
@@ -20731,6 +21158,7 @@ impl PduSessionResourceModifyConfirmTransfer {
 }
 
 impl PerCodec for PduSessionResourceModifyConfirmTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyConfirmTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -20784,6 +21212,7 @@ impl PduSessionResourceModifyIndicationUnsuccessfulTransfer {
 }
 
 impl PerCodec for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyIndicationUnsuccessfulTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -20888,10 +21317,10 @@ impl PduSessionResourceModifyRequestTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
@@ -20901,7 +21330,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.ul_ngu_up_tnl_modify_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 140, false)?;
             Criticality::Reject.encode(ies)?;
@@ -20911,7 +21340,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.network_instance {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
@@ -20921,7 +21350,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.qos_flow_add_or_modify_request_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 135, false)?;
             Criticality::Reject.encode(ies)?;
@@ -20931,7 +21360,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.qos_flow_to_release_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 137, false)?;
             Criticality::Reject.encode(ies)?;
@@ -20941,7 +21370,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
@@ -20951,7 +21380,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.common_network_instance {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -20961,7 +21390,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -20971,7 +21400,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_common_network_instance {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -20981,7 +21410,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -20991,7 +21420,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.security_indication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -21008,6 +21437,7 @@ impl PduSessionResourceModifyRequestTransfer {
 }
 
 impl PerCodec for PduSessionResourceModifyRequestTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyRequestTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -21154,6 +21584,7 @@ impl PduSessionResourceModifyResponseTransfer {
 }
 
 impl PerCodec for PduSessionResourceModifyResponseTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyResponseTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -21251,6 +21682,7 @@ impl PduSessionResourceModifyIndicationTransfer {
 }
 
 impl PerCodec for PduSessionResourceModifyIndicationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyIndicationTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -21291,6 +21723,7 @@ impl PduSessionResourceModifyListModCfm {
 }
 
 impl PerCodec for PduSessionResourceModifyListModCfm {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyListModCfm::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyListModCfm");
@@ -21356,6 +21789,7 @@ impl PduSessionResourceModifyItemModCfm {
 }
 
 impl PerCodec for PduSessionResourceModifyItemModCfm {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyItemModCfm::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyItemModCfm");
@@ -21394,6 +21828,7 @@ impl PduSessionResourceModifyListModInd {
 }
 
 impl PerCodec for PduSessionResourceModifyListModInd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyListModInd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyListModInd");
@@ -21459,6 +21894,7 @@ impl PduSessionResourceModifyItemModInd {
 }
 
 impl PerCodec for PduSessionResourceModifyItemModInd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyItemModInd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyItemModInd");
@@ -21497,6 +21933,7 @@ impl PduSessionResourceModifyListModReq {
 }
 
 impl PerCodec for PduSessionResourceModifyListModReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyListModReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyListModReq");
@@ -21577,6 +22014,7 @@ impl PduSessionResourceModifyItemModReq {
 }
 
 impl PerCodec for PduSessionResourceModifyItemModReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyItemModReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyItemModReq");
@@ -21615,6 +22053,7 @@ impl PduSessionResourceModifyListModRes {
 }
 
 impl PerCodec for PduSessionResourceModifyListModRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyListModRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyListModRes");
@@ -21680,6 +22119,7 @@ impl PduSessionResourceModifyItemModRes {
 }
 
 impl PerCodec for PduSessionResourceModifyItemModRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyItemModRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceModifyItemModRes");
@@ -21744,6 +22184,7 @@ impl PduSessionResourceModifyUnsuccessfulTransfer {
 }
 
 impl PerCodec for PduSessionResourceModifyUnsuccessfulTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceModifyUnsuccessfulTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -21784,6 +22225,7 @@ impl PduSessionResourceNotifyList {
 }
 
 impl PerCodec for PduSessionResourceNotifyList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceNotifyList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceNotifyList");
@@ -21849,6 +22291,7 @@ impl PduSessionResourceNotifyItem {
 }
 
 impl PerCodec for PduSessionResourceNotifyItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceNotifyItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceNotifyItem");
@@ -21909,6 +22352,7 @@ impl PduSessionResourceNotifyReleasedTransfer {
 }
 
 impl PerCodec for PduSessionResourceNotifyReleasedTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceNotifyReleasedTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -21993,6 +22437,7 @@ impl PduSessionResourceNotifyTransfer {
 }
 
 impl PerCodec for PduSessionResourceNotifyTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceNotifyTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceNotifyTransfer");
@@ -22044,6 +22489,7 @@ impl PduSessionResourceReleaseCommandTransfer {
 }
 
 impl PerCodec for PduSessionResourceReleaseCommandTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleaseCommandTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -22084,6 +22530,7 @@ impl PduSessionResourceReleasedListNot {
 }
 
 impl PerCodec for PduSessionResourceReleasedListNot {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedListNot::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedListNot");
@@ -22149,6 +22596,7 @@ impl PduSessionResourceReleasedItemNot {
 }
 
 impl PerCodec for PduSessionResourceReleasedItemNot {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedItemNot::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedItemNot");
@@ -22187,6 +22635,7 @@ impl PduSessionResourceReleasedListPsAck {
 }
 
 impl PerCodec for PduSessionResourceReleasedListPsAck {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedListPsAck::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedListPsAck");
@@ -22252,6 +22701,7 @@ impl PduSessionResourceReleasedItemPsAck {
 }
 
 impl PerCodec for PduSessionResourceReleasedItemPsAck {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedItemPsAck::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedItemPsAck");
@@ -22290,6 +22740,7 @@ impl PduSessionResourceReleasedListPsFail {
 }
 
 impl PerCodec for PduSessionResourceReleasedListPsFail {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedListPsFail::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedListPsFail");
@@ -22355,6 +22806,7 @@ impl PduSessionResourceReleasedItemPsFail {
 }
 
 impl PerCodec for PduSessionResourceReleasedItemPsFail {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedItemPsFail::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedItemPsFail");
@@ -22393,6 +22845,7 @@ impl PduSessionResourceReleasedListRelRes {
 }
 
 impl PerCodec for PduSessionResourceReleasedListRelRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedListRelRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedListRelRes");
@@ -22458,6 +22911,7 @@ impl PduSessionResourceReleasedItemRelRes {
 }
 
 impl PerCodec for PduSessionResourceReleasedItemRelRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleasedItemRelRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceReleasedItemRelRes");
@@ -22514,6 +22968,7 @@ impl PduSessionResourceReleaseResponseTransfer {
 }
 
 impl PerCodec for PduSessionResourceReleaseResponseTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceReleaseResponseTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -22554,6 +23009,7 @@ impl PduSessionResourceResumeListResReq {
 }
 
 impl PerCodec for PduSessionResourceResumeListResReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceResumeListResReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceResumeListResReq");
@@ -22619,6 +23075,7 @@ impl PduSessionResourceResumeItemResReq {
 }
 
 impl PerCodec for PduSessionResourceResumeItemResReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceResumeItemResReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceResumeItemResReq");
@@ -22657,6 +23114,7 @@ impl PduSessionResourceResumeListResRes {
 }
 
 impl PerCodec for PduSessionResourceResumeListResRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceResumeListResRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceResumeListResRes");
@@ -22722,6 +23180,7 @@ impl PduSessionResourceResumeItemResRes {
 }
 
 impl PerCodec for PduSessionResourceResumeItemResRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceResumeItemResRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceResumeItemResRes");
@@ -22762,6 +23221,7 @@ impl PduSessionResourceSecondaryRatUsageList {
 }
 
 impl PerCodec for PduSessionResourceSecondaryRatUsageList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSecondaryRatUsageList::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -22829,6 +23289,7 @@ impl PduSessionResourceSecondaryRatUsageItem {
 }
 
 impl PerCodec for PduSessionResourceSecondaryRatUsageItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSecondaryRatUsageItem::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -22869,6 +23330,7 @@ impl PduSessionResourceSetupListCxtReq {
 }
 
 impl PerCodec for PduSessionResourceSetupListCxtReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupListCxtReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupListCxtReq");
@@ -22949,6 +23411,7 @@ impl PduSessionResourceSetupItemCxtReq {
 }
 
 impl PerCodec for PduSessionResourceSetupItemCxtReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupItemCxtReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupItemCxtReq");
@@ -22987,6 +23450,7 @@ impl PduSessionResourceSetupListCxtRes {
 }
 
 impl PerCodec for PduSessionResourceSetupListCxtRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupListCxtRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupListCxtRes");
@@ -23052,6 +23516,7 @@ impl PduSessionResourceSetupItemCxtRes {
 }
 
 impl PerCodec for PduSessionResourceSetupItemCxtRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupItemCxtRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupItemCxtRes");
@@ -23090,6 +23555,7 @@ impl PduSessionResourceSetupListHoReq {
 }
 
 impl PerCodec for PduSessionResourceSetupListHoReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupListHoReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupListHoReq");
@@ -23158,6 +23624,7 @@ impl PduSessionResourceSetupItemHoReq {
 }
 
 impl PerCodec for PduSessionResourceSetupItemHoReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupItemHoReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupItemHoReq");
@@ -23196,6 +23663,7 @@ impl PduSessionResourceSetupListSuReq {
 }
 
 impl PerCodec for PduSessionResourceSetupListSuReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupListSuReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupListSuReq");
@@ -23276,6 +23744,7 @@ impl PduSessionResourceSetupItemSuReq {
 }
 
 impl PerCodec for PduSessionResourceSetupItemSuReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupItemSuReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupItemSuReq");
@@ -23314,6 +23783,7 @@ impl PduSessionResourceSetupListSuRes {
 }
 
 impl PerCodec for PduSessionResourceSetupListSuRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupListSuRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupListSuRes");
@@ -23379,6 +23849,7 @@ impl PduSessionResourceSetupItemSuRes {
 }
 
 impl PerCodec for PduSessionResourceSetupItemSuRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupItemSuRes::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSetupItemSuRes");
@@ -23508,10 +23979,10 @@ impl PduSessionResourceSetupRequestTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
@@ -23520,7 +23991,7 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ul_ngu_up_tnl_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 139, false)?;
         Criticality::Reject.encode(ies)?;
@@ -23529,7 +24000,7 @@ impl PduSessionResourceSetupRequestTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
@@ -23539,7 +24010,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.data_forwarding_not_possible {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 127, false)?;
             Criticality::Reject.encode(ies)?;
@@ -23548,7 +24019,7 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.pdu_session_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 134, false)?;
         Criticality::Reject.encode(ies)?;
@@ -23557,7 +24028,7 @@ impl PduSessionResourceSetupRequestTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.security_indication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Reject.encode(ies)?;
@@ -23567,7 +24038,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.network_instance {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
@@ -23576,7 +24047,7 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.qos_flow_setup_request_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 136, false)?;
         Criticality::Reject.encode(ies)?;
@@ -23585,7 +24056,7 @@ impl PduSessionResourceSetupRequestTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.common_network_instance {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -23595,7 +24066,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.direct_forwarding_path_availability {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 22, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -23605,7 +24076,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -23615,7 +24086,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -23625,7 +24096,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_common_network_instance {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -23635,7 +24106,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_pdu_session_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 197, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -23652,6 +24123,7 @@ impl PduSessionResourceSetupRequestTransfer {
 }
 
 impl PerCodec for PduSessionResourceSetupRequestTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupRequestTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -23766,6 +24238,7 @@ impl PduSessionResourceSetupResponseTransfer {
 }
 
 impl PerCodec for PduSessionResourceSetupResponseTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupResponseTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -23832,6 +24305,7 @@ impl PduSessionResourceSetupUnsuccessfulTransfer {
 }
 
 impl PerCodec for PduSessionResourceSetupUnsuccessfulTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSetupUnsuccessfulTransfer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -23872,6 +24346,7 @@ impl PduSessionResourceSuspendListSusReq {
 }
 
 impl PerCodec for PduSessionResourceSuspendListSusReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSuspendListSusReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSuspendListSusReq");
@@ -23937,6 +24412,7 @@ impl PduSessionResourceSuspendItemSusReq {
 }
 
 impl PerCodec for PduSessionResourceSuspendItemSusReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSuspendItemSusReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSuspendItemSusReq");
@@ -23975,6 +24451,7 @@ impl PduSessionResourceSwitchedList {
 }
 
 impl PerCodec for PduSessionResourceSwitchedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSwitchedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSwitchedList");
@@ -24040,6 +24517,7 @@ impl PduSessionResourceSwitchedItem {
 }
 
 impl PerCodec for PduSessionResourceSwitchedItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceSwitchedItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceSwitchedItem");
@@ -24078,6 +24556,7 @@ impl PduSessionResourceToBeSwitchedDlList {
 }
 
 impl PerCodec for PduSessionResourceToBeSwitchedDlList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceToBeSwitchedDlList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceToBeSwitchedDlList");
@@ -24142,6 +24621,7 @@ impl PduSessionResourceToBeSwitchedDlItem {
 }
 
 impl PerCodec for PduSessionResourceToBeSwitchedDlItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceToBeSwitchedDlItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceToBeSwitchedDlItem");
@@ -24180,6 +24660,7 @@ impl PduSessionResourceToReleaseListHoCmd {
 }
 
 impl PerCodec for PduSessionResourceToReleaseListHoCmd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceToReleaseListHoCmd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceToReleaseListHoCmd");
@@ -24245,6 +24726,7 @@ impl PduSessionResourceToReleaseItemHoCmd {
 }
 
 impl PerCodec for PduSessionResourceToReleaseItemHoCmd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceToReleaseItemHoCmd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceToReleaseItemHoCmd");
@@ -24283,6 +24765,7 @@ impl PduSessionResourceToReleaseListRelCmd {
 }
 
 impl PerCodec for PduSessionResourceToReleaseListRelCmd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceToReleaseListRelCmd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceToReleaseListRelCmd");
@@ -24348,6 +24831,7 @@ impl PduSessionResourceToReleaseItemRelCmd {
 }
 
 impl PerCodec for PduSessionResourceToReleaseItemRelCmd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionResourceToReleaseItemRelCmd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionResourceToReleaseItemRelCmd");
@@ -24386,6 +24870,7 @@ impl PduSessionType {
 }
 
 impl PerCodec for PduSessionType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionType");
@@ -24443,6 +24928,7 @@ impl PduSessionUsageReport {
 }
 
 impl PerCodec for PduSessionUsageReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PduSessionUsageReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionUsageReport");
@@ -24472,6 +24958,7 @@ impl Periodicity {
 }
 
 impl PerCodec for Periodicity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Periodicity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Periodicity");
@@ -24504,6 +24991,7 @@ impl PeriodicRegistrationUpdateTimer {
 }
 
 impl PerCodec for PeriodicRegistrationUpdateTimer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PeriodicRegistrationUpdateTimer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PeriodicRegistrationUpdateTimer");
@@ -24536,6 +25024,7 @@ impl PlmnIdentity {
 }
 
 impl PerCodec for PlmnIdentity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PlmnIdentity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PlmnIdentity");
@@ -24574,6 +25063,7 @@ impl PlmnSupportList {
 }
 
 impl PerCodec for PlmnSupportList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PlmnSupportList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PlmnSupportList");
@@ -24641,6 +25131,7 @@ impl PlmnSupportItem {
 }
 
 impl PerCodec for PlmnSupportItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PlmnSupportItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PlmnSupportItem");
@@ -24694,6 +25185,7 @@ impl PniNpnMobilityInformation {
 }
 
 impl PerCodec for PniNpnMobilityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PniNpnMobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PniNpnMobilityInformation");
@@ -24726,6 +25218,7 @@ impl PortNumber {
 }
 
 impl PerCodec for PortNumber {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PortNumber::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PortNumber");
@@ -24761,6 +25254,7 @@ impl PreEmptionCapability {
 }
 
 impl PerCodec for PreEmptionCapability {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PreEmptionCapability::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PreEmptionCapability");
@@ -24796,6 +25290,7 @@ impl PreEmptionVulnerability {
 }
 
 impl PerCodec for PreEmptionVulnerability {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PreEmptionVulnerability::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PreEmptionVulnerability");
@@ -24825,6 +25320,7 @@ impl PriorityLevelArp {
 }
 
 impl PerCodec for PriorityLevelArp {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PriorityLevelArp::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PriorityLevelArp");
@@ -24854,6 +25350,7 @@ impl PriorityLevelQos {
 }
 
 impl PerCodec for PriorityLevelQos {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PriorityLevelQos::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PriorityLevelQos");
@@ -24904,6 +25401,7 @@ impl PwsFailedCellIdList {
 }
 
 impl PerCodec for PwsFailedCellIdList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PwsFailedCellIdList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PwsFailedCellIdList");
@@ -24954,6 +25452,7 @@ impl QosCharacteristics {
 }
 
 impl PerCodec for QosCharacteristics {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosCharacteristics::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosCharacteristics");
@@ -24992,6 +25491,7 @@ impl QosFlowAcceptedList {
 }
 
 impl PerCodec for QosFlowAcceptedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowAcceptedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowAcceptedList");
@@ -25051,6 +25551,7 @@ impl QosFlowAcceptedItem {
 }
 
 impl PerCodec for QosFlowAcceptedItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowAcceptedItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowAcceptedItem");
@@ -25089,6 +25590,7 @@ impl QosFlowAddOrModifyRequestList {
 }
 
 impl PerCodec for QosFlowAddOrModifyRequestList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowAddOrModifyRequestList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowAddOrModifyRequestList");
@@ -25177,6 +25679,7 @@ impl QosFlowAddOrModifyRequestItem {
 }
 
 impl PerCodec for QosFlowAddOrModifyRequestItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowAddOrModifyRequestItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowAddOrModifyRequestItem");
@@ -25215,6 +25718,7 @@ impl QosFlowAddOrModifyResponseList {
 }
 
 impl PerCodec for QosFlowAddOrModifyResponseList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowAddOrModifyResponseList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowAddOrModifyResponseList");
@@ -25274,6 +25778,7 @@ impl QosFlowAddOrModifyResponseItem {
 }
 
 impl PerCodec for QosFlowAddOrModifyResponseItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowAddOrModifyResponseItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowAddOrModifyResponseItem");
@@ -25312,6 +25817,7 @@ impl QosFlowFeedbackList {
 }
 
 impl PerCodec for QosFlowFeedbackList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowFeedbackList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowFeedbackList");
@@ -25398,6 +25904,7 @@ impl QosFlowFeedbackItem {
 }
 
 impl PerCodec for QosFlowFeedbackItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowFeedbackItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowFeedbackItem");
@@ -25427,6 +25934,7 @@ impl QosFlowIdentifier {
 }
 
 impl PerCodec for QosFlowIdentifier {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowIdentifier::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowIdentifier");
@@ -25465,6 +25973,7 @@ impl QosFlowInformationList {
 }
 
 impl PerCodec for QosFlowInformationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowInformationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowInformationList");
@@ -25533,6 +26042,7 @@ impl QosFlowInformationItem {
 }
 
 impl PerCodec for QosFlowInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowInformationItem");
@@ -25634,6 +26144,7 @@ impl QosFlowLevelQosParameters {
 }
 
 impl PerCodec for QosFlowLevelQosParameters {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowLevelQosParameters::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowLevelQosParameters");
@@ -25670,6 +26181,7 @@ impl QosMonitoringRequest {
 }
 
 impl PerCodec for QosMonitoringRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosMonitoringRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosMonitoringRequest");
@@ -25699,6 +26211,7 @@ impl QosMonitoringReportingFrequency {
 }
 
 impl PerCodec for QosMonitoringReportingFrequency {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosMonitoringReportingFrequency::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosMonitoringReportingFrequency");
@@ -25737,6 +26250,7 @@ impl QosFlowListWithCause {
 }
 
 impl PerCodec for QosFlowListWithCause {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowListWithCause::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowListWithCause");
@@ -25794,6 +26308,7 @@ impl QosFlowWithCauseItem {
 }
 
 impl PerCodec for QosFlowWithCauseItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowWithCauseItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowWithCauseItem");
@@ -25832,6 +26347,7 @@ impl QosFlowModifyConfirmList {
 }
 
 impl PerCodec for QosFlowModifyConfirmList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowModifyConfirmList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowModifyConfirmList");
@@ -25885,6 +26401,7 @@ impl QosFlowModifyConfirmItem {
 }
 
 impl PerCodec for QosFlowModifyConfirmItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowModifyConfirmItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowModifyConfirmItem");
@@ -25923,6 +26440,7 @@ impl QosFlowNotifyList {
 }
 
 impl PerCodec for QosFlowNotifyList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowNotifyList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowNotifyList");
@@ -25987,6 +26505,7 @@ impl QosFlowNotifyItem {
 }
 
 impl PerCodec for QosFlowNotifyItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowNotifyItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowNotifyItem");
@@ -26025,6 +26544,7 @@ impl QosFlowParametersList {
 }
 
 impl PerCodec for QosFlowParametersList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowParametersList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowParametersList");
@@ -26105,6 +26625,7 @@ impl QosFlowParametersItem {
 }
 
 impl PerCodec for QosFlowParametersItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowParametersItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowParametersItem");
@@ -26162,6 +26683,7 @@ impl QosFlowPerTnlInformation {
 }
 
 impl PerCodec for QosFlowPerTnlInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowPerTnlInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowPerTnlInformation");
@@ -26200,6 +26722,7 @@ impl QosFlowPerTnlInformationList {
 }
 
 impl PerCodec for QosFlowPerTnlInformationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowPerTnlInformationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowPerTnlInformationList");
@@ -26253,6 +26776,7 @@ impl QosFlowPerTnlInformationItem {
 }
 
 impl PerCodec for QosFlowPerTnlInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowPerTnlInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowPerTnlInformationItem");
@@ -26291,6 +26815,7 @@ impl QosFlowSetupRequestList {
 }
 
 impl PerCodec for QosFlowSetupRequestList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowSetupRequestList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowSetupRequestList");
@@ -26372,6 +26897,7 @@ impl QosFlowSetupRequestItem {
 }
 
 impl PerCodec for QosFlowSetupRequestItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowSetupRequestItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowSetupRequestItem");
@@ -26410,6 +26936,7 @@ impl QosFlowListWithDataForwarding {
 }
 
 impl PerCodec for QosFlowListWithDataForwarding {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowListWithDataForwarding::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowListWithDataForwarding");
@@ -26480,6 +27007,7 @@ impl QosFlowItemWithDataForwarding {
 }
 
 impl PerCodec for QosFlowItemWithDataForwarding {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowItemWithDataForwarding::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowItemWithDataForwarding");
@@ -26518,6 +27046,7 @@ impl QosFlowToBeForwardedList {
 }
 
 impl PerCodec for QosFlowToBeForwardedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowToBeForwardedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowToBeForwardedList");
@@ -26571,6 +27100,7 @@ impl QosFlowToBeForwardedItem {
 }
 
 impl PerCodec for QosFlowToBeForwardedItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowToBeForwardedItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowToBeForwardedItem");
@@ -26609,6 +27139,7 @@ impl QosFlowsUsageReportList {
 }
 
 impl PerCodec for QosFlowsUsageReportList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowsUsageReportList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowsUsageReportList");
@@ -26670,6 +27201,7 @@ impl QosFlowsUsageReportItem {
 }
 
 impl PerCodec for QosFlowsUsageReportItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowsUsageReportItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowsUsageReportItem");
@@ -26712,6 +27244,7 @@ impl Range {
 }
 
 impl PerCodec for Range {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Range::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Range");
@@ -26744,6 +27277,7 @@ impl RanNodeName {
 }
 
 impl PerCodec for RanNodeName {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RanNodeName::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RanNodeName");
@@ -26776,6 +27310,7 @@ impl RanNodeNameVisibleString {
 }
 
 impl PerCodec for RanNodeNameVisibleString {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RanNodeNameVisibleString::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RanNodeNameVisibleString");
@@ -26808,6 +27343,7 @@ impl RanNodeNameUtf8String {
 }
 
 impl PerCodec for RanNodeNameUtf8String {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RanNodeNameUtf8String::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RanNodeNameUtf8String");
@@ -26837,6 +27373,7 @@ impl RanPagingPriority {
 }
 
 impl PerCodec for RanPagingPriority {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RanPagingPriority::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RanPagingPriority");
@@ -26890,6 +27427,7 @@ impl RanStatusTransferTransparentContainer {
 }
 
 impl PerCodec for RanStatusTransferTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RanStatusTransferTransparentContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RanStatusTransferTransparentContainer");
@@ -26926,6 +27464,7 @@ impl RanUeNgapId {
 }
 
 impl PerCodec for RanUeNgapId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RanUeNgapId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RanUeNgapId");
@@ -26961,6 +27500,7 @@ impl RatInformation {
 }
 
 impl PerCodec for RatInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RatInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RatInformation");
@@ -26999,6 +27539,7 @@ impl RatRestrictions {
 }
 
 impl PerCodec for RatRestrictions {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RatRestrictions::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RatRestrictions");
@@ -27064,6 +27605,7 @@ impl RatRestrictionsItem {
 }
 
 impl PerCodec for RatRestrictionsItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RatRestrictionsItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RatRestrictionsItem");
@@ -27096,6 +27638,7 @@ impl RatRestrictionInformation {
 }
 
 impl PerCodec for RatRestrictionInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RatRestrictionInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RatRestrictionInformation");
@@ -27149,6 +27692,7 @@ impl RecommendedCellsForPaging {
 }
 
 impl PerCodec for RecommendedCellsForPaging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RecommendedCellsForPaging::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RecommendedCellsForPaging");
@@ -27187,6 +27731,7 @@ impl RecommendedCellList {
 }
 
 impl PerCodec for RecommendedCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RecommendedCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RecommendedCellList");
@@ -27251,6 +27796,7 @@ impl RecommendedCellItem {
 }
 
 impl PerCodec for RecommendedCellItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RecommendedCellItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RecommendedCellItem");
@@ -27304,6 +27850,7 @@ impl RecommendedRanNodesForPaging {
 }
 
 impl PerCodec for RecommendedRanNodesForPaging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RecommendedRanNodesForPaging::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RecommendedRanNodesForPaging");
@@ -27342,6 +27889,7 @@ impl RecommendedRanNodeList {
 }
 
 impl PerCodec for RecommendedRanNodeList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RecommendedRanNodeList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RecommendedRanNodeList");
@@ -27393,6 +27941,7 @@ impl RecommendedRanNodeItem {
 }
 
 impl PerCodec for RecommendedRanNodeItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RecommendedRanNodeItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RecommendedRanNodeItem");
@@ -27428,6 +27977,7 @@ impl RedirectionVoiceFallback {
 }
 
 impl PerCodec for RedirectionVoiceFallback {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RedirectionVoiceFallback::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RedirectionVoiceFallback");
@@ -27479,6 +28029,7 @@ impl RedundantPduSessionInformation {
 }
 
 impl PerCodec for RedundantPduSessionInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RedundantPduSessionInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RedundantPduSessionInformation");
@@ -27514,6 +28065,7 @@ impl RedundantQosFlowIndicator {
 }
 
 impl PerCodec for RedundantQosFlowIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RedundantQosFlowIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RedundantQosFlowIndicator");
@@ -27548,6 +28100,7 @@ impl ReflectiveQosAttribute {
 }
 
 impl PerCodec for ReflectiveQosAttribute {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ReflectiveQosAttribute::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ReflectiveQosAttribute");
@@ -27577,6 +28130,7 @@ impl RelativeAmfCapacity {
 }
 
 impl PerCodec for RelativeAmfCapacity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RelativeAmfCapacity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RelativeAmfCapacity");
@@ -27611,6 +28165,7 @@ impl ReportArea {
 }
 
 impl PerCodec for ReportArea {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ReportArea::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ReportArea");
@@ -27640,6 +28195,7 @@ impl RepetitionPeriod {
 }
 
 impl PerCodec for RepetitionPeriod {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RepetitionPeriod::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RepetitionPeriod");
@@ -27674,6 +28230,7 @@ impl ResetAll {
 }
 
 impl PerCodec for ResetAll {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResetAll::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResetAll");
@@ -27715,6 +28272,7 @@ impl ReportAmountMdt {
 }
 
 impl PerCodec for ReportAmountMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ReportAmountMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ReportAmountMdt");
@@ -27761,6 +28319,7 @@ impl ReportIntervalMdt {
 }
 
 impl PerCodec for ReportIntervalMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ReportIntervalMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ReportIntervalMdt");
@@ -27813,6 +28372,7 @@ impl ResetType {
 }
 
 impl PerCodec for ResetType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResetType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResetType");
@@ -27840,6 +28400,7 @@ impl RgLevelWirelineAccessCharacteristics {
 }
 
 impl PerCodec for RgLevelWirelineAccessCharacteristics {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RgLevelWirelineAccessCharacteristics::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RgLevelWirelineAccessCharacteristics");
@@ -27869,6 +28430,7 @@ impl RncId {
 }
 
 impl PerCodec for RncId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RncId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RncId");
@@ -27896,6 +28458,7 @@ impl RoutingId {
 }
 
 impl PerCodec for RoutingId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RoutingId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RoutingId");
@@ -27923,6 +28486,7 @@ impl RrcContainer {
 }
 
 impl PerCodec for RrcContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RrcContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RrcContainer");
@@ -27966,6 +28530,7 @@ impl RrcEstablishmentCause {
 }
 
 impl PerCodec for RrcEstablishmentCause {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RrcEstablishmentCause::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RrcEstablishmentCause");
@@ -28002,6 +28567,7 @@ impl RrcInactiveTransitionReportRequest {
 }
 
 impl PerCodec for RrcInactiveTransitionReportRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RrcInactiveTransitionReportRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RrcInactiveTransitionReportRequest");
@@ -28037,6 +28603,7 @@ impl RrcState {
 }
 
 impl PerCodec for RrcState {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RrcState::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RrcState");
@@ -28072,6 +28639,7 @@ impl Rsn {
 }
 
 impl PerCodec for Rsn {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Rsn::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Rsn");
@@ -28133,6 +28701,7 @@ impl RimInformationTransfer {
 }
 
 impl PerCodec for RimInformationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RimInformationTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RimInformationTransfer");
@@ -28190,6 +28759,7 @@ impl RimInformation {
 }
 
 impl PerCodec for RimInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RimInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RimInformation");
@@ -28222,6 +28792,7 @@ impl GnbSetId {
 }
 
 impl PerCodec for GnbSetId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbSetId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbSetId");
@@ -28304,6 +28875,7 @@ impl ScheduledCommunicationTime {
 }
 
 impl PerCodec for ScheduledCommunicationTime {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ScheduledCommunicationTime::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ScheduledCommunicationTime");
@@ -28342,6 +28914,7 @@ impl SctpTlAs {
 }
 
 impl PerCodec for SctpTlAs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SctpTlAs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SctpTlAs");
@@ -28374,6 +28947,7 @@ impl Sd {
 }
 
 impl PerCodec for Sd {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Sd::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Sd");
@@ -28445,6 +29019,7 @@ impl SecondaryRatUsageInformation {
 }
 
 impl PerCodec for SecondaryRatUsageInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SecondaryRatUsageInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SecondaryRatUsageInformation");
@@ -28505,6 +29080,7 @@ impl SecondaryRatDataUsageReportTransfer {
 }
 
 impl PerCodec for SecondaryRatDataUsageReportTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SecondaryRatDataUsageReportTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SecondaryRatDataUsageReportTransfer");
@@ -28562,6 +29138,7 @@ impl SecurityContext {
 }
 
 impl PerCodec for SecurityContext {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SecurityContext::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SecurityContext");
@@ -28640,6 +29217,7 @@ impl SecurityIndication {
 }
 
 impl PerCodec for SecurityIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SecurityIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SecurityIndication");
@@ -28672,6 +29250,7 @@ impl SecurityKey {
 }
 
 impl PerCodec for SecurityKey {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SecurityKey::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SecurityKey");
@@ -28729,6 +29308,7 @@ impl SecurityResult {
 }
 
 impl PerCodec for SecurityResult {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SecurityResult::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SecurityResult");
@@ -28793,6 +29373,7 @@ impl SensorMeasurementConfiguration {
 }
 
 impl PerCodec for SensorMeasurementConfiguration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SensorMeasurementConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SensorMeasurementConfiguration");
@@ -28831,6 +29412,7 @@ impl SensorMeasConfigNameList {
 }
 
 impl PerCodec for SensorMeasConfigNameList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SensorMeasConfigNameList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SensorMeasConfigNameList");
@@ -28882,6 +29464,7 @@ impl SensorMeasConfigNameItem {
 }
 
 impl PerCodec for SensorMeasConfigNameItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SensorMeasConfigNameItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SensorMeasConfigNameItem");
@@ -28916,6 +29499,7 @@ impl SensorMeasConfig {
 }
 
 impl PerCodec for SensorMeasConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SensorMeasConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SensorMeasConfig");
@@ -28976,6 +29560,7 @@ impl SensorNameConfig {
 }
 
 impl PerCodec for SensorNameConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SensorNameConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SensorNameConfig");
@@ -29008,6 +29593,7 @@ impl SerialNumber {
 }
 
 impl PerCodec for SerialNumber {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SerialNumber::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SerialNumber");
@@ -29046,6 +29632,7 @@ impl ServedGuamiList {
 }
 
 impl PerCodec for ServedGuamiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServedGuamiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServedGuamiList");
@@ -29114,6 +29701,7 @@ impl ServedGuamiItem {
 }
 
 impl PerCodec for ServedGuamiItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServedGuamiItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServedGuamiItem");
@@ -29152,6 +29740,7 @@ impl ServiceAreaInformation {
 }
 
 impl PerCodec for ServiceAreaInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServiceAreaInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServiceAreaInformation");
@@ -29227,6 +29816,7 @@ impl ServiceAreaInformationItem {
 }
 
 impl PerCodec for ServiceAreaInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServiceAreaInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServiceAreaInformationItem");
@@ -29263,6 +29853,7 @@ impl SGnbUeX2apId {
 }
 
 impl PerCodec for SGnbUeX2apId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SGnbUeX2apId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SGnbUeX2apId");
@@ -29301,6 +29892,7 @@ impl SliceOverloadList {
 }
 
 impl PerCodec for SliceOverloadList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SliceOverloadList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SliceOverloadList");
@@ -29352,6 +29944,7 @@ impl SliceOverloadItem {
 }
 
 impl PerCodec for SliceOverloadItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SliceOverloadItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SliceOverloadItem");
@@ -29390,6 +29983,7 @@ impl SliceSupportList {
 }
 
 impl PerCodec for SliceSupportList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SliceSupportList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SliceSupportList");
@@ -29441,6 +30035,7 @@ impl SliceSupportItem {
 }
 
 impl PerCodec for SliceSupportItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SliceSupportItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SliceSupportItem");
@@ -29492,6 +30087,7 @@ impl SnpnMobilityInformation {
 }
 
 impl PerCodec for SnpnMobilityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SnpnMobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SnpnMobilityInformation");
@@ -29553,6 +30149,7 @@ impl SNssai {
 }
 
 impl PerCodec for SNssai {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SNssai::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SNssai");
@@ -29625,6 +30222,7 @@ impl SonConfigurationTransfer {
 }
 
 impl PerCodec for SonConfigurationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SonConfigurationTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SonConfigurationTransfer");
@@ -29679,6 +30277,7 @@ impl SonInformation {
 }
 
 impl PerCodec for SonInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SonInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SonInformation");
@@ -29739,6 +30338,7 @@ impl SonInformationReply {
 }
 
 impl PerCodec for SonInformationReply {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SonInformationReply::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SonInformationReply");
@@ -29791,6 +30391,7 @@ impl SonInformationReport {
 }
 
 impl PerCodec for SonInformationReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SonInformationReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SonInformationReport");
@@ -29825,6 +30426,7 @@ impl SonInformationRequest {
 }
 
 impl PerCodec for SonInformationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SonInformationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SonInformationRequest");
@@ -29930,6 +30532,7 @@ impl SourceNgranNodeToTargetNgranNodeTransparentContainer {
 }
 
 impl PerCodec for SourceNgranNodeToTargetNgranNodeTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SourceNgranNodeToTargetNgranNodeTransparentContainer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -29967,6 +30570,7 @@ impl SourceOfUeActivityBehaviourInformation {
 }
 
 impl PerCodec for SourceOfUeActivityBehaviourInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SourceOfUeActivityBehaviourInformation::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -30026,6 +30630,7 @@ impl SourceRanNodeId {
 }
 
 impl PerCodec for SourceRanNodeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SourceRanNodeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SourceRanNodeId");
@@ -30053,6 +30658,7 @@ impl SourceToTargetTransparentContainer {
 }
 
 impl PerCodec for SourceToTargetTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SourceToTargetTransparentContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SourceToTargetTransparentContainer");
@@ -30135,6 +30741,7 @@ impl SourceToTargetAmfInformationReroute {
 }
 
 impl PerCodec for SourceToTargetAmfInformationReroute {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SourceToTargetAmfInformationReroute::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SourceToTargetAmfInformationReroute");
@@ -30170,6 +30777,7 @@ impl SrvccOperationPossible {
 }
 
 impl PerCodec for SrvccOperationPossible {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrvccOperationPossible::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrvccOperationPossible");
@@ -30202,6 +30810,7 @@ impl ConfiguredNssai {
 }
 
 impl PerCodec for ConfiguredNssai {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ConfiguredNssai::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ConfiguredNssai");
@@ -30234,6 +30843,7 @@ impl RejectedNssaIinPlmn {
 }
 
 impl PerCodec for RejectedNssaIinPlmn {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RejectedNssaIinPlmn::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RejectedNssaIinPlmn");
@@ -30266,6 +30876,7 @@ impl RejectedNssaIinTa {
 }
 
 impl PerCodec for RejectedNssaIinTa {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RejectedNssaIinTa::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RejectedNssaIinTa");
@@ -30298,6 +30909,7 @@ impl Sst {
 }
 
 impl PerCodec for Sst {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Sst::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Sst");
@@ -30336,6 +30948,7 @@ impl SupportedTaList {
 }
 
 impl PerCodec for SupportedTaList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SupportedTaList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SupportedTaList");
@@ -30401,6 +31014,7 @@ impl SupportedTaItem {
 }
 
 impl PerCodec for SupportedTaItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SupportedTaItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SupportedTaItem");
@@ -30435,6 +31049,7 @@ impl SuspendIndicator {
 }
 
 impl PerCodec for SuspendIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SuspendIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SuspendIndicator");
@@ -30469,6 +31084,7 @@ impl SuspendRequestIndication {
 }
 
 impl PerCodec for SuspendRequestIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SuspendRequestIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SuspendRequestIndication");
@@ -30503,6 +31119,7 @@ impl SuspendResponseIndication {
 }
 
 impl PerCodec for SuspendResponseIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SuspendResponseIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SuspendResponseIndication");
@@ -30535,6 +31152,7 @@ impl Tac {
 }
 
 impl PerCodec for Tac {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Tac::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Tac");
@@ -30589,6 +31207,7 @@ impl Tai {
 }
 
 impl PerCodec for Tai {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Tai::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Tai");
@@ -30627,6 +31246,7 @@ impl TaiBroadcastEutra {
 }
 
 impl PerCodec for TaiBroadcastEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiBroadcastEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiBroadcastEutra");
@@ -30684,6 +31304,7 @@ impl TaiBroadcastEutraItem {
 }
 
 impl PerCodec for TaiBroadcastEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiBroadcastEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiBroadcastEutraItem");
@@ -30722,6 +31343,7 @@ impl TaiBroadcastNr {
 }
 
 impl PerCodec for TaiBroadcastNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiBroadcastNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiBroadcastNr");
@@ -30779,6 +31401,7 @@ impl TaiBroadcastNrItem {
 }
 
 impl PerCodec for TaiBroadcastNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiBroadcastNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiBroadcastNrItem");
@@ -30817,6 +31440,7 @@ impl TaiCancelledEutra {
 }
 
 impl PerCodec for TaiCancelledEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiCancelledEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiCancelledEutra");
@@ -30874,6 +31498,7 @@ impl TaiCancelledEutraItem {
 }
 
 impl PerCodec for TaiCancelledEutraItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiCancelledEutraItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiCancelledEutraItem");
@@ -30912,6 +31537,7 @@ impl TaiCancelledNr {
 }
 
 impl PerCodec for TaiCancelledNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiCancelledNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiCancelledNr");
@@ -30969,6 +31595,7 @@ impl TaiCancelledNrItem {
 }
 
 impl PerCodec for TaiCancelledNrItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiCancelledNrItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiCancelledNrItem");
@@ -31007,6 +31634,7 @@ impl TaiListForInactive {
 }
 
 impl PerCodec for TaiListForInactive {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListForInactive::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListForInactive");
@@ -31058,6 +31686,7 @@ impl TaiListForInactiveItem {
 }
 
 impl PerCodec for TaiListForInactiveItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListForInactiveItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListForInactiveItem");
@@ -31096,6 +31725,7 @@ impl TaiListForPaging {
 }
 
 impl PerCodec for TaiListForPaging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListForPaging::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListForPaging");
@@ -31147,6 +31777,7 @@ impl TaiListForPagingItem {
 }
 
 impl PerCodec for TaiListForPagingItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListForPagingItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListForPagingItem");
@@ -31185,6 +31816,7 @@ impl TaiListForRestart {
 }
 
 impl PerCodec for TaiListForRestart {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListForRestart::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListForRestart");
@@ -31223,6 +31855,7 @@ impl TaiListForWarning {
 }
 
 impl PerCodec for TaiListForWarning {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListForWarning::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListForWarning");
@@ -31280,6 +31913,7 @@ impl TargetEnbId {
 }
 
 impl PerCodec for TargetEnbId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetEnbId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TargetEnbId");
@@ -31330,6 +31964,7 @@ impl TargetId {
 }
 
 impl PerCodec for TargetId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TargetId");
@@ -31387,6 +32022,7 @@ impl TargetNgranNodeToSourceNgranNodeTransparentContainer {
 }
 
 impl PerCodec for TargetNgranNodeToSourceNgranNodeTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetNgranNodeToSourceNgranNodeTransparentContainer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -31442,6 +32078,7 @@ impl TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
 }
 
 impl PerCodec for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetNgranNodeToSourceNgranNodeFailureTransparentContainer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -31501,6 +32138,7 @@ impl TargetRanNodeId {
 }
 
 impl PerCodec for TargetRanNodeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetRanNodeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TargetRanNodeId");
@@ -31569,6 +32207,7 @@ impl TargetRncId {
 }
 
 impl PerCodec for TargetRncId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetRncId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TargetRncId");
@@ -31596,6 +32235,7 @@ impl TargetToSourceTransparentContainer {
 }
 
 impl PerCodec for TargetToSourceTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargetToSourceTransparentContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TargetToSourceTransparentContainer");
@@ -31623,6 +32263,7 @@ impl TargettoSourceFailureTransparentContainer {
 }
 
 impl PerCodec for TargettoSourceFailureTransparentContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TargettoSourceFailureTransparentContainer::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -31659,6 +32300,7 @@ impl TimerApproachForGuamiRemoval {
 }
 
 impl PerCodec for TimerApproachForGuamiRemoval {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TimerApproachForGuamiRemoval::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TimerApproachForGuamiRemoval");
@@ -31691,6 +32333,7 @@ impl TimeStamp {
 }
 
 impl PerCodec for TimeStamp {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TimeStamp::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TimeStamp");
@@ -31730,6 +32373,7 @@ impl TimeToWait {
 }
 
 impl PerCodec for TimeToWait {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TimeToWait::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TimeToWait");
@@ -31759,6 +32403,7 @@ impl TimeUeStayedInCell {
 }
 
 impl PerCodec for TimeUeStayedInCell {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TimeUeStayedInCell::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TimeUeStayedInCell");
@@ -31788,6 +32433,7 @@ impl TimeUeStayedInCellEnhancedGranularity {
 }
 
 impl PerCodec for TimeUeStayedInCellEnhancedGranularity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TimeUeStayedInCellEnhancedGranularity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TimeUeStayedInCellEnhancedGranularity");
@@ -31815,6 +32461,7 @@ impl TnapId {
 }
 
 impl PerCodec for TnapId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TnapId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TnapId");
@@ -31864,6 +32511,7 @@ impl TngfId {
 }
 
 impl PerCodec for TngfId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TngfId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TngfId");
@@ -31893,6 +32541,7 @@ impl TnlAddressWeightFactor {
 }
 
 impl PerCodec for TnlAddressWeightFactor {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TnlAddressWeightFactor::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TnlAddressWeightFactor");
@@ -31931,6 +32580,7 @@ impl TnlAssociationList {
 }
 
 impl PerCodec for TnlAssociationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TnlAssociationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TnlAssociationList");
@@ -31988,6 +32638,7 @@ impl TnlAssociationItem {
 }
 
 impl PerCodec for TnlAssociationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TnlAssociationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TnlAssociationItem");
@@ -32024,6 +32675,7 @@ impl TnlAssociationUsage {
 }
 
 impl PerCodec for TnlAssociationUsage {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TnlAssociationUsage::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TnlAssociationUsage");
@@ -32092,6 +32744,7 @@ impl TooearlyIntersystemHo {
 }
 
 impl PerCodec for TooearlyIntersystemHo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TooearlyIntersystemHo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TooearlyIntersystemHo");
@@ -32165,6 +32818,7 @@ impl TraceActivation {
 }
 
 impl PerCodec for TraceActivation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TraceActivation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TraceActivation");
@@ -32204,6 +32858,7 @@ impl TraceDepth {
 }
 
 impl PerCodec for TraceDepth {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TraceDepth::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TraceDepth");
@@ -32233,6 +32888,7 @@ impl TrafficLoadReductionIndication {
 }
 
 impl PerCodec for TrafficLoadReductionIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrafficLoadReductionIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrafficLoadReductionIndication");
@@ -32265,6 +32921,7 @@ impl TransportLayerAddress {
 }
 
 impl PerCodec for TransportLayerAddress {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TransportLayerAddress::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TransportLayerAddress");
@@ -32300,6 +32957,7 @@ impl TypeOfError {
 }
 
 impl PerCodec for TypeOfError {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TypeOfError::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TypeOfError");
@@ -32351,6 +33009,7 @@ impl TaiBasedMdt {
 }
 
 impl PerCodec for TaiBasedMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiBasedMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiBasedMdt");
@@ -32389,6 +33048,7 @@ impl TaiListforMdt {
 }
 
 impl PerCodec for TaiListforMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaiListforMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaiListforMdt");
@@ -32440,6 +33100,7 @@ impl TaBasedMdt {
 }
 
 impl PerCodec for TaBasedMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaBasedMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaBasedMdt");
@@ -32478,6 +33139,7 @@ impl TaListforMdt {
 }
 
 impl PerCodec for TaListforMdt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TaListforMdt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TaListforMdt");
@@ -32507,6 +33169,7 @@ impl ThresholdRsrp {
 }
 
 impl PerCodec for ThresholdRsrp {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ThresholdRsrp::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ThresholdRsrp");
@@ -32536,6 +33199,7 @@ impl ThresholdRsrq {
 }
 
 impl PerCodec for ThresholdRsrq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ThresholdRsrq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ThresholdRsrq");
@@ -32565,6 +33229,7 @@ impl ThresholdSiNr {
 }
 
 impl PerCodec for ThresholdSiNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ThresholdSiNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ThresholdSiNr");
@@ -32614,6 +33279,7 @@ impl TimeToTrigger {
 }
 
 impl PerCodec for TimeToTrigger {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TimeToTrigger::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TimeToTrigger");
@@ -32641,6 +33307,7 @@ impl TwapId {
 }
 
 impl PerCodec for TwapId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TwapId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TwapId");
@@ -32690,6 +33357,7 @@ impl TwifId {
 }
 
 impl PerCodec for TwifId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TwifId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TwifId");
@@ -32754,6 +33422,7 @@ impl TscAssistanceInformation {
 }
 
 impl PerCodec for TscAssistanceInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TscAssistanceInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TscAssistanceInformation");
@@ -32825,6 +33494,7 @@ impl TscTrafficCharacteristics {
 }
 
 impl PerCodec for TscTrafficCharacteristics {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TscTrafficCharacteristics::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TscTrafficCharacteristics");
@@ -32882,6 +33552,7 @@ impl UeAggregateMaximumBitRate {
 }
 
 impl PerCodec for UeAggregateMaximumBitRate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeAggregateMaximumBitRate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeAggregateMaximumBitRate");
@@ -32920,6 +33591,7 @@ impl UeAssociatedLogicalNgConnectionList {
 }
 
 impl PerCodec for UeAssociatedLogicalNgConnectionList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeAssociatedLogicalNgConnectionList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeAssociatedLogicalNgConnectionList");
@@ -32991,6 +33663,7 @@ impl UeAssociatedLogicalNgConnectionItem {
 }
 
 impl PerCodec for UeAssociatedLogicalNgConnectionItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeAssociatedLogicalNgConnectionItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeAssociatedLogicalNgConnectionItem");
@@ -33025,6 +33698,7 @@ impl UeCapabilityInfoRequest {
 }
 
 impl PerCodec for UeCapabilityInfoRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeCapabilityInfoRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeCapabilityInfoRequest");
@@ -33059,6 +33733,7 @@ impl UeContextRequest {
 }
 
 impl PerCodec for UeContextRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextRequest");
@@ -33119,6 +33794,7 @@ impl UeContextResumeRequestTransfer {
 }
 
 impl PerCodec for UeContextResumeRequestTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextResumeRequestTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextResumeRequestTransfer");
@@ -33179,6 +33855,7 @@ impl UeContextResumeResponseTransfer {
 }
 
 impl PerCodec for UeContextResumeResponseTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextResumeResponseTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextResumeResponseTransfer");
@@ -33237,6 +33914,7 @@ impl UeContextSuspendRequestTransfer {
 }
 
 impl PerCodec for UeContextSuspendRequestTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextSuspendRequestTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextSuspendRequestTransfer");
@@ -33352,6 +34030,7 @@ impl UeDifferentiationInfo {
 }
 
 impl PerCodec for UeDifferentiationInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeDifferentiationInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeDifferentiationInfo");
@@ -33390,6 +34069,7 @@ impl UeHistoryInformation {
 }
 
 impl PerCodec for UeHistoryInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeHistoryInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeHistoryInformation");
@@ -33434,6 +34114,7 @@ impl UeHistoryInformationFromTheUe {
 }
 
 impl PerCodec for UeHistoryInformationFromTheUe {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeHistoryInformationFromTheUe::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeHistoryInformationFromTheUe");
@@ -33483,6 +34164,7 @@ impl UeIdentityIndexValue {
 }
 
 impl PerCodec for UeIdentityIndexValue {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeIdentityIndexValue::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeIdentityIndexValue");
@@ -33533,6 +34215,7 @@ impl UeNgapIDs {
 }
 
 impl PerCodec for UeNgapIDs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeNgapIDs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeNgapIDs");
@@ -33590,6 +34273,7 @@ impl UeNgapIdPair {
 }
 
 impl PerCodec for UeNgapIdPair {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeNgapIdPair::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeNgapIdPair");
@@ -33634,6 +34318,7 @@ impl UePagingIdentity {
 }
 
 impl PerCodec for UePagingIdentity {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UePagingIdentity::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UePagingIdentity");
@@ -33670,6 +34355,7 @@ impl UePresence {
 }
 
 impl PerCodec for UePresence {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UePresence::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UePresence");
@@ -33708,6 +34394,7 @@ impl UePresenceInAreaOfInterestList {
 }
 
 impl PerCodec for UePresenceInAreaOfInterestList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UePresenceInAreaOfInterestList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UePresenceInAreaOfInterestList");
@@ -33765,6 +34452,7 @@ impl UePresenceInAreaOfInterestItem {
 }
 
 impl PerCodec for UePresenceInAreaOfInterestItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UePresenceInAreaOfInterestItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UePresenceInAreaOfInterestItem");
@@ -33792,6 +34480,7 @@ impl UeRadioCapability {
 }
 
 impl PerCodec for UeRadioCapability {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRadioCapability::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRadioCapability");
@@ -33872,6 +34561,7 @@ impl UeRadioCapabilityForPaging {
 }
 
 impl PerCodec for UeRadioCapabilityForPaging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRadioCapabilityForPaging::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRadioCapabilityForPaging");
@@ -33899,6 +34589,7 @@ impl UeRadioCapabilityForPagingOfNbIot {
 }
 
 impl PerCodec for UeRadioCapabilityForPagingOfNbIot {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRadioCapabilityForPagingOfNbIot::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRadioCapabilityForPagingOfNbIot");
@@ -33926,6 +34617,7 @@ impl UeRadioCapabilityForPagingOfNr {
 }
 
 impl PerCodec for UeRadioCapabilityForPagingOfNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRadioCapabilityForPagingOfNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRadioCapabilityForPagingOfNr");
@@ -33953,6 +34645,7 @@ impl UeRadioCapabilityForPagingOfEutra {
 }
 
 impl PerCodec for UeRadioCapabilityForPagingOfEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRadioCapabilityForPagingOfEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRadioCapabilityForPagingOfEutra");
@@ -33980,6 +34673,7 @@ impl UeRadioCapabilityId {
 }
 
 impl PerCodec for UeRadioCapabilityId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRadioCapabilityId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRadioCapabilityId");
@@ -34014,6 +34708,7 @@ impl UeRetentionInformation {
 }
 
 impl PerCodec for UeRetentionInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRetentionInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRetentionInformation");
@@ -34064,6 +34759,7 @@ impl UeRlfReportContainer {
 }
 
 impl PerCodec for UeRlfReportContainer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeRlfReportContainer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeRlfReportContainer");
@@ -34130,6 +34826,7 @@ impl UeSecurityCapabilities {
 }
 
 impl PerCodec for UeSecurityCapabilities {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeSecurityCapabilities::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeSecurityCapabilities");
@@ -34164,6 +34861,7 @@ impl UeUpCIotSupport {
 }
 
 impl PerCodec for UeUpCIotSupport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeUpCIotSupport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeUpCIotSupport");
@@ -34221,6 +34919,7 @@ impl UlCpSecurityInformation {
 }
 
 impl PerCodec for UlCpSecurityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlCpSecurityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlCpSecurityInformation");
@@ -34253,6 +34952,7 @@ impl UlNasMac {
 }
 
 impl PerCodec for UlNasMac {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlNasMac::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlNasMac");
@@ -34285,6 +34985,7 @@ impl UlNasCount {
 }
 
 impl PerCodec for UlNasCount {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlNasCount::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlNasCount");
@@ -34323,6 +35024,7 @@ impl UlNguUpTnlModifyList {
 }
 
 impl PerCodec for UlNguUpTnlModifyList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlNguUpTnlModifyList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlNguUpTnlModifyList");
@@ -34394,6 +35096,7 @@ impl UlNguUpTnlModifyItem {
 }
 
 impl PerCodec for UlNguUpTnlModifyItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlNguUpTnlModifyItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlNguUpTnlModifyItem");
@@ -34432,6 +35135,7 @@ impl UnavailableGuamiList {
 }
 
 impl PerCodec for UnavailableGuamiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UnavailableGuamiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UnavailableGuamiList");
@@ -34507,6 +35211,7 @@ impl UnavailableGuamiItem {
 }
 
 impl PerCodec for UnavailableGuamiItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UnavailableGuamiItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UnavailableGuamiItem");
@@ -34541,6 +35246,7 @@ impl UlForwarding {
 }
 
 impl PerCodec for UlForwarding {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlForwarding::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlForwarding");
@@ -34573,6 +35279,7 @@ impl UpdateFeedback {
 }
 
 impl PerCodec for UpdateFeedback {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UpdateFeedback::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UpdateFeedback");
@@ -34617,6 +35324,7 @@ impl UpTransportLayerInformation {
 }
 
 impl PerCodec for UpTransportLayerInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UpTransportLayerInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UpTransportLayerInformation");
@@ -34655,6 +35363,7 @@ impl UpTransportLayerInformationList {
 }
 
 impl PerCodec for UpTransportLayerInformationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UpTransportLayerInformationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UpTransportLayerInformationList");
@@ -34708,6 +35417,7 @@ impl UpTransportLayerInformationItem {
 }
 
 impl PerCodec for UpTransportLayerInformationItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UpTransportLayerInformationItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UpTransportLayerInformationItem");
@@ -34746,6 +35456,7 @@ impl UpTransportLayerInformationPairList {
 }
 
 impl PerCodec for UpTransportLayerInformationPairList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UpTransportLayerInformationPairList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UpTransportLayerInformationPairList");
@@ -34803,6 +35514,7 @@ impl UpTransportLayerInformationPairItem {
 }
 
 impl PerCodec for UpTransportLayerInformationPairItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UpTransportLayerInformationPairItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UpTransportLayerInformationPairItem");
@@ -34832,6 +35544,7 @@ impl UriAddress {
 }
 
 impl PerCodec for UriAddress {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UriAddress::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UriAddress");
@@ -34894,6 +35607,7 @@ impl UserLocationInformation {
 }
 
 impl PerCodec for UserLocationInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformation");
@@ -34966,6 +35680,7 @@ impl UserLocationInformationEutra {
 }
 
 impl PerCodec for UserLocationInformationEutra {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformationEutra::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformationEutra");
@@ -35023,6 +35738,7 @@ impl UserLocationInformationN3Iwf {
 }
 
 impl PerCodec for UserLocationInformationN3Iwf {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformationN3Iwf::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformationN3Iwf");
@@ -35091,6 +35807,7 @@ impl UserLocationInformationTngf {
 }
 
 impl PerCodec for UserLocationInformationTngf {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformationTngf::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformationTngf");
@@ -35159,6 +35876,7 @@ impl UserLocationInformationTwif {
 }
 
 impl PerCodec for UserLocationInformationTwif {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformationTwif::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformationTwif");
@@ -35209,6 +35927,7 @@ impl UserLocationInformationWAgf {
 }
 
 impl PerCodec for UserLocationInformationWAgf {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformationWAgf::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformationWAgf");
@@ -35285,6 +36004,7 @@ impl UserLocationInformationNr {
 }
 
 impl PerCodec for UserLocationInformationNr {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserLocationInformationNr::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserLocationInformationNr");
@@ -35342,6 +36062,7 @@ impl UserPlaneSecurityInformation {
 }
 
 impl PerCodec for UserPlaneSecurityInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UserPlaneSecurityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UserPlaneSecurityInformation");
@@ -35380,6 +36101,7 @@ impl VolumeTimedReportList {
 }
 
 impl PerCodec for VolumeTimedReportList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         VolumeTimedReportList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("VolumeTimedReportList");
@@ -35459,6 +36181,7 @@ impl VolumeTimedReportItem {
 }
 
 impl PerCodec for VolumeTimedReportItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         VolumeTimedReportItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("VolumeTimedReportItem");
@@ -35508,6 +36231,7 @@ impl WAgfId {
 }
 
 impl PerCodec for WAgfId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WAgfId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WAgfId");
@@ -35540,6 +36264,7 @@ impl WarningAreaCoordinates {
 }
 
 impl PerCodec for WarningAreaCoordinates {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WarningAreaCoordinates::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WarningAreaCoordinates");
@@ -35608,6 +36333,7 @@ impl WarningAreaList {
 }
 
 impl PerCodec for WarningAreaList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WarningAreaList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WarningAreaList");
@@ -35640,6 +36366,7 @@ impl WarningMessageContents {
 }
 
 impl PerCodec for WarningMessageContents {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WarningMessageContents::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WarningMessageContents");
@@ -35672,6 +36399,7 @@ impl WarningSecurityInfo {
 }
 
 impl PerCodec for WarningSecurityInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WarningSecurityInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WarningSecurityInfo");
@@ -35704,6 +36432,7 @@ impl WarningType {
 }
 
 impl PerCodec for WarningType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WarningType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WarningType");
@@ -35790,6 +36519,7 @@ impl WlanMeasurementConfiguration {
 }
 
 impl PerCodec for WlanMeasurementConfiguration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanMeasurementConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanMeasurementConfiguration");
@@ -35828,6 +36558,7 @@ impl WlanMeasConfigNameList {
 }
 
 impl PerCodec for WlanMeasConfigNameList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanMeasConfigNameList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanMeasConfigNameList");
@@ -35879,6 +36610,7 @@ impl WlanMeasConfigNameItem {
 }
 
 impl PerCodec for WlanMeasConfigNameItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanMeasConfigNameItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanMeasConfigNameItem");
@@ -35913,6 +36645,7 @@ impl WlanMeasConfig {
 }
 
 impl PerCodec for WlanMeasConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanMeasConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanMeasConfig");
@@ -35945,6 +36678,7 @@ impl WlanName {
 }
 
 impl PerCodec for WlanName {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanName::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanName");
@@ -35998,6 +36732,7 @@ impl WusAssistanceInformation {
 }
 
 impl PerCodec for WusAssistanceInformation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WusAssistanceInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WusAssistanceInformation");
@@ -36036,6 +36771,7 @@ impl XnExtTlAs {
 }
 
 impl PerCodec for XnExtTlAs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         XnExtTlAs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("XnExtTlAs");
@@ -36111,6 +36847,7 @@ impl XnExtTlaItem {
 }
 
 impl PerCodec for XnExtTlaItem {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         XnExtTlaItem::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("XnExtTlaItem");
@@ -36149,6 +36886,7 @@ impl XnGtpTlAs {
 }
 
 impl PerCodec for XnGtpTlAs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         XnGtpTlAs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("XnGtpTlAs");
@@ -36187,6 +36925,7 @@ impl XnTlAs {
 }
 
 impl PerCodec for XnTlAs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         XnTlAs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("XnTlAs");
@@ -36251,6 +36990,7 @@ impl XnTnlConfigurationInfo {
 }
 
 impl PerCodec for XnTnlConfigurationInfo {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         XnTnlConfigurationInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("XnTnlConfigurationInfo");
@@ -36286,6 +37026,7 @@ impl PniNpnRestricted {
 }
 
 impl PerCodec for PniNpnRestricted {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PniNpnRestricted::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PniNpnRestricted");
@@ -36321,6 +37062,7 @@ impl QosFlowMappingIndication {
 }
 
 impl PerCodec for QosFlowMappingIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         QosFlowMappingIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("QosFlowMappingIndication");
@@ -36355,6 +37097,7 @@ impl BtRssi {
 }
 
 impl PerCodec for BtRssi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BtRssi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BtRssi");
@@ -36390,6 +37133,7 @@ impl CnType {
 }
 
 impl PerCodec for CnType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CnType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CnType");
@@ -36424,6 +37168,7 @@ impl DapsIndicator {
 }
 
 impl PerCodec for DapsIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DapsIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DapsIndicator");
@@ -36459,6 +37204,7 @@ impl Dapsresponseindicator {
 }
 
 impl PerCodec for Dapsresponseindicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Dapsresponseindicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Dapsresponseindicator");
@@ -36493,6 +37239,7 @@ impl OutOfCoverage {
 }
 
 impl PerCodec for OutOfCoverage {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         OutOfCoverage::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("OutOfCoverage");
@@ -36529,6 +37276,7 @@ impl HandoverReportType {
 }
 
 impl PerCodec for HandoverReportType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         HandoverReportType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("HandoverReportType");
@@ -36564,6 +37312,7 @@ impl EarlyIratho {
 }
 
 impl PerCodec for EarlyIratho {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         EarlyIratho::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("EarlyIratho");
@@ -36599,6 +37348,7 @@ impl RatType {
 }
 
 impl PerCodec for RatType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RatType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RatType");
@@ -36634,6 +37384,7 @@ impl RatType1 {
 }
 
 impl PerCodec for RatType1 {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RatType1::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RatType1");
@@ -36669,6 +37420,7 @@ impl RimRsDetection {
 }
 
 impl PerCodec for RimRsDetection {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RimRsDetection::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RimRsDetection");
@@ -36703,6 +37455,7 @@ impl UncompensatedBarometricConfig {
 }
 
 impl PerCodec for UncompensatedBarometricConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UncompensatedBarometricConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UncompensatedBarometricConfig");
@@ -36737,6 +37490,7 @@ impl UeSpeedConfig {
 }
 
 impl PerCodec for UeSpeedConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeSpeedConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeSpeedConfig");
@@ -36771,6 +37525,7 @@ impl UeOrientationConfig {
 }
 
 impl PerCodec for UeOrientationConfig {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeOrientationConfig::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeOrientationConfig");
@@ -36806,6 +37561,7 @@ impl PeriodicCommunicationIndicator {
 }
 
 impl PerCodec for PeriodicCommunicationIndicator {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PeriodicCommunicationIndicator::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PeriodicCommunicationIndicator");
@@ -36841,6 +37597,7 @@ impl StationaryIndication {
 }
 
 impl PerCodec for StationaryIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         StationaryIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("StationaryIndication");
@@ -36877,6 +37634,7 @@ impl TrafficProfile {
 }
 
 impl PerCodec for TrafficProfile {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrafficProfile::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrafficProfile");
@@ -36913,6 +37671,7 @@ impl BatteryIndication {
 }
 
 impl PerCodec for BatteryIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BatteryIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BatteryIndication");
@@ -36947,6 +37706,7 @@ impl WlanRssi {
 }
 
 impl PerCodec for WlanRssi {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanRssi::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanRssi");
@@ -36981,6 +37741,7 @@ impl WlanRtt {
 }
 
 impl PerCodec for WlanRtt {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WlanRtt::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WlanRtt");

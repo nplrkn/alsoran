@@ -4,7 +4,6 @@ use super::top_pdu::*;
 use crate::{InitiatingMessage, NgapPdu};
 use asn1_per::*;
 use async_trait::async_trait;
-use net::{Application, EventHandler, TnlaEvent};
 use slog::Logger;
 
 pub struct NgapAmf<T>(pub T)

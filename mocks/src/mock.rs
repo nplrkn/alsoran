@@ -4,13 +4,13 @@ use anyhow::{bail, Result};
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, Binding, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
+    Binding, SctpTransportProvider, SerDes, ShutdownHandle, TnlaEvent, TnlaEventHandler,
     TransportProvider,
 };
 use slog::{debug, info, Logger};
 use std::fmt::Debug;
 
-pub trait Pdu: AperSerde + 'static + Send + Sync + Clone + Debug {}
+pub trait Pdu: SerDes + 'static + Send + Sync + Clone + Debug {}
 
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
@@ -114,7 +114,8 @@ impl<P: Pdu> Mock<P> {
         }
     }
 
-    pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {
+    pub async fn send<T: SerDes>(&self, pdu: T, assoc_id: Option<u32>) {
+        let message = pdu.into_bytes().unwrap();
         self.transport
             .send_message(message, assoc_id, &self.logger)
             .await

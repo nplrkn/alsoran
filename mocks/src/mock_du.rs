@@ -4,7 +4,7 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, ensure, Result};
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Binding, Indication, TransportProvider};
+use net::{Binding, SerDes, TransportProvider};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
@@ -83,7 +83,7 @@ impl MockDu {
                 extended_gnb_cu_name: None,
             }));
         info!(self.logger, "F1SetupRequest >>");
-        self.send(pdu.into_bytes()?, None).await;
+        self.send(pdu, None).await;
         Ok(())
     }
 
@@ -127,8 +127,8 @@ impl MockDu {
         let du_to_cu_rrc_container = Some(make_du_to_cu_rrc_container());
 
         // Wrap them in an F1 Initial UL Rrc Message Transfer.
-        let f1_indication =
-            InitialUlRrcMessageTransferProcedure::encode_request(InitialUlRrcMessageTransfer {
+        let f1_indication = F1apPdu::InitiatingMessage(
+            InitiatingMessage::InitialUlRrcMessageTransfer(InitialUlRrcMessageTransfer {
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_context.ue_id),
                 nr_cgi: NrCgi {
                     plmn_identity: PlmnIdentity(vec![0, 1, 2]),
@@ -141,7 +141,8 @@ impl MockDu {
                 transaction_id: Some(TransactionId(1)), // Should be mandatory - ODU ORAN interop hack
                 ran_ue_id: None,
                 rrc_container_rrc_setup_complete: None,
-            })?;
+            }),
+        );
 
         info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
         self.send(f1_indication, Some(ue_context.binding.assoc_id))
@@ -232,14 +233,16 @@ impl MockDu {
         let pdcp_pdu = PdcpPdu::encode(&rrc_bytes);
 
         // Wrap it in an UL Rrc Message Transfer
-        let f1_indication = UlRrcMessageTransferProcedure::encode_request(UlRrcMessageTransfer {
-            gnb_cu_ue_f1ap_id,
-            gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_context.ue_id),
-            srb_id: SrbId(1),
-            rrc_container: RrcContainer(pdcp_pdu.into()),
-            selected_plmn_id: None,
-            new_gnb_du_ue_f1ap_id: None,
-        })?;
+        let f1_indication = F1apPdu::InitiatingMessage(InitiatingMessage::UlRrcMessageTransfer(
+            UlRrcMessageTransfer {
+                gnb_cu_ue_f1ap_id,
+                gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_context.ue_id),
+                srb_id: SrbId(1),
+                rrc_container: RrcContainer(pdcp_pdu.into()),
+                selected_plmn_id: None,
+                new_gnb_du_ue_f1ap_id: None,
+            },
+        ));
 
         self.send(f1_indication, Some(ue_context.binding.assoc_id))
             .await;
@@ -314,8 +317,7 @@ impl MockDu {
 
         let ue_context_setup_response = self.build_ue_context_setup_response(ue_context);
         info!(&self.logger, "UeContextSetupResponse >>");
-        self.send(ue_context_setup_response.into_bytes()?, Some(assoc_id))
-            .await;
+        self.send(ue_context_setup_response, Some(assoc_id)).await;
 
         Ok(())
     }
@@ -542,7 +544,7 @@ impl MockDu {
         );
 
         info!(self.logger, "GnbCuConfigurationUpdateAcknowledge >>");
-        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
+        self.send(pdu, Some(assoc_id)).await;
         Ok(())
     }
 
@@ -566,7 +568,7 @@ impl MockDu {
             },
         ));
         info!(self.logger, "GnbDuConfigurationUpdate >>");
-        self.send(pdu.into_bytes()?, None).await;
+        self.send(pdu, None).await;
         Ok(())
     }
 

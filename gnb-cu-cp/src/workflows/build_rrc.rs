@@ -1,11 +1,11 @@
 //! build_rrc - construction of RRC messages
 
 use anyhow::Result;
-use net::AperSerde;
+use net::SerDes;
 use pdcp::PdcpPdu;
 use rrc::*;
 
-pub fn make_rrc_container<T: AperSerde>(rrc: T) -> Result<f1ap::RrcContainer> {
+pub fn make_rrc_container<T: SerDes>(rrc: T) -> Result<f1ap::RrcContainer> {
     let rrc_bytes = rrc.into_bytes()?;
     Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).into()))
 }

@@ -1,5 +1,5 @@
 use super::rrc::*;
-use net::{AperSerde, PerCodecError};
+use asn1_per::*;
 
 #[test]
 fn test_rrc_setup_container() -> Result<(), PerCodecError> {

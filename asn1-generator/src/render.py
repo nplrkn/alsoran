@@ -120,7 +120,7 @@ def encode_expression_fn(tree):
         return lambda x, data="data", copy_type_deref="": f"""\
 encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             {encode_expression_fn(tree.children[2])("x", "ie")}?;
             encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.inner_type_info.code}, false)?;
             Criticality::{type_info.inner_type_info.criticality.title()}.encode({data})?;
@@ -392,7 +392,7 @@ class IeFields(Interpreter):
         )))?;
 """
         self.fields_to += f"""
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         {encode_expression_fn(tree.children[3])("self."+ name, "ie")}?;
         encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
         Criticality::{criticality.title()}.encode(ies)?;
@@ -420,7 +420,7 @@ class IeFields(Interpreter):
         self.optionals_presence_list += f"self.{name}.is_some(),"
         self.fields_to += f"""
         if let Some(x) = &self.{name} {{
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             {encode_expression_fn(tree.children[3])("x", "ie", copy_type_deref="*")}?;
             encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
             Criticality::{criticality.title()}.encode(ies)?;
@@ -522,6 +522,7 @@ class StructFieldsTo(Interpreter):
 
 xper_CODEC_IMPL_FORMAT = """\
 impl PerCodec for {name} {{
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         {name}::decode_inner(data).map_err(|mut e: PerCodecError| {{e.push_context("{name}"); e}})
     }}
@@ -576,7 +577,7 @@ pub enum UnsuccessfulOutcome {
             Self::{p.initiating}(x) => {{
                 encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
                 Criticality::{p.criticality.title()}.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -591,7 +592,7 @@ pub enum UnsuccessfulOutcome {
             Self::{p.successful}(x) => {{
                 encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
                 Criticality::{p.criticality.title()}.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -606,7 +607,7 @@ pub enum UnsuccessfulOutcome {
             Self::{p.unsuccessful}(x) => {{
                 encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
                 Criticality::{p.criticality.title()}.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -914,7 +915,7 @@ impl {orig_name} {{
     }}
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
         let {mut}num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 {fields.fields_to}"""
 
         if is_sequence:
@@ -1144,7 +1145,7 @@ impl InitiatingMessage {
             Self::AmfConfigurationUpdate(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -1152,7 +1153,7 @@ impl InitiatingMessage {
             Self::HandoverNotify(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -1191,7 +1192,7 @@ impl SuccessfulOutcome {
             Self::AmfConfigurationUpdateAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -1230,7 +1231,7 @@ impl UnsuccessfulOutcome {
             Self::AmfConfigurationUpdateFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut new_codec_data();
+                let container = &mut Allocator::new();
                 x.encode(container)?;
                 encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
@@ -1668,9 +1669,9 @@ impl PduSessionResourceSetupRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.amf_ue_ngap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
@@ -1679,7 +1680,7 @@ impl PduSessionResourceSetupRequest {
         num_ies += 1;
 
         if let Some(x) = &self.ran_paging_priority {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             encode::encode_octetstring(ie, None, None, false, &x, false)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2004,7 +2005,7 @@ impl UeAssociatedLogicalF1ConnectionListRes {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(63356), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 80, false)?;
             Criticality::Reject.encode(data)?;
@@ -2072,10 +2073,10 @@ impl BapMappingConfiguration {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
         if let Some(x) = &self.bh_routing_information_added_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 283, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2120,7 +2121,7 @@ impl BhRoutingInformationAddedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 284, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2340,7 +2341,7 @@ impl OverloadStop {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
         encode::encode_sequence_header(data, true, &BitString::new(), false)?;
         encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
@@ -2739,10 +2740,10 @@ impl EutranBearerContextSetupRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
         if let Some(x) = &self.subscriber_profile_i_dfor_rfp {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2795,9 +2796,9 @@ impl NgRanBearerContextSetupRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.pdu_session_resource_to_setup_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 321, false)?;
         Criticality::Reject.encode(ies)?;

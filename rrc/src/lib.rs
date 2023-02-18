@@ -14,6 +14,7 @@ pub enum SetupRelease<T: PerCodec> {
 }
 
 impl<T: PerCodec> PerCodec for SetupRelease<T> {
+    type Allocator = uper::Allocator;
     fn decode(_data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         todo!()
     }

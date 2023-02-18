@@ -5,7 +5,7 @@ use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use f1ap::{InitialUlRrcMessageTransfer, SrbId};
-use net::AperSerde;
+use net::SerDes;
 use ngap::*;
 use rrc::*;
 use slog::debug;

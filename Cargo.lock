@@ -1061,6 +1061,7 @@ name = "gnb-cu-cp"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "asn1-per",
  "async-channel",
  "async-std",
  "async-trait",

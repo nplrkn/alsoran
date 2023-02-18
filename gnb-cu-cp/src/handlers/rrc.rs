@@ -2,7 +2,7 @@
 
 use crate::{workflows::Workflow, GnbCuCp, UeState};
 use anyhow::Result;
-use net::AperSerde;
+use net::SerDes;
 use rrc::*;
 use slog::{debug, warn, Logger};
 

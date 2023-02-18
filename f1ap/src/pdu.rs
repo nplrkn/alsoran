@@ -46,9 +46,9 @@ impl Reset {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -56,7 +56,7 @@ impl Reset {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -64,7 +64,7 @@ impl Reset {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.reset_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 48, false)?;
         Criticality::Reject.encode(ies)?;
@@ -80,6 +80,7 @@ impl Reset {
 }
 
 impl PerCodec for Reset {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Reset::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Reset");
@@ -132,6 +133,7 @@ impl ResetType {
 }
 
 impl PerCodec for ResetType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResetType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResetType");
@@ -166,6 +168,7 @@ impl ResetAll {
 }
 
 impl PerCodec for ResetAll {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResetAll::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResetAll");
@@ -200,7 +203,7 @@ impl UeAssociatedLogicalF1ConnectionListRes {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 80, false)?;
             Criticality::Reject.encode(data)?;
@@ -212,6 +215,7 @@ impl UeAssociatedLogicalF1ConnectionListRes {
 }
 
 impl PerCodec for UeAssociatedLogicalF1ConnectionListRes {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -272,9 +276,9 @@ impl ResetAcknowledge {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -283,7 +287,7 @@ impl ResetAcknowledge {
         num_ies += 1;
 
         if let Some(x) = &self.ue_associated_logical_f1_connection_list_res_ack {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 81, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -293,7 +297,7 @@ impl ResetAcknowledge {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -310,6 +314,7 @@ impl ResetAcknowledge {
 }
 
 impl PerCodec for ResetAcknowledge {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResetAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResetAcknowledge");
@@ -344,7 +349,7 @@ impl UeAssociatedLogicalF1ConnectionListResAck {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 80, false)?;
             Criticality::Ignore.encode(data)?;
@@ -356,6 +361,7 @@ impl UeAssociatedLogicalF1ConnectionListResAck {
 }
 
 impl PerCodec for UeAssociatedLogicalF1ConnectionListResAck {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeAssociatedLogicalF1ConnectionListResAck::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -418,9 +424,9 @@ impl ErrorIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -429,7 +435,7 @@ impl ErrorIndication {
         num_ies += 1;
 
         if let Some(x) = &self.gnb_cu_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -439,7 +445,7 @@ impl ErrorIndication {
         }
 
         if let Some(x) = &self.gnb_du_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -449,7 +455,7 @@ impl ErrorIndication {
         }
 
         if let Some(x) = &self.cause {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -459,7 +465,7 @@ impl ErrorIndication {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -476,6 +482,7 @@ impl ErrorIndication {
 }
 
 impl PerCodec for ErrorIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ErrorIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ErrorIndication");
@@ -556,9 +563,9 @@ impl F1SetupRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -566,7 +573,7 @@ impl F1SetupRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 42, false)?;
         Criticality::Reject.encode(ies)?;
@@ -575,7 +582,7 @@ impl F1SetupRequest {
         num_ies += 1;
 
         if let Some(x) = &self.gnb_du_name {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 45, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -585,7 +592,7 @@ impl F1SetupRequest {
         }
 
         if let Some(x) = &self.gnb_du_served_cells_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 44, false)?;
             Criticality::Reject.encode(ies)?;
@@ -594,7 +601,7 @@ impl F1SetupRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_rrc_version.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 171, false)?;
         Criticality::Reject.encode(ies)?;
@@ -603,7 +610,7 @@ impl F1SetupRequest {
         num_ies += 1;
 
         if let Some(x) = &self.transport_layer_address_info {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -613,7 +620,7 @@ impl F1SetupRequest {
         }
 
         if let Some(x) = &self.bap_address {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 281, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -623,7 +630,7 @@ impl F1SetupRequest {
         }
 
         if let Some(x) = &self.extended_gnb_cu_name {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 427, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -640,6 +647,7 @@ impl F1SetupRequest {
 }
 
 impl PerCodec for F1SetupRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         F1SetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("F1SetupRequest");
@@ -674,7 +682,7 @@ impl GnbDuServedCellsList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 43, false)?;
             Criticality::Reject.encode(data)?;
@@ -686,6 +694,7 @@ impl GnbDuServedCellsList {
 }
 
 impl PerCodec for GnbDuServedCellsList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuServedCellsList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuServedCellsList");
@@ -763,9 +772,9 @@ impl F1SetupResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -774,7 +783,7 @@ impl F1SetupResponse {
         num_ies += 1;
 
         if let Some(x) = &self.gnb_cu_name {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 82, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -784,7 +793,7 @@ impl F1SetupResponse {
         }
 
         if let Some(x) = &self.cells_to_be_activated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 3, false)?;
             Criticality::Reject.encode(ies)?;
@@ -793,7 +802,7 @@ impl F1SetupResponse {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_rrc_version.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 170, false)?;
         Criticality::Reject.encode(ies)?;
@@ -802,7 +811,7 @@ impl F1SetupResponse {
         num_ies += 1;
 
         if let Some(x) = &self.transport_layer_address_info {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -812,7 +821,7 @@ impl F1SetupResponse {
         }
 
         if let Some(x) = &self.ul_bh_non_up_traffic_mapping {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 287, false)?;
             Criticality::Reject.encode(ies)?;
@@ -822,7 +831,7 @@ impl F1SetupResponse {
         }
 
         if let Some(x) = &self.bap_address {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 281, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -832,7 +841,7 @@ impl F1SetupResponse {
         }
 
         if let Some(x) = &self.extended_gnb_du_name {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 426, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -849,6 +858,7 @@ impl F1SetupResponse {
 }
 
 impl PerCodec for F1SetupResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         F1SetupResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("F1SetupResponse");
@@ -883,7 +893,7 @@ impl CellsToBeActivatedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 4, false)?;
             Criticality::Reject.encode(data)?;
@@ -895,6 +905,7 @@ impl CellsToBeActivatedList {
 }
 
 impl PerCodec for CellsToBeActivatedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsToBeActivatedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsToBeActivatedList");
@@ -952,9 +963,9 @@ impl F1SetupFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -962,7 +973,7 @@ impl F1SetupFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -971,7 +982,7 @@ impl F1SetupFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -981,7 +992,7 @@ impl F1SetupFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -998,6 +1009,7 @@ impl F1SetupFailure {
 }
 
 impl PerCodec for F1SetupFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         F1SetupFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("F1SetupFailure");
@@ -1084,9 +1096,9 @@ impl GnbDuConfigurationUpdate {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -1095,7 +1107,7 @@ impl GnbDuConfigurationUpdate {
         num_ies += 1;
 
         if let Some(x) = &self.served_cells_to_add_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 58, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1105,7 +1117,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.served_cells_to_modify_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 62, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1115,7 +1127,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.served_cells_to_delete_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 60, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1125,7 +1137,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.cells_status_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 89, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1135,7 +1147,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.dedicated_si_delivery_needed_ue_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 189, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1145,7 +1157,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.gnb_du_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 42, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1155,7 +1167,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.gnb_du_tnl_association_to_remove_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 228, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1165,7 +1177,7 @@ impl GnbDuConfigurationUpdate {
         }
 
         if let Some(x) = &self.transport_layer_address_info {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1182,6 +1194,7 @@ impl GnbDuConfigurationUpdate {
 }
 
 impl PerCodec for GnbDuConfigurationUpdate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuConfigurationUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuConfigurationUpdate");
@@ -1216,7 +1229,7 @@ impl ServedCellsToAddList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 57, false)?;
             Criticality::Reject.encode(data)?;
@@ -1228,6 +1241,7 @@ impl ServedCellsToAddList {
 }
 
 impl PerCodec for ServedCellsToAddList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServedCellsToAddList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServedCellsToAddList");
@@ -1262,7 +1276,7 @@ impl ServedCellsToModifyList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 61, false)?;
             Criticality::Reject.encode(data)?;
@@ -1274,6 +1288,7 @@ impl ServedCellsToModifyList {
 }
 
 impl PerCodec for ServedCellsToModifyList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServedCellsToModifyList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServedCellsToModifyList");
@@ -1308,7 +1323,7 @@ impl ServedCellsToDeleteList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 59, false)?;
             Criticality::Reject.encode(data)?;
@@ -1320,6 +1335,7 @@ impl ServedCellsToDeleteList {
 }
 
 impl PerCodec for ServedCellsToDeleteList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ServedCellsToDeleteList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ServedCellsToDeleteList");
@@ -1354,7 +1370,7 @@ impl CellsStatusList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(0), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 88, false)?;
             Criticality::Reject.encode(data)?;
@@ -1366,6 +1382,7 @@ impl CellsStatusList {
 }
 
 impl PerCodec for CellsStatusList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsStatusList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsStatusList");
@@ -1400,7 +1417,7 @@ impl DedicatedSiDeliveryNeededUeList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(data)?;
@@ -1412,6 +1429,7 @@ impl DedicatedSiDeliveryNeededUeList {
 }
 
 impl PerCodec for DedicatedSiDeliveryNeededUeList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DedicatedSiDeliveryNeededUeList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DedicatedSiDeliveryNeededUeList");
@@ -1446,7 +1464,7 @@ impl GnbDuTnlAssociationToRemoveList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 227, false)?;
             Criticality::Reject.encode(data)?;
@@ -1458,6 +1476,7 @@ impl GnbDuTnlAssociationToRemoveList {
 }
 
 impl PerCodec for GnbDuTnlAssociationToRemoveList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuTnlAssociationToRemoveList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuTnlAssociationToRemoveList");
@@ -1528,9 +1547,9 @@ impl GnbDuConfigurationUpdateAcknowledge {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -1539,7 +1558,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
         num_ies += 1;
 
         if let Some(x) = &self.cells_to_be_activated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 3, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1549,7 +1568,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1559,7 +1578,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.cells_to_be_deactivated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 5, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1569,7 +1588,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.transport_layer_address_info {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1579,7 +1598,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.ul_bh_non_up_traffic_mapping {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 287, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1589,7 +1608,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.bap_address {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 281, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1606,6 +1625,7 @@ impl GnbDuConfigurationUpdateAcknowledge {
 }
 
 impl PerCodec for GnbDuConfigurationUpdateAcknowledge {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuConfigurationUpdateAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuConfigurationUpdateAcknowledge");
@@ -1663,9 +1683,9 @@ impl GnbDuConfigurationUpdateFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -1673,7 +1693,7 @@ impl GnbDuConfigurationUpdateFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -1682,7 +1702,7 @@ impl GnbDuConfigurationUpdateFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1692,7 +1712,7 @@ impl GnbDuConfigurationUpdateFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1709,6 +1729,7 @@ impl GnbDuConfigurationUpdateFailure {
 }
 
 impl PerCodec for GnbDuConfigurationUpdateFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuConfigurationUpdateFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuConfigurationUpdateFailure");
@@ -1816,9 +1837,9 @@ impl GnbCuConfigurationUpdate {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -1827,7 +1848,7 @@ impl GnbCuConfigurationUpdate {
         num_ies += 1;
 
         if let Some(x) = &self.cells_to_be_activated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 3, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1837,7 +1858,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.cells_to_be_deactivated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 5, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1847,7 +1868,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.gnb_cu_tnl_association_to_add_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1857,7 +1878,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.gnb_cu_tnl_association_to_remove_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 123, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1867,7 +1888,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.gnb_cu_tnl_association_to_update_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 125, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1877,7 +1898,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.cells_to_be_barred_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1887,7 +1908,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.protected_eutra_resources_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 105, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1897,7 +1918,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.neighbour_cell_information_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 244, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1907,7 +1928,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.transport_layer_address_info {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1917,7 +1938,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.ul_bh_non_up_traffic_mapping {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 287, false)?;
             Criticality::Reject.encode(ies)?;
@@ -1927,7 +1948,7 @@ impl GnbCuConfigurationUpdate {
         }
 
         if let Some(x) = &self.bap_address {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 281, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -1944,6 +1965,7 @@ impl GnbCuConfigurationUpdate {
 }
 
 impl PerCodec for GnbCuConfigurationUpdate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuConfigurationUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuConfigurationUpdate");
@@ -1978,7 +2000,7 @@ impl CellsToBeDeactivatedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 6, false)?;
             Criticality::Reject.encode(data)?;
@@ -1990,6 +2012,7 @@ impl CellsToBeDeactivatedList {
 }
 
 impl PerCodec for CellsToBeDeactivatedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsToBeDeactivatedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsToBeDeactivatedList");
@@ -2024,7 +2047,7 @@ impl GnbCuTnlAssociationToAddList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 120, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2036,6 +2059,7 @@ impl GnbCuTnlAssociationToAddList {
 }
 
 impl PerCodec for GnbCuTnlAssociationToAddList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuTnlAssociationToAddList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuTnlAssociationToAddList");
@@ -2070,7 +2094,7 @@ impl GnbCuTnlAssociationToRemoveList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 122, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2082,6 +2106,7 @@ impl GnbCuTnlAssociationToRemoveList {
 }
 
 impl PerCodec for GnbCuTnlAssociationToRemoveList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuTnlAssociationToRemoveList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuTnlAssociationToRemoveList");
@@ -2116,7 +2141,7 @@ impl GnbCuTnlAssociationToUpdateList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 124, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2128,6 +2153,7 @@ impl GnbCuTnlAssociationToUpdateList {
 }
 
 impl PerCodec for GnbCuTnlAssociationToUpdateList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuTnlAssociationToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuTnlAssociationToUpdateList");
@@ -2162,7 +2188,7 @@ impl CellsToBeBarredList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 130, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2174,6 +2200,7 @@ impl CellsToBeBarredList {
 }
 
 impl PerCodec for CellsToBeBarredList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsToBeBarredList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsToBeBarredList");
@@ -2208,7 +2235,7 @@ impl ProtectedEutraResourcesList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(256), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 168, false)?;
             Criticality::Reject.encode(data)?;
@@ -2220,6 +2247,7 @@ impl ProtectedEutraResourcesList {
 }
 
 impl PerCodec for ProtectedEutraResourcesList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ProtectedEutraResourcesList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ProtectedEutraResourcesList");
@@ -2254,7 +2282,7 @@ impl NeighbourCellInformationList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 255, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2266,6 +2294,7 @@ impl NeighbourCellInformationList {
 }
 
 impl PerCodec for NeighbourCellInformationList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NeighbourCellInformationList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NeighbourCellInformationList");
@@ -2351,9 +2380,9 @@ impl GnbCuConfigurationUpdateAcknowledge {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -2362,7 +2391,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
         num_ies += 1;
 
         if let Some(x) = &self.cells_failed_to_be_activated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 1, false)?;
             Criticality::Reject.encode(ies)?;
@@ -2372,7 +2401,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2382,7 +2411,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.gnb_cu_tnl_association_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 132, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2392,7 +2421,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.gnb_cu_tnl_association_failed_to_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 134, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2402,7 +2431,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.dedicated_si_delivery_needed_ue_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 189, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2412,7 +2441,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
         }
 
         if let Some(x) = &self.transport_layer_address_info {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2429,6 +2458,7 @@ impl GnbCuConfigurationUpdateAcknowledge {
 }
 
 impl PerCodec for GnbCuConfigurationUpdateAcknowledge {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuConfigurationUpdateAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuConfigurationUpdateAcknowledge");
@@ -2463,7 +2493,7 @@ impl CellsFailedToBeActivatedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 2, false)?;
             Criticality::Reject.encode(data)?;
@@ -2475,6 +2505,7 @@ impl CellsFailedToBeActivatedList {
 }
 
 impl PerCodec for CellsFailedToBeActivatedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsFailedToBeActivatedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsFailedToBeActivatedList");
@@ -2509,7 +2540,7 @@ impl GnbCuTnlAssociationSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 133, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2521,6 +2552,7 @@ impl GnbCuTnlAssociationSetupList {
 }
 
 impl PerCodec for GnbCuTnlAssociationSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuTnlAssociationSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuTnlAssociationSetupList");
@@ -2555,7 +2587,7 @@ impl GnbCuTnlAssociationFailedToSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 135, false)?;
             Criticality::Ignore.encode(data)?;
@@ -2567,6 +2599,7 @@ impl GnbCuTnlAssociationFailedToSetupList {
 }
 
 impl PerCodec for GnbCuTnlAssociationFailedToSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuTnlAssociationFailedToSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuTnlAssociationFailedToSetupList");
@@ -2624,9 +2657,9 @@ impl GnbCuConfigurationUpdateFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -2634,7 +2667,7 @@ impl GnbCuConfigurationUpdateFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -2643,7 +2676,7 @@ impl GnbCuConfigurationUpdateFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2653,7 +2686,7 @@ impl GnbCuConfigurationUpdateFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -2670,6 +2703,7 @@ impl GnbCuConfigurationUpdateFailure {
 }
 
 impl PerCodec for GnbCuConfigurationUpdateFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbCuConfigurationUpdateFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbCuConfigurationUpdateFailure");
@@ -2744,9 +2778,9 @@ impl GnbDuResourceCoordinationRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -2754,7 +2788,7 @@ impl GnbDuResourceCoordinationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.request_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 106, false)?;
         Criticality::Reject.encode(ies)?;
@@ -2762,7 +2796,7 @@ impl GnbDuResourceCoordinationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.eutra_nr_cell_resource_coordination_req_container
             .encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 101, false)?;
@@ -2772,7 +2806,7 @@ impl GnbDuResourceCoordinationRequest {
         num_ies += 1;
 
         if let Some(x) = &self.ignore_resource_coordination_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 213, false)?;
             Criticality::Reject.encode(ies)?;
@@ -2789,6 +2823,7 @@ impl GnbDuResourceCoordinationRequest {
 }
 
 impl PerCodec for GnbDuResourceCoordinationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuResourceCoordinationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuResourceCoordinationRequest");
@@ -2850,9 +2885,9 @@ impl GnbDuResourceCoordinationResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -2860,7 +2895,7 @@ impl GnbDuResourceCoordinationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.eutra_nr_cell_resource_coordination_req_ack_container
             .encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 102, false)?;
@@ -2877,6 +2912,7 @@ impl GnbDuResourceCoordinationResponse {
 }
 
 impl PerCodec for GnbDuResourceCoordinationResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuResourceCoordinationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuResourceCoordinationResponse");
@@ -3106,9 +3142,9 @@ impl UeContextSetupRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3117,7 +3153,7 @@ impl UeContextSetupRequest {
         num_ies += 1;
 
         if let Some(x) = &self.gnb_du_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3126,7 +3162,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.sp_cell_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 63, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3134,7 +3170,7 @@ impl UeContextSetupRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.serv_cell_index.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 107, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3143,7 +3179,7 @@ impl UeContextSetupRequest {
         num_ies += 1;
 
         if let Some(x) = &self.sp_cell_ul_configured {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3152,7 +3188,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cu_to_du_rrc_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3161,7 +3197,7 @@ impl UeContextSetupRequest {
         num_ies += 1;
 
         if let Some(x) = &self.candidate_sp_cell_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 90, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3171,7 +3207,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.drx_cycle {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3181,7 +3217,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.resource_coordination_transfer_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3191,7 +3227,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.s_cell_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 54, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3201,7 +3237,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.srbs_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 74, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3211,7 +3247,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.drbs_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3221,7 +3257,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.inactivity_monitoring_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 97, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3231,7 +3267,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.rat_frequency_priority_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3241,7 +3277,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.rrc_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3251,7 +3287,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.masked_imeisv {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3261,7 +3297,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.serving_plmn {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 165, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3271,7 +3307,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.gnb_du_ue_ambr_ul {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 158, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3281,7 +3317,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.rrc_delivery_status_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 184, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3291,7 +3327,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.resource_coordination_transfer_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3301,7 +3337,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.serving_cell_mo {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 182, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3311,7 +3347,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.new_gnb_cu_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3321,7 +3357,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.ran_ue_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3331,7 +3367,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.trace_activation {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 242, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3341,7 +3377,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.additional_rrm_priority_index {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 248, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3351,7 +3387,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.bh_channels_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 258, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3361,7 +3397,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.configured_bap_address {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 282, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3371,7 +3407,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.nr_v2x_services_authorized {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 306, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3381,7 +3417,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.ltev2x_services_authorized {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 307, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3391,7 +3427,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 308, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3401,7 +3437,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 309, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3411,7 +3447,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.pc5_link_ambr {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 340, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3421,7 +3457,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.sl_drbs_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 330, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3431,7 +3467,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.conditional_inter_du_mobility_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 373, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3441,7 +3477,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.management_based_mdt_plmn_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 377, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3451,7 +3487,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.serving_nid {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 382, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3461,7 +3497,7 @@ impl UeContextSetupRequest {
         }
 
         if let Some(x) = &self.f1c_transfer_path {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 428, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3478,6 +3514,7 @@ impl UeContextSetupRequest {
 }
 
 impl PerCodec for UeContextSetupRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextSetupRequest");
@@ -3512,7 +3549,7 @@ impl CandidateSpCellList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 91, false)?;
             Criticality::Ignore.encode(data)?;
@@ -3524,6 +3561,7 @@ impl CandidateSpCellList {
 }
 
 impl PerCodec for CandidateSpCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CandidateSpCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CandidateSpCellList");
@@ -3558,7 +3596,7 @@ impl SCellToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 53, false)?;
             Criticality::Ignore.encode(data)?;
@@ -3570,6 +3608,7 @@ impl SCellToBeSetupList {
 }
 
 impl PerCodec for SCellToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SCellToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SCellToBeSetupList");
@@ -3604,7 +3643,7 @@ impl SrbsToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 73, false)?;
             Criticality::Reject.encode(data)?;
@@ -3616,6 +3655,7 @@ impl SrbsToBeSetupList {
 }
 
 impl PerCodec for SrbsToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsToBeSetupList");
@@ -3650,7 +3690,7 @@ impl DrbsToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 34, false)?;
             Criticality::Reject.encode(data)?;
@@ -3662,6 +3702,7 @@ impl DrbsToBeSetupList {
 }
 
 impl PerCodec for DrbsToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsToBeSetupList");
@@ -3696,7 +3737,7 @@ impl BhChannelsToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 259, false)?;
             Criticality::Reject.encode(data)?;
@@ -3708,6 +3749,7 @@ impl BhChannelsToBeSetupList {
 }
 
 impl PerCodec for BhChannelsToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsToBeSetupList");
@@ -3742,7 +3784,7 @@ impl SlDrbsToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 329, false)?;
             Criticality::Reject.encode(data)?;
@@ -3754,6 +3796,7 @@ impl SlDrbsToBeSetupList {
 }
 
 impl PerCodec for SlDrbsToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsToBeSetupList");
@@ -3885,9 +3928,9 @@ impl UeContextSetupResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3895,7 +3938,7 @@ impl UeContextSetupResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3903,7 +3946,7 @@ impl UeContextSetupResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.du_to_cu_rrc_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
         Criticality::Reject.encode(ies)?;
@@ -3912,7 +3955,7 @@ impl UeContextSetupResponse {
         num_ies += 1;
 
         if let Some(x) = &self.c_rnti {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3922,7 +3965,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.resource_coordination_transfer_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3932,7 +3975,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.full_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 94, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3942,7 +3985,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.drbs_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 27, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3952,7 +3995,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.srbs_failed_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 66, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3962,7 +4005,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.drbs_failed_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3972,7 +4015,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.s_cell_failedto_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -3982,7 +4025,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.inactivity_monitoring_response {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
             Criticality::Reject.encode(ies)?;
@@ -3992,7 +4035,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4002,7 +4045,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.srbs_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 202, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4012,7 +4055,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.bh_channels_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 260, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4022,7 +4065,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.bh_channels_failed_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 279, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4032,7 +4075,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.sl_drbs_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 324, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4042,7 +4085,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.sl_drbs_failed_to_be_setup_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 316, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4052,7 +4095,7 @@ impl UeContextSetupResponse {
         }
 
         if let Some(x) = &self.requested_target_cell_global_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 376, false)?;
             Criticality::Reject.encode(ies)?;
@@ -4069,6 +4112,7 @@ impl UeContextSetupResponse {
 }
 
 impl PerCodec for UeContextSetupResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextSetupResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextSetupResponse");
@@ -4103,7 +4147,7 @@ impl DrbsSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 26, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4115,6 +4159,7 @@ impl DrbsSetupList {
 }
 
 impl PerCodec for DrbsSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsSetupList");
@@ -4149,7 +4194,7 @@ impl SrbsFailedToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 65, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4161,6 +4206,7 @@ impl SrbsFailedToBeSetupList {
 }
 
 impl PerCodec for SrbsFailedToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsFailedToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsFailedToBeSetupList");
@@ -4195,7 +4241,7 @@ impl DrbsFailedToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 14, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4207,6 +4253,7 @@ impl DrbsFailedToBeSetupList {
 }
 
 impl PerCodec for DrbsFailedToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsFailedToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsFailedToBeSetupList");
@@ -4241,7 +4288,7 @@ impl SCellFailedtoSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 84, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4253,6 +4300,7 @@ impl SCellFailedtoSetupList {
 }
 
 impl PerCodec for SCellFailedtoSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SCellFailedtoSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SCellFailedtoSetupList");
@@ -4287,7 +4335,7 @@ impl SrbsSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 203, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4299,6 +4347,7 @@ impl SrbsSetupList {
 }
 
 impl PerCodec for SrbsSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsSetupList");
@@ -4333,7 +4382,7 @@ impl BhChannelsSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 261, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4345,6 +4394,7 @@ impl BhChannelsSetupList {
 }
 
 impl PerCodec for BhChannelsSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsSetupList");
@@ -4379,7 +4429,7 @@ impl BhChannelsFailedToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 278, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4391,6 +4441,7 @@ impl BhChannelsFailedToBeSetupList {
 }
 
 impl PerCodec for BhChannelsFailedToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsFailedToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsFailedToBeSetupList");
@@ -4425,7 +4476,7 @@ impl SlDrbsSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 323, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4437,6 +4488,7 @@ impl SlDrbsSetupList {
 }
 
 impl PerCodec for SlDrbsSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsSetupList");
@@ -4471,7 +4523,7 @@ impl SlDrbsFailedToBeSetupList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 315, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4483,6 +4535,7 @@ impl SlDrbsFailedToBeSetupList {
 }
 
 impl PerCodec for SlDrbsFailedToBeSetupList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsFailedToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsFailedToBeSetupList");
@@ -4548,9 +4601,9 @@ impl UeContextSetupFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -4559,7 +4612,7 @@ impl UeContextSetupFailure {
         num_ies += 1;
 
         if let Some(x) = &self.gnb_du_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4568,7 +4621,7 @@ impl UeContextSetupFailure {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -4577,7 +4630,7 @@ impl UeContextSetupFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4587,7 +4640,7 @@ impl UeContextSetupFailure {
         }
 
         if let Some(x) = &self.potential_sp_cell_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 92, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4597,7 +4650,7 @@ impl UeContextSetupFailure {
         }
 
         if let Some(x) = &self.requested_target_cell_global_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 376, false)?;
             Criticality::Reject.encode(ies)?;
@@ -4614,6 +4667,7 @@ impl UeContextSetupFailure {
 }
 
 impl PerCodec for UeContextSetupFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextSetupFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextSetupFailure");
@@ -4648,7 +4702,7 @@ impl PotentialSpCellList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(0), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 93, false)?;
             Criticality::Ignore.encode(data)?;
@@ -4660,6 +4714,7 @@ impl PotentialSpCellList {
 }
 
 impl PerCodec for PotentialSpCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PotentialSpCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PotentialSpCellList");
@@ -4720,9 +4775,9 @@ impl UeContextReleaseRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -4730,7 +4785,7 @@ impl UeContextReleaseRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -4738,7 +4793,7 @@ impl UeContextReleaseRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -4747,7 +4802,7 @@ impl UeContextReleaseRequest {
         num_ies += 1;
 
         if let Some(x) = &self.target_cells_to_cancel {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 375, false)?;
             Criticality::Reject.encode(ies)?;
@@ -4764,6 +4819,7 @@ impl UeContextReleaseRequest {
 }
 
 impl PerCodec for UeContextReleaseRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextReleaseRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextReleaseRequest");
@@ -4844,9 +4900,9 @@ impl UeContextReleaseCommand {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -4854,7 +4910,7 @@ impl UeContextReleaseCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -4862,7 +4918,7 @@ impl UeContextReleaseCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -4871,7 +4927,7 @@ impl UeContextReleaseCommand {
         num_ies += 1;
 
         if let Some(x) = &self.rrc_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4881,7 +4937,7 @@ impl UeContextReleaseCommand {
         }
 
         if let Some(x) = &self.srb_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4891,7 +4947,7 @@ impl UeContextReleaseCommand {
         }
 
         if let Some(x) = &self.old_gnb_du_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 47, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4901,7 +4957,7 @@ impl UeContextReleaseCommand {
         }
 
         if let Some(x) = &self.execute_duplication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 109, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4911,7 +4967,7 @@ impl UeContextReleaseCommand {
         }
 
         if let Some(x) = &self.rrc_delivery_status_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 184, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -4921,7 +4977,7 @@ impl UeContextReleaseCommand {
         }
 
         if let Some(x) = &self.target_cells_to_cancel {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 375, false)?;
             Criticality::Reject.encode(ies)?;
@@ -4938,6 +4994,7 @@ impl UeContextReleaseCommand {
 }
 
 impl PerCodec for UeContextReleaseCommand {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextReleaseCommand::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextReleaseCommand");
@@ -4993,9 +5050,9 @@ impl UeContextReleaseComplete {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -5003,7 +5060,7 @@ impl UeContextReleaseComplete {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -5012,7 +5069,7 @@ impl UeContextReleaseComplete {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5029,6 +5086,7 @@ impl UeContextReleaseComplete {
 }
 
 impl PerCodec for UeContextReleaseComplete {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextReleaseComplete::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextReleaseComplete");
@@ -5316,9 +5374,9 @@ impl UeContextModificationRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -5326,7 +5384,7 @@ impl UeContextModificationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -5335,7 +5393,7 @@ impl UeContextModificationRequest {
         num_ies += 1;
 
         if let Some(x) = &self.sp_cell_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 63, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5345,7 +5403,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.serv_cell_index {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 107, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5355,7 +5413,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.sp_cell_ul_configured {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5365,7 +5423,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.drx_cycle {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5375,7 +5433,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.cu_to_du_rrc_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5385,7 +5443,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.transmission_action_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 79, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5395,7 +5453,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.resource_coordination_transfer_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5405,7 +5463,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.rrc_reconfiguration_complete_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 87, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5415,7 +5473,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.rrc_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5425,7 +5483,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.s_cell_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 56, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5435,7 +5493,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.s_cell_to_be_removed_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 52, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5445,7 +5503,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.srbs_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 76, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5455,7 +5513,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.drbs_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 37, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5465,7 +5523,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.drbs_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 31, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5475,7 +5533,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.srbs_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 72, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5485,7 +5543,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.drbs_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5495,7 +5553,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.inactivity_monitoring_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 97, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5505,7 +5563,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.rat_frequency_priority_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5515,7 +5573,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.drx_configuration_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 159, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5525,7 +5583,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.rlc_failure_indication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 174, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5535,7 +5593,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.uplink_tx_direct_current_list_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 175, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5545,7 +5603,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.gnb_du_configuration_query {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 162, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5555,7 +5613,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.gnb_du_ue_ambr_ul {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 158, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5565,7 +5623,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.execute_duplication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 109, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5575,7 +5633,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.rrc_delivery_status_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 184, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5585,7 +5643,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.resource_coordination_transfer_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5595,7 +5653,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.serving_cell_mo {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 182, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5605,7 +5663,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.needfor_gap {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 215, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5615,7 +5673,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.full_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 94, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5625,7 +5683,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.additional_rrm_priority_index {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 248, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5635,7 +5693,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.lower_layer_presence_status_change {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 253, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5645,7 +5703,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.bh_channels_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 267, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5655,7 +5713,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.bh_channels_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 263, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5665,7 +5723,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.bh_channels_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 265, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5675,7 +5733,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.nr_v2x_services_authorized {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 306, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5685,7 +5743,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.ltev2x_services_authorized {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 307, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5695,7 +5753,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 308, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5705,7 +5763,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 309, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5715,7 +5773,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.pc5_link_ambr {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 340, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5725,7 +5783,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.sl_drbs_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 332, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5735,7 +5793,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.sl_drbs_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 326, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5745,7 +5803,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.sl_drbs_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 328, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5755,7 +5813,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.conditional_intra_du_mobility_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 374, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5765,7 +5823,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.f1c_transfer_path {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 428, false)?;
             Criticality::Reject.encode(ies)?;
@@ -5775,7 +5833,7 @@ impl UeContextModificationRequest {
         }
 
         if let Some(x) = &self.scg_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 432, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -5792,6 +5850,7 @@ impl UeContextModificationRequest {
 }
 
 impl PerCodec for UeContextModificationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextModificationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextModificationRequest");
@@ -5826,7 +5885,7 @@ impl SCellToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 55, false)?;
             Criticality::Ignore.encode(data)?;
@@ -5838,6 +5897,7 @@ impl SCellToBeSetupModList {
 }
 
 impl PerCodec for SCellToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SCellToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SCellToBeSetupModList");
@@ -5872,7 +5932,7 @@ impl SCellToBeRemovedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 51, false)?;
             Criticality::Ignore.encode(data)?;
@@ -5884,6 +5944,7 @@ impl SCellToBeRemovedList {
 }
 
 impl PerCodec for SCellToBeRemovedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SCellToBeRemovedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SCellToBeRemovedList");
@@ -5918,7 +5979,7 @@ impl SrbsToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 75, false)?;
             Criticality::Reject.encode(data)?;
@@ -5930,6 +5991,7 @@ impl SrbsToBeSetupModList {
 }
 
 impl PerCodec for SrbsToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsToBeSetupModList");
@@ -5964,7 +6026,7 @@ impl DrbsToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 36, false)?;
             Criticality::Reject.encode(data)?;
@@ -5976,6 +6038,7 @@ impl DrbsToBeSetupModList {
 }
 
 impl PerCodec for DrbsToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsToBeSetupModList");
@@ -6010,7 +6073,7 @@ impl BhChannelsToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 266, false)?;
             Criticality::Reject.encode(data)?;
@@ -6022,6 +6085,7 @@ impl BhChannelsToBeSetupModList {
 }
 
 impl PerCodec for BhChannelsToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsToBeSetupModList");
@@ -6056,7 +6120,7 @@ impl DrbsToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 30, false)?;
             Criticality::Reject.encode(data)?;
@@ -6068,6 +6132,7 @@ impl DrbsToBeModifiedList {
 }
 
 impl PerCodec for DrbsToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsToBeModifiedList");
@@ -6102,7 +6167,7 @@ impl BhChannelsToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 262, false)?;
             Criticality::Reject.encode(data)?;
@@ -6114,6 +6179,7 @@ impl BhChannelsToBeModifiedList {
 }
 
 impl PerCodec for BhChannelsToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsToBeModifiedList");
@@ -6148,7 +6214,7 @@ impl SrbsToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 71, false)?;
             Criticality::Reject.encode(data)?;
@@ -6160,6 +6226,7 @@ impl SrbsToBeReleasedList {
 }
 
 impl PerCodec for SrbsToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsToBeReleasedList");
@@ -6194,7 +6261,7 @@ impl DrbsToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 32, false)?;
             Criticality::Reject.encode(data)?;
@@ -6206,6 +6273,7 @@ impl DrbsToBeReleasedList {
 }
 
 impl PerCodec for DrbsToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsToBeReleasedList");
@@ -6240,7 +6308,7 @@ impl BhChannelsToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(data)?;
@@ -6252,6 +6320,7 @@ impl BhChannelsToBeReleasedList {
 }
 
 impl PerCodec for BhChannelsToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsToBeReleasedList");
@@ -6286,7 +6355,7 @@ impl SlDrbsToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 331, false)?;
             Criticality::Reject.encode(data)?;
@@ -6298,6 +6367,7 @@ impl SlDrbsToBeSetupModList {
 }
 
 impl PerCodec for SlDrbsToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsToBeSetupModList");
@@ -6332,7 +6402,7 @@ impl SlDrbsToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 325, false)?;
             Criticality::Reject.encode(data)?;
@@ -6344,6 +6414,7 @@ impl SlDrbsToBeModifiedList {
 }
 
 impl PerCodec for SlDrbsToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsToBeModifiedList");
@@ -6378,7 +6449,7 @@ impl SlDrbsToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 327, false)?;
             Criticality::Reject.encode(data)?;
@@ -6390,6 +6461,7 @@ impl SlDrbsToBeReleasedList {
 }
 
 impl PerCodec for SlDrbsToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsToBeReleasedList");
@@ -6570,9 +6642,9 @@ impl UeContextModificationResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -6580,7 +6652,7 @@ impl UeContextModificationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -6589,7 +6661,7 @@ impl UeContextModificationResponse {
         num_ies += 1;
 
         if let Some(x) = &self.resource_coordination_transfer_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6599,7 +6671,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.du_to_cu_rrc_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
             Criticality::Reject.encode(ies)?;
@@ -6609,7 +6681,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.drbs_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 29, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6619,7 +6691,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.drbs_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 21, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6629,7 +6701,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.srbs_failed_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 68, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6639,7 +6711,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.drbs_failed_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 17, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6649,7 +6721,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.s_cell_failedto_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6659,7 +6731,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.drbs_failed_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 13, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6669,7 +6741,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.inactivity_monitoring_response {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
             Criticality::Reject.encode(ies)?;
@@ -6679,7 +6751,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6689,7 +6761,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.c_rnti {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6699,7 +6771,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.associated_s_cell_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 198, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6709,7 +6781,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.srbs_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 204, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6719,7 +6791,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.srbs_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6729,7 +6801,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.full_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 94, false)?;
             Criticality::Reject.encode(ies)?;
@@ -6739,7 +6811,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.bh_channels_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 275, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6749,7 +6821,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.bh_channels_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 273, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6759,7 +6831,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.bh_channels_failed_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 271, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6769,7 +6841,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.bh_channels_failed_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 269, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6779,7 +6851,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.sl_drbs_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 333, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6789,7 +6861,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.sl_drbs_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 318, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6799,7 +6871,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.sl_drbs_failed_to_be_setup_mod_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 334, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6809,7 +6881,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.sl_drbs_failed_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 314, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -6819,7 +6891,7 @@ impl UeContextModificationResponse {
         }
 
         if let Some(x) = &self.requested_target_cell_global_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 376, false)?;
             Criticality::Reject.encode(ies)?;
@@ -6836,6 +6908,7 @@ impl UeContextModificationResponse {
 }
 
 impl PerCodec for UeContextModificationResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextModificationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextModificationResponse");
@@ -6870,7 +6943,7 @@ impl DrbsSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 28, false)?;
             Criticality::Ignore.encode(data)?;
@@ -6882,6 +6955,7 @@ impl DrbsSetupModList {
 }
 
 impl PerCodec for DrbsSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsSetupModList");
@@ -6916,7 +6990,7 @@ impl DrbsModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 20, false)?;
             Criticality::Ignore.encode(data)?;
@@ -6928,6 +7002,7 @@ impl DrbsModifiedList {
 }
 
 impl PerCodec for DrbsModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsModifiedList");
@@ -6962,7 +7037,7 @@ impl SrbsSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(data)?;
@@ -6974,6 +7049,7 @@ impl SrbsSetupModList {
 }
 
 impl PerCodec for SrbsSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsSetupModList");
@@ -7008,7 +7084,7 @@ impl SrbsModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 207, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7020,6 +7096,7 @@ impl SrbsModifiedList {
 }
 
 impl PerCodec for SrbsModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsModifiedList");
@@ -7054,7 +7131,7 @@ impl DrbsFailedToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 12, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7066,6 +7143,7 @@ impl DrbsFailedToBeModifiedList {
 }
 
 impl PerCodec for DrbsFailedToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsFailedToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsFailedToBeModifiedList");
@@ -7100,7 +7178,7 @@ impl SrbsFailedToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 67, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7112,6 +7190,7 @@ impl SrbsFailedToBeSetupModList {
 }
 
 impl PerCodec for SrbsFailedToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsFailedToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsFailedToBeSetupModList");
@@ -7146,7 +7225,7 @@ impl DrbsFailedToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 16, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7158,6 +7237,7 @@ impl DrbsFailedToBeSetupModList {
 }
 
 impl PerCodec for DrbsFailedToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsFailedToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsFailedToBeSetupModList");
@@ -7192,7 +7272,7 @@ impl SCellFailedtoSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 86, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7204,6 +7284,7 @@ impl SCellFailedtoSetupModList {
 }
 
 impl PerCodec for SCellFailedtoSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SCellFailedtoSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SCellFailedtoSetupModList");
@@ -7238,7 +7319,7 @@ impl BhChannelsSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 274, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7250,6 +7331,7 @@ impl BhChannelsSetupModList {
 }
 
 impl PerCodec for BhChannelsSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsSetupModList");
@@ -7284,7 +7366,7 @@ impl BhChannelsModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 272, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7296,6 +7378,7 @@ impl BhChannelsModifiedList {
 }
 
 impl PerCodec for BhChannelsModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsModifiedList");
@@ -7330,7 +7413,7 @@ impl BhChannelsFailedToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 268, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7342,6 +7425,7 @@ impl BhChannelsFailedToBeModifiedList {
 }
 
 impl PerCodec for BhChannelsFailedToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsFailedToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsFailedToBeModifiedList");
@@ -7376,7 +7460,7 @@ impl BhChannelsFailedToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 270, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7388,6 +7472,7 @@ impl BhChannelsFailedToBeSetupModList {
 }
 
 impl PerCodec for BhChannelsFailedToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsFailedToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsFailedToBeSetupModList");
@@ -7422,7 +7507,7 @@ impl AssociatedSCellList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 200, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7434,6 +7519,7 @@ impl AssociatedSCellList {
 }
 
 impl PerCodec for AssociatedSCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AssociatedSCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AssociatedSCellList");
@@ -7468,7 +7554,7 @@ impl SlDrbsSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 335, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7480,6 +7566,7 @@ impl SlDrbsSetupModList {
 }
 
 impl PerCodec for SlDrbsSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsSetupModList");
@@ -7514,7 +7601,7 @@ impl SlDrbsModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 317, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7526,6 +7613,7 @@ impl SlDrbsModifiedList {
 }
 
 impl PerCodec for SlDrbsModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsModifiedList");
@@ -7560,7 +7648,7 @@ impl SlDrbsFailedToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 313, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7572,6 +7660,7 @@ impl SlDrbsFailedToBeModifiedList {
 }
 
 impl PerCodec for SlDrbsFailedToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsFailedToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsFailedToBeModifiedList");
@@ -7606,7 +7695,7 @@ impl SlDrbsFailedToBeSetupModList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 336, false)?;
             Criticality::Ignore.encode(data)?;
@@ -7618,6 +7707,7 @@ impl SlDrbsFailedToBeSetupModList {
 }
 
 impl PerCodec for SlDrbsFailedToBeSetupModList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsFailedToBeSetupModList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsFailedToBeSetupModList");
@@ -7682,9 +7772,9 @@ impl UeContextModificationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -7692,7 +7782,7 @@ impl UeContextModificationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -7700,7 +7790,7 @@ impl UeContextModificationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -7709,7 +7799,7 @@ impl UeContextModificationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -7719,7 +7809,7 @@ impl UeContextModificationFailure {
         }
 
         if let Some(x) = &self.requested_target_cell_global_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 376, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7736,6 +7826,7 @@ impl UeContextModificationFailure {
 }
 
 impl PerCodec for UeContextModificationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextModificationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextModificationFailure");
@@ -7853,9 +7944,9 @@ impl UeContextModificationRequired {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -7863,7 +7954,7 @@ impl UeContextModificationRequired {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -7872,7 +7963,7 @@ impl UeContextModificationRequired {
         num_ies += 1;
 
         if let Some(x) = &self.resource_coordination_transfer_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -7882,7 +7973,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.du_to_cu_rrc_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7892,7 +7983,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.drbs_required_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 23, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7902,7 +7993,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.srbs_required_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 70, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7912,7 +8003,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.drbs_required_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 25, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7921,7 +8012,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -7930,7 +8021,7 @@ impl UeContextModificationRequired {
         num_ies += 1;
 
         if let Some(x) = &self.bh_channels_required_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 277, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7940,7 +8031,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.sl_drbs_required_to_be_modified_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 320, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7950,7 +8041,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.sl_drbs_required_to_be_released_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 322, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7960,7 +8051,7 @@ impl UeContextModificationRequired {
         }
 
         if let Some(x) = &self.target_cells_to_cancel {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 375, false)?;
             Criticality::Reject.encode(ies)?;
@@ -7977,6 +8068,7 @@ impl UeContextModificationRequired {
 }
 
 impl PerCodec for UeContextModificationRequired {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextModificationRequired::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextModificationRequired");
@@ -8011,7 +8103,7 @@ impl DrbsRequiredToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 22, false)?;
             Criticality::Reject.encode(data)?;
@@ -8023,6 +8115,7 @@ impl DrbsRequiredToBeModifiedList {
 }
 
 impl PerCodec for DrbsRequiredToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsRequiredToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsRequiredToBeModifiedList");
@@ -8057,7 +8150,7 @@ impl DrbsRequiredToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 24, false)?;
             Criticality::Reject.encode(data)?;
@@ -8069,6 +8162,7 @@ impl DrbsRequiredToBeReleasedList {
 }
 
 impl PerCodec for DrbsRequiredToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsRequiredToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsRequiredToBeReleasedList");
@@ -8103,7 +8197,7 @@ impl SrbsRequiredToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 69, false)?;
             Criticality::Reject.encode(data)?;
@@ -8115,6 +8209,7 @@ impl SrbsRequiredToBeReleasedList {
 }
 
 impl PerCodec for SrbsRequiredToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrbsRequiredToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrbsRequiredToBeReleasedList");
@@ -8149,7 +8244,7 @@ impl BhChannelsRequiredToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65536), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 276, false)?;
             Criticality::Reject.encode(data)?;
@@ -8161,6 +8256,7 @@ impl BhChannelsRequiredToBeReleasedList {
 }
 
 impl PerCodec for BhChannelsRequiredToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhChannelsRequiredToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhChannelsRequiredToBeReleasedList");
@@ -8195,7 +8291,7 @@ impl SlDrbsRequiredToBeModifiedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 319, false)?;
             Criticality::Reject.encode(data)?;
@@ -8207,6 +8303,7 @@ impl SlDrbsRequiredToBeModifiedList {
 }
 
 impl PerCodec for SlDrbsRequiredToBeModifiedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsRequiredToBeModifiedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsRequiredToBeModifiedList");
@@ -8241,7 +8338,7 @@ impl SlDrbsRequiredToBeReleasedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 321, false)?;
             Criticality::Reject.encode(data)?;
@@ -8253,6 +8350,7 @@ impl SlDrbsRequiredToBeReleasedList {
 }
 
 impl PerCodec for SlDrbsRequiredToBeReleasedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsRequiredToBeReleasedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsRequiredToBeReleasedList");
@@ -8342,9 +8440,9 @@ impl UeContextModificationConfirm {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8352,7 +8450,7 @@ impl UeContextModificationConfirm {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8361,7 +8459,7 @@ impl UeContextModificationConfirm {
         num_ies += 1;
 
         if let Some(x) = &self.resource_coordination_transfer_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8371,7 +8469,7 @@ impl UeContextModificationConfirm {
         }
 
         if let Some(x) = &self.drbs_modified_conf_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8381,7 +8479,7 @@ impl UeContextModificationConfirm {
         }
 
         if let Some(x) = &self.rrc_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8391,7 +8489,7 @@ impl UeContextModificationConfirm {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8401,7 +8499,7 @@ impl UeContextModificationConfirm {
         }
 
         if let Some(x) = &self.execute_duplication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 109, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8411,7 +8509,7 @@ impl UeContextModificationConfirm {
         }
 
         if let Some(x) = &self.resource_coordination_transfer_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8421,7 +8519,7 @@ impl UeContextModificationConfirm {
         }
 
         if let Some(x) = &self.sl_drbs_modified_conf_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 337, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8438,6 +8536,7 @@ impl UeContextModificationConfirm {
 }
 
 impl PerCodec for UeContextModificationConfirm {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextModificationConfirm::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextModificationConfirm");
@@ -8472,7 +8571,7 @@ impl DrbsModifiedConfList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 18, false)?;
             Criticality::Ignore.encode(data)?;
@@ -8484,6 +8583,7 @@ impl DrbsModifiedConfList {
 }
 
 impl PerCodec for DrbsModifiedConfList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbsModifiedConfList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbsModifiedConfList");
@@ -8518,7 +8618,7 @@ impl SlDrbsModifiedConfList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 338, false)?;
             Criticality::Ignore.encode(data)?;
@@ -8530,6 +8630,7 @@ impl SlDrbsModifiedConfList {
 }
 
 impl PerCodec for SlDrbsModifiedConfList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SlDrbsModifiedConfList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SlDrbsModifiedConfList");
@@ -8590,9 +8691,9 @@ impl UeContextModificationRefuse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8600,7 +8701,7 @@ impl UeContextModificationRefuse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8608,7 +8709,7 @@ impl UeContextModificationRefuse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -8617,7 +8718,7 @@ impl UeContextModificationRefuse {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8634,6 +8735,7 @@ impl UeContextModificationRefuse {
 }
 
 impl PerCodec for UeContextModificationRefuse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeContextModificationRefuse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeContextModificationRefuse");
@@ -8703,9 +8805,9 @@ impl WriteReplaceWarningRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8713,7 +8815,7 @@ impl WriteReplaceWarningRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.pws_system_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 140, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8721,7 +8823,7 @@ impl WriteReplaceWarningRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.repetition_period.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 141, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8729,7 +8831,7 @@ impl WriteReplaceWarningRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.numberof_broadcast_request.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 142, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8738,7 +8840,7 @@ impl WriteReplaceWarningRequest {
         num_ies += 1;
 
         if let Some(x) = &self.cells_to_be_broadcast_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 144, false)?;
             Criticality::Reject.encode(ies)?;
@@ -8755,6 +8857,7 @@ impl WriteReplaceWarningRequest {
 }
 
 impl PerCodec for WriteReplaceWarningRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WriteReplaceWarningRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WriteReplaceWarningRequest");
@@ -8789,7 +8892,7 @@ impl CellsToBeBroadcastList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 145, false)?;
             Criticality::Reject.encode(data)?;
@@ -8801,6 +8904,7 @@ impl CellsToBeBroadcastList {
 }
 
 impl PerCodec for CellsToBeBroadcastList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsToBeBroadcastList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsToBeBroadcastList");
@@ -8864,9 +8968,9 @@ impl WriteReplaceWarningResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -8875,7 +8979,7 @@ impl WriteReplaceWarningResponse {
         num_ies += 1;
 
         if let Some(x) = &self.cells_broadcast_completed_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 146, false)?;
             Criticality::Reject.encode(ies)?;
@@ -8885,7 +8989,7 @@ impl WriteReplaceWarningResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8895,7 +8999,7 @@ impl WriteReplaceWarningResponse {
         }
 
         if let Some(x) = &self.dedicated_si_delivery_needed_ue_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 189, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -8912,6 +9016,7 @@ impl WriteReplaceWarningResponse {
 }
 
 impl PerCodec for WriteReplaceWarningResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         WriteReplaceWarningResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("WriteReplaceWarningResponse");
@@ -8946,7 +9051,7 @@ impl CellsBroadcastCompletedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 147, false)?;
             Criticality::Reject.encode(data)?;
@@ -8958,6 +9063,7 @@ impl CellsBroadcastCompletedList {
 }
 
 impl PerCodec for CellsBroadcastCompletedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsBroadcastCompletedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsBroadcastCompletedList");
@@ -9027,9 +9133,9 @@ impl PwsCancelRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9037,7 +9143,7 @@ impl PwsCancelRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.numberof_broadcast_request.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 142, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9046,7 +9152,7 @@ impl PwsCancelRequest {
         num_ies += 1;
 
         if let Some(x) = &self.broadcast_to_be_cancelled_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9056,7 +9162,7 @@ impl PwsCancelRequest {
         }
 
         if let Some(x) = &self.cancel_all_warning_messages_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 157, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9066,7 +9172,7 @@ impl PwsCancelRequest {
         }
 
         if let Some(x) = &self.notification_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 220, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9083,6 +9189,7 @@ impl PwsCancelRequest {
 }
 
 impl PerCodec for PwsCancelRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PwsCancelRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PwsCancelRequest");
@@ -9117,7 +9224,7 @@ impl BroadcastToBeCancelledList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 149, false)?;
             Criticality::Reject.encode(data)?;
@@ -9129,6 +9236,7 @@ impl BroadcastToBeCancelledList {
 }
 
 impl PerCodec for BroadcastToBeCancelledList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BroadcastToBeCancelledList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BroadcastToBeCancelledList");
@@ -9184,9 +9292,9 @@ impl PwsCancelResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9195,7 +9303,7 @@ impl PwsCancelResponse {
         num_ies += 1;
 
         if let Some(x) = &self.cells_broadcast_cancelled_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 150, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9205,7 +9313,7 @@ impl PwsCancelResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9222,6 +9330,7 @@ impl PwsCancelResponse {
 }
 
 impl PerCodec for PwsCancelResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PwsCancelResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PwsCancelResponse");
@@ -9256,7 +9365,7 @@ impl CellsBroadcastCancelledList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 151, false)?;
             Criticality::Reject.encode(data)?;
@@ -9268,6 +9377,7 @@ impl CellsBroadcastCancelledList {
 }
 
 impl PerCodec for CellsBroadcastCancelledList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellsBroadcastCancelledList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellsBroadcastCancelledList");
@@ -9326,9 +9436,9 @@ impl UeInactivityNotification {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9336,7 +9446,7 @@ impl UeInactivityNotification {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9344,7 +9454,7 @@ impl UeInactivityNotification {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.drb_activity_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 100, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9360,6 +9470,7 @@ impl UeInactivityNotification {
 }
 
 impl PerCodec for UeInactivityNotification {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UeInactivityNotification::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UeInactivityNotification");
@@ -9394,7 +9505,7 @@ impl DrbActivityList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 99, false)?;
             Criticality::Reject.encode(data)?;
@@ -9406,6 +9517,7 @@ impl DrbActivityList {
 }
 
 impl PerCodec for DrbActivityList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbActivityList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbActivityList");
@@ -9490,9 +9602,9 @@ impl InitialUlRrcMessageTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9500,7 +9612,7 @@ impl InitialUlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.nr_cgi.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9508,7 +9620,7 @@ impl InitialUlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.c_rnti.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9516,7 +9628,7 @@ impl InitialUlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.rrc_container.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9525,7 +9637,7 @@ impl InitialUlRrcMessageTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.du_to_cu_rrc_container {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 128, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9535,7 +9647,7 @@ impl InitialUlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.sul_access_indication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 178, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9545,7 +9657,7 @@ impl InitialUlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.transaction_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9555,7 +9667,7 @@ impl InitialUlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.ran_ue_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9565,7 +9677,7 @@ impl InitialUlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.rrc_container_rrc_setup_complete {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 241, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9582,6 +9694,7 @@ impl InitialUlRrcMessageTransfer {
 }
 
 impl PerCodec for InitialUlRrcMessageTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InitialUlRrcMessageTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InitialUlRrcMessageTransfer");
@@ -9689,9 +9802,9 @@ impl DlRrcMessageTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9699,7 +9812,7 @@ impl DlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9708,7 +9821,7 @@ impl DlRrcMessageTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.old_gnb_du_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 47, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9717,7 +9830,7 @@ impl DlRrcMessageTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.srb_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9726,7 +9839,7 @@ impl DlRrcMessageTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.execute_duplication {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 109, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9735,7 +9848,7 @@ impl DlRrcMessageTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.rrc_container.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9744,7 +9857,7 @@ impl DlRrcMessageTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.rat_frequency_priority_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9754,7 +9867,7 @@ impl DlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.rrc_delivery_status_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 184, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9764,7 +9877,7 @@ impl DlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.ue_context_not_retrievable {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9774,7 +9887,7 @@ impl DlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.redirected_rrc_message {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             encode::encode_octetstring(ie, None, None, false, &x, false)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9784,7 +9897,7 @@ impl DlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.plmn_assistance_info_for_net_shar {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 221, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9794,7 +9907,7 @@ impl DlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.new_gnb_cu_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9804,7 +9917,7 @@ impl DlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.additional_rrm_priority_index {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 248, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -9821,6 +9934,7 @@ impl DlRrcMessageTransfer {
 }
 
 impl PerCodec for DlRrcMessageTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DlRrcMessageTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DlRrcMessageTransfer");
@@ -9892,9 +10006,9 @@ impl UlRrcMessageTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9902,7 +10016,7 @@ impl UlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9910,7 +10024,7 @@ impl UlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.srb_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9918,7 +10032,7 @@ impl UlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.rrc_container.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
         Criticality::Reject.encode(ies)?;
@@ -9927,7 +10041,7 @@ impl UlRrcMessageTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.selected_plmn_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 224, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9937,7 +10051,7 @@ impl UlRrcMessageTransfer {
         }
 
         if let Some(x) = &self.new_gnb_du_ue_f1ap_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 219, false)?;
             Criticality::Reject.encode(ies)?;
@@ -9954,6 +10068,7 @@ impl UlRrcMessageTransfer {
 }
 
 impl PerCodec for UlRrcMessageTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlRrcMessageTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlRrcMessageTransfer");
@@ -9987,6 +10102,7 @@ impl PrivateMessage {
 }
 
 impl PerCodec for PrivateMessage {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PrivateMessage::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PrivateMessage");
@@ -10050,9 +10166,9 @@ impl SystemInformationDeliveryCommand {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10060,7 +10176,7 @@ impl SystemInformationDeliveryCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.nr_cgi.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10068,7 +10184,7 @@ impl SystemInformationDeliveryCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.s_itype_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 116, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10076,7 +10192,7 @@ impl SystemInformationDeliveryCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.confirmed_ue_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 156, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10092,6 +10208,7 @@ impl SystemInformationDeliveryCommand {
 }
 
 impl PerCodec for SystemInformationDeliveryCommand {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SystemInformationDeliveryCommand::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SystemInformationDeliveryCommand");
@@ -10162,9 +10279,9 @@ impl Paging {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ue_identity_index_value.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10172,7 +10289,7 @@ impl Paging {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.paging_identity.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 127, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10181,7 +10298,7 @@ impl Paging {
         num_ies += 1;
 
         if let Some(x) = &self.paging_drx {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 114, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -10191,7 +10308,7 @@ impl Paging {
         }
 
         if let Some(x) = &self.paging_priority {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 115, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -10200,7 +10317,7 @@ impl Paging {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.paging_cell_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 113, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -10209,7 +10326,7 @@ impl Paging {
         num_ies += 1;
 
         if let Some(x) = &self.paging_origin {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -10226,6 +10343,7 @@ impl Paging {
 }
 
 impl PerCodec for Paging {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Paging::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Paging");
@@ -10260,7 +10378,7 @@ impl PagingCellList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 112, false)?;
             Criticality::Ignore.encode(data)?;
@@ -10272,6 +10390,7 @@ impl PagingCellList {
 }
 
 impl PerCodec for PagingCellList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PagingCellList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PagingCellList");
@@ -10330,9 +10449,9 @@ impl Notify {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10340,7 +10459,7 @@ impl Notify {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10348,7 +10467,7 @@ impl Notify {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.drb_notify_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 137, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10364,6 +10483,7 @@ impl Notify {
 }
 
 impl PerCodec for Notify {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Notify::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Notify");
@@ -10398,7 +10518,7 @@ impl DrbNotifyList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 136, false)?;
             Criticality::Reject.encode(data)?;
@@ -10410,6 +10530,7 @@ impl DrbNotifyList {
 }
 
 impl PerCodec for DrbNotifyList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DrbNotifyList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DrbNotifyList");
@@ -10461,9 +10582,9 @@ impl NetworkAccessRateReduction {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10471,7 +10592,7 @@ impl NetworkAccessRateReduction {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.uac_assistance_info.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 225, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10487,6 +10608,7 @@ impl NetworkAccessRateReduction {
 }
 
 impl PerCodec for NetworkAccessRateReduction {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NetworkAccessRateReduction::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NetworkAccessRateReduction");
@@ -10538,9 +10660,9 @@ impl PwsRestartIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10548,7 +10670,7 @@ impl PwsRestartIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.nr_cgi_list_for_restart_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 152, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10564,6 +10686,7 @@ impl PwsRestartIndication {
 }
 
 impl PerCodec for PwsRestartIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PwsRestartIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PwsRestartIndication");
@@ -10598,7 +10721,7 @@ impl NrCgiListForRestartList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 153, false)?;
             Criticality::Reject.encode(data)?;
@@ -10610,6 +10733,7 @@ impl NrCgiListForRestartList {
 }
 
 impl PerCodec for NrCgiListForRestartList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         NrCgiListForRestartList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("NrCgiListForRestartList");
@@ -10658,9 +10782,9 @@ impl PwsFailureIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10669,7 +10793,7 @@ impl PwsFailureIndication {
         num_ies += 1;
 
         if let Some(x) = &self.pws_failed_nr_cgi_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 154, false)?;
             Criticality::Reject.encode(ies)?;
@@ -10686,6 +10810,7 @@ impl PwsFailureIndication {
 }
 
 impl PerCodec for PwsFailureIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PwsFailureIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PwsFailureIndication");
@@ -10720,7 +10845,7 @@ impl PwsFailedNrCgiList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(512), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 155, false)?;
             Criticality::Reject.encode(data)?;
@@ -10732,6 +10857,7 @@ impl PwsFailedNrCgiList {
 }
 
 impl PerCodec for PwsFailedNrCgiList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PwsFailedNrCgiList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PwsFailedNrCgiList");
@@ -10783,9 +10909,9 @@ impl GnbDuStatusIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10793,7 +10919,7 @@ impl GnbDuStatusIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_overload_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 172, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10809,6 +10935,7 @@ impl GnbDuStatusIndication {
 }
 
 impl PerCodec for GnbDuStatusIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuStatusIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuStatusIndication");
@@ -10872,9 +10999,9 @@ impl RrcDeliveryReport {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10882,7 +11009,7 @@ impl RrcDeliveryReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10890,7 +11017,7 @@ impl RrcDeliveryReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.rrc_delivery_status.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 185, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -10898,7 +11025,7 @@ impl RrcDeliveryReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.srb_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -10914,6 +11041,7 @@ impl RrcDeliveryReport {
 }
 
 impl PerCodec for RrcDeliveryReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         RrcDeliveryReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("RrcDeliveryReport");
@@ -10956,9 +11084,9 @@ impl F1RemovalRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -10974,6 +11102,7 @@ impl F1RemovalRequest {
 }
 
 impl PerCodec for F1RemovalRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         F1RemovalRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("F1RemovalRequest");
@@ -11022,9 +11151,9 @@ impl F1RemovalResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11033,7 +11162,7 @@ impl F1RemovalResponse {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11050,6 +11179,7 @@ impl F1RemovalResponse {
 }
 
 impl PerCodec for F1RemovalResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         F1RemovalResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("F1RemovalResponse");
@@ -11103,9 +11233,9 @@ impl F1RemovalFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11113,7 +11243,7 @@ impl F1RemovalFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11122,7 +11252,7 @@ impl F1RemovalFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11139,6 +11269,7 @@ impl F1RemovalFailure {
 }
 
 impl PerCodec for F1RemovalFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         F1RemovalFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("F1RemovalFailure");
@@ -11197,9 +11328,9 @@ impl TraceStart {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11207,7 +11338,7 @@ impl TraceStart {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11215,7 +11346,7 @@ impl TraceStart {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trace_activation.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 242, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11231,6 +11362,7 @@ impl TraceStart {
 }
 
 impl PerCodec for TraceStart {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TraceStart::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TraceStart");
@@ -11288,9 +11420,9 @@ impl DeactivateTrace {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11298,7 +11430,7 @@ impl DeactivateTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11306,7 +11438,7 @@ impl DeactivateTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trace_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 243, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11322,6 +11454,7 @@ impl DeactivateTrace {
 }
 
 impl PerCodec for DeactivateTrace {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DeactivateTrace::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DeactivateTrace");
@@ -11397,9 +11530,9 @@ impl CellTrafficTrace {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11407,7 +11540,7 @@ impl CellTrafficTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11415,7 +11548,7 @@ impl CellTrafficTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trace_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 243, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11423,7 +11556,7 @@ impl CellTrafficTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trace_collection_entity_ip_address.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 378, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11432,7 +11565,7 @@ impl CellTrafficTrace {
         num_ies += 1;
 
         if let Some(x) = &self.privacy_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 379, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11442,7 +11575,7 @@ impl CellTrafficTrace {
         }
 
         if let Some(x) = &self.trace_collection_entity_uri {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 380, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11459,6 +11592,7 @@ impl CellTrafficTrace {
 }
 
 impl PerCodec for CellTrafficTrace {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CellTrafficTrace::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CellTrafficTrace");
@@ -11510,9 +11644,9 @@ impl DuCuRadioInformationTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11520,7 +11654,7 @@ impl DuCuRadioInformationTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.du_cu_radio_information_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 249, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11536,6 +11670,7 @@ impl DuCuRadioInformationTransfer {
 }
 
 impl PerCodec for DuCuRadioInformationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DuCuRadioInformationTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DuCuRadioInformationTransfer");
@@ -11587,9 +11722,9 @@ impl CuDuRadioInformationTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11597,7 +11732,7 @@ impl CuDuRadioInformationTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cu_du_radio_information_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 250, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11613,6 +11748,7 @@ impl CuDuRadioInformationTransfer {
 }
 
 impl PerCodec for CuDuRadioInformationTransfer {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         CuDuRadioInformationTransfer::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("CuDuRadioInformationTransfer");
@@ -11675,9 +11811,9 @@ impl BapMappingConfiguration {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11686,7 +11822,7 @@ impl BapMappingConfiguration {
         num_ies += 1;
 
         if let Some(x) = &self.bh_routing_information_added_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 283, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11696,7 +11832,7 @@ impl BapMappingConfiguration {
         }
 
         if let Some(x) = &self.bh_routing_information_removed_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 285, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11706,7 +11842,7 @@ impl BapMappingConfiguration {
         }
 
         if let Some(x) = &self.traffic_mapping_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 299, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11723,6 +11859,7 @@ impl BapMappingConfiguration {
 }
 
 impl PerCodec for BapMappingConfiguration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BapMappingConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BapMappingConfiguration");
@@ -11757,7 +11894,7 @@ impl BhRoutingInformationAddedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 284, false)?;
             Criticality::Ignore.encode(data)?;
@@ -11769,6 +11906,7 @@ impl BhRoutingInformationAddedList {
 }
 
 impl PerCodec for BhRoutingInformationAddedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhRoutingInformationAddedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhRoutingInformationAddedList");
@@ -11803,7 +11941,7 @@ impl BhRoutingInformationRemovedList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 286, false)?;
             Criticality::Ignore.encode(data)?;
@@ -11815,6 +11953,7 @@ impl BhRoutingInformationRemovedList {
 }
 
 impl PerCodec for BhRoutingInformationRemovedList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BhRoutingInformationRemovedList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BhRoutingInformationRemovedList");
@@ -11863,9 +12002,9 @@ impl BapMappingConfigurationAcknowledge {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11874,7 +12013,7 @@ impl BapMappingConfigurationAcknowledge {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11891,6 +12030,7 @@ impl BapMappingConfigurationAcknowledge {
 }
 
 impl PerCodec for BapMappingConfigurationAcknowledge {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BapMappingConfigurationAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BapMappingConfigurationAcknowledge");
@@ -11948,9 +12088,9 @@ impl BapMappingConfigurationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -11958,7 +12098,7 @@ impl BapMappingConfigurationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -11967,7 +12107,7 @@ impl BapMappingConfigurationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11977,7 +12117,7 @@ impl BapMappingConfigurationFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -11994,6 +12134,7 @@ impl BapMappingConfigurationFailure {
 }
 
 impl PerCodec for BapMappingConfigurationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         BapMappingConfigurationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("BapMappingConfigurationFailure");
@@ -12049,9 +12190,9 @@ impl GnbDuResourceConfiguration {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12060,7 +12201,7 @@ impl GnbDuResourceConfiguration {
         num_ies += 1;
 
         if let Some(x) = &self.activated_cells_to_be_updated_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 288, false)?;
             Criticality::Reject.encode(ies)?;
@@ -12070,7 +12211,7 @@ impl GnbDuResourceConfiguration {
         }
 
         if let Some(x) = &self.child_nodes_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 289, false)?;
             Criticality::Reject.encode(ies)?;
@@ -12087,6 +12228,7 @@ impl GnbDuResourceConfiguration {
 }
 
 impl PerCodec for GnbDuResourceConfiguration {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuResourceConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuResourceConfiguration");
@@ -12135,9 +12277,9 @@ impl GnbDuResourceConfigurationAcknowledge {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12146,7 +12288,7 @@ impl GnbDuResourceConfigurationAcknowledge {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12163,6 +12305,7 @@ impl GnbDuResourceConfigurationAcknowledge {
 }
 
 impl PerCodec for GnbDuResourceConfigurationAcknowledge {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuResourceConfigurationAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuResourceConfigurationAcknowledge");
@@ -12220,9 +12363,9 @@ impl GnbDuResourceConfigurationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12230,7 +12373,7 @@ impl GnbDuResourceConfigurationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -12239,7 +12382,7 @@ impl GnbDuResourceConfigurationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12249,7 +12392,7 @@ impl GnbDuResourceConfigurationFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12266,6 +12409,7 @@ impl GnbDuResourceConfigurationFailure {
 }
 
 impl PerCodec for GnbDuResourceConfigurationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         GnbDuResourceConfigurationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("GnbDuResourceConfigurationFailure");
@@ -12325,9 +12469,9 @@ impl IabtnlAddressRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12336,7 +12480,7 @@ impl IabtnlAddressRequest {
         num_ies += 1;
 
         if let Some(x) = &self.ia_bv_4_addresses_requested {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 297, false)?;
             Criticality::Reject.encode(ies)?;
@@ -12346,7 +12490,7 @@ impl IabtnlAddressRequest {
         }
 
         if let Some(x) = &self.iabi_pv_6_request_type {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 296, false)?;
             Criticality::Reject.encode(ies)?;
@@ -12356,7 +12500,7 @@ impl IabtnlAddressRequest {
         }
 
         if let Some(x) = &self.iab_tnl_addresses_to_remove_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 292, false)?;
             Criticality::Reject.encode(ies)?;
@@ -12373,6 +12517,7 @@ impl IabtnlAddressRequest {
 }
 
 impl PerCodec for IabtnlAddressRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabtnlAddressRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabtnlAddressRequest");
@@ -12407,7 +12552,7 @@ impl IabTnlAddressesToRemoveList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 293, false)?;
             Criticality::Reject.encode(data)?;
@@ -12419,6 +12564,7 @@ impl IabTnlAddressesToRemoveList {
 }
 
 impl PerCodec for IabTnlAddressesToRemoveList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabTnlAddressesToRemoveList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabTnlAddressesToRemoveList");
@@ -12473,9 +12619,9 @@ impl IabtnlAddressResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12483,7 +12629,7 @@ impl IabtnlAddressResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.iab_allocated_tnl_address_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 294, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12499,6 +12645,7 @@ impl IabtnlAddressResponse {
 }
 
 impl PerCodec for IabtnlAddressResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabtnlAddressResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabtnlAddressResponse");
@@ -12533,7 +12680,7 @@ impl IabAllocatedTnlAddressList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 295, false)?;
             Criticality::Reject.encode(data)?;
@@ -12545,6 +12692,7 @@ impl IabAllocatedTnlAddressList {
 }
 
 impl PerCodec for IabAllocatedTnlAddressList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabAllocatedTnlAddressList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabAllocatedTnlAddressList");
@@ -12602,9 +12750,9 @@ impl IabtnlAddressFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12612,7 +12760,7 @@ impl IabtnlAddressFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -12621,7 +12769,7 @@ impl IabtnlAddressFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12631,7 +12779,7 @@ impl IabtnlAddressFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12648,6 +12796,7 @@ impl IabtnlAddressFailure {
 }
 
 impl PerCodec for IabtnlAddressFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabtnlAddressFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabtnlAddressFailure");
@@ -12706,9 +12855,9 @@ impl IabupConfigurationUpdateRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12717,7 +12866,7 @@ impl IabupConfigurationUpdateRequest {
         num_ies += 1;
 
         if let Some(x) = &self.ul_up_tnl_information_to_update_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 300, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12727,7 +12876,7 @@ impl IabupConfigurationUpdateRequest {
         }
 
         if let Some(x) = &self.ul_up_tnl_address_to_update_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 302, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12744,6 +12893,7 @@ impl IabupConfigurationUpdateRequest {
 }
 
 impl PerCodec for IabupConfigurationUpdateRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabupConfigurationUpdateRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabupConfigurationUpdateRequest");
@@ -12778,7 +12928,7 @@ impl UlUpTnlInformationToUpdateList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(32678), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 301, false)?;
             Criticality::Ignore.encode(data)?;
@@ -12790,6 +12940,7 @@ impl UlUpTnlInformationToUpdateList {
 }
 
 impl PerCodec for UlUpTnlInformationToUpdateList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlUpTnlInformationToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlUpTnlInformationToUpdateList");
@@ -12824,7 +12975,7 @@ impl UlUpTnlAddressToUpdateList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 303, false)?;
             Criticality::Ignore.encode(data)?;
@@ -12836,6 +12987,7 @@ impl UlUpTnlAddressToUpdateList {
 }
 
 impl PerCodec for UlUpTnlAddressToUpdateList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UlUpTnlAddressToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UlUpTnlAddressToUpdateList");
@@ -12891,9 +13043,9 @@ impl IabupConfigurationUpdateResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -12902,7 +13054,7 @@ impl IabupConfigurationUpdateResponse {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -12912,7 +13064,7 @@ impl IabupConfigurationUpdateResponse {
         }
 
         if let Some(x) = &self.dl_up_tnl_address_to_update_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 304, false)?;
             Criticality::Reject.encode(ies)?;
@@ -12929,6 +13081,7 @@ impl IabupConfigurationUpdateResponse {
 }
 
 impl PerCodec for IabupConfigurationUpdateResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabupConfigurationUpdateResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabupConfigurationUpdateResponse");
@@ -12963,7 +13116,7 @@ impl DlUpTnlAddressToUpdateList {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(8), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 305, false)?;
             Criticality::Ignore.encode(data)?;
@@ -12975,6 +13128,7 @@ impl DlUpTnlAddressToUpdateList {
 }
 
 impl PerCodec for DlUpTnlAddressToUpdateList {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         DlUpTnlAddressToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("DlUpTnlAddressToUpdateList");
@@ -13032,9 +13186,9 @@ impl IabupConfigurationUpdateFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13042,7 +13196,7 @@ impl IabupConfigurationUpdateFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13051,7 +13205,7 @@ impl IabupConfigurationUpdateFailure {
         num_ies += 1;
 
         if let Some(x) = &self.time_to_wait {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13061,7 +13215,7 @@ impl IabupConfigurationUpdateFailure {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13078,6 +13232,7 @@ impl IabupConfigurationUpdateFailure {
 }
 
 impl PerCodec for IabupConfigurationUpdateFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         IabupConfigurationUpdateFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("IabupConfigurationUpdateFailure");
@@ -13152,9 +13307,9 @@ impl ResourceStatusRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13162,7 +13317,7 @@ impl ResourceStatusRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 345, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13171,7 +13326,7 @@ impl ResourceStatusRequest {
         num_ies += 1;
 
         if let Some(x) = &self.gnb_du_measurement_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 346, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13180,7 +13335,7 @@ impl ResourceStatusRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.registration_request.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 347, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13189,7 +13344,7 @@ impl ResourceStatusRequest {
         num_ies += 1;
 
         if let Some(x) = &self.report_characteristics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 348, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13199,7 +13354,7 @@ impl ResourceStatusRequest {
         }
 
         if let Some(x) = &self.cell_to_report_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 349, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13209,7 +13364,7 @@ impl ResourceStatusRequest {
         }
 
         if let Some(x) = &self.reporting_periodicity {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 352, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13226,6 +13381,7 @@ impl ResourceStatusRequest {
 }
 
 impl PerCodec for ResourceStatusRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResourceStatusRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResourceStatusRequest");
@@ -13288,9 +13444,9 @@ impl ResourceStatusResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13298,7 +13454,7 @@ impl ResourceStatusResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 345, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13306,7 +13462,7 @@ impl ResourceStatusResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 346, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13315,7 +13471,7 @@ impl ResourceStatusResponse {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13332,6 +13488,7 @@ impl ResourceStatusResponse {
 }
 
 impl PerCodec for ResourceStatusResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResourceStatusResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResourceStatusResponse");
@@ -13399,9 +13556,9 @@ impl ResourceStatusFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13409,7 +13566,7 @@ impl ResourceStatusFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 345, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13417,7 +13574,7 @@ impl ResourceStatusFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 346, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13425,7 +13582,7 @@ impl ResourceStatusFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13434,7 +13591,7 @@ impl ResourceStatusFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13451,6 +13608,7 @@ impl ResourceStatusFailure {
 }
 
 impl PerCodec for ResourceStatusFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResourceStatusFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResourceStatusFailure");
@@ -13523,9 +13681,9 @@ impl ResourceStatusUpdate {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13533,7 +13691,7 @@ impl ResourceStatusUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 345, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13541,7 +13699,7 @@ impl ResourceStatusUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 346, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13550,7 +13708,7 @@ impl ResourceStatusUpdate {
         num_ies += 1;
 
         if let Some(x) = &self.hardware_load_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 351, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13560,7 +13718,7 @@ impl ResourceStatusUpdate {
         }
 
         if let Some(x) = &self.tnl_capacity_indicator {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 353, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13570,7 +13728,7 @@ impl ResourceStatusUpdate {
         }
 
         if let Some(x) = &self.cell_measurement_result_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 350, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13587,6 +13745,7 @@ impl ResourceStatusUpdate {
 }
 
 impl PerCodec for ResourceStatusUpdate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ResourceStatusUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ResourceStatusUpdate");
@@ -13641,9 +13800,9 @@ impl AccessAndMobilityIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13652,7 +13811,7 @@ impl AccessAndMobilityIndication {
         num_ies += 1;
 
         if let Some(x) = &self.rach_report_information_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 359, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13662,7 +13821,7 @@ impl AccessAndMobilityIndication {
         }
 
         if let Some(x) = &self.rlf_report_information_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 360, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -13679,6 +13838,7 @@ impl AccessAndMobilityIndication {
 }
 
 impl PerCodec for AccessAndMobilityIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AccessAndMobilityIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AccessAndMobilityIndication");
@@ -13730,9 +13890,9 @@ impl ReferenceTimeInformationReportingControl {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13740,7 +13900,7 @@ impl ReferenceTimeInformationReportingControl {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.reporting_request_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 365, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13756,6 +13916,7 @@ impl ReferenceTimeInformationReportingControl {
 }
 
 impl PerCodec for ReferenceTimeInformationReportingControl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ReferenceTimeInformationReportingControl::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -13809,9 +13970,9 @@ impl ReferenceTimeInformationReport {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13819,7 +13980,7 @@ impl ReferenceTimeInformationReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.time_reference_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 366, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -13835,6 +13996,7 @@ impl ReferenceTimeInformationReport {
 }
 
 impl PerCodec for ReferenceTimeInformationReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ReferenceTimeInformationReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ReferenceTimeInformationReport");
@@ -13891,9 +14053,9 @@ impl AccessSuccess {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13901,7 +14063,7 @@ impl AccessSuccess {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13909,7 +14071,7 @@ impl AccessSuccess {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.nr_cgi.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13925,6 +14087,7 @@ impl AccessSuccess {
 }
 
 impl PerCodec for AccessSuccess {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AccessSuccess::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AccessSuccess");
@@ -13985,9 +14148,9 @@ impl PositioningAssistanceInformationControl {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -13996,7 +14159,7 @@ impl PositioningAssistanceInformationControl {
         num_ies += 1;
 
         if let Some(x) = &self.pos_assistance_information {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 392, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14006,7 +14169,7 @@ impl PositioningAssistanceInformationControl {
         }
 
         if let Some(x) = &self.pos_broadcast {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 393, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14016,7 +14179,7 @@ impl PositioningAssistanceInformationControl {
         }
 
         if let Some(x) = &self.positioning_broadcast_cells {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 406, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14026,7 +14189,7 @@ impl PositioningAssistanceInformationControl {
         }
 
         if let Some(x) = &self.routing_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 394, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14043,6 +14206,7 @@ impl PositioningAssistanceInformationControl {
 }
 
 impl PerCodec for PositioningAssistanceInformationControl {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningAssistanceInformationControl::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -14110,9 +14274,9 @@ impl PositioningAssistanceInformationFeedback {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14121,7 +14285,7 @@ impl PositioningAssistanceInformationFeedback {
         num_ies += 1;
 
         if let Some(x) = &self.pos_assistance_information_failure_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 395, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14131,7 +14295,7 @@ impl PositioningAssistanceInformationFeedback {
         }
 
         if let Some(x) = &self.positioning_broadcast_cells {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 406, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14141,7 +14305,7 @@ impl PositioningAssistanceInformationFeedback {
         }
 
         if let Some(x) = &self.routing_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 394, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14151,7 +14315,7 @@ impl PositioningAssistanceInformationFeedback {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14168,6 +14332,7 @@ impl PositioningAssistanceInformationFeedback {
 }
 
 impl PerCodec for PositioningAssistanceInformationFeedback {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningAssistanceInformationFeedback::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -14277,9 +14442,9 @@ impl PositioningMeasurementRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14287,7 +14452,7 @@ impl PositioningMeasurementRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14295,7 +14460,7 @@ impl PositioningMeasurementRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14303,7 +14468,7 @@ impl PositioningMeasurementRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trp_measurement_request_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 422, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14311,7 +14476,7 @@ impl PositioningMeasurementRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.pos_report_characteristics.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 408, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14320,7 +14485,7 @@ impl PositioningMeasurementRequest {
         num_ies += 1;
 
         if let Some(x) = &self.pos_measurement_periodicity {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 409, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14329,7 +14494,7 @@ impl PositioningMeasurementRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.pos_measurement_quantities.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 396, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14338,7 +14503,7 @@ impl PositioningMeasurementRequest {
         num_ies += 1;
 
         if let Some(x) = &self.sfn_initialisation_time {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 419, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14348,7 +14513,7 @@ impl PositioningMeasurementRequest {
         }
 
         if let Some(x) = &self.srs_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 407, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14358,7 +14523,7 @@ impl PositioningMeasurementRequest {
         }
 
         if let Some(x) = &self.measurement_beam_info_request {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 423, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14368,7 +14533,7 @@ impl PositioningMeasurementRequest {
         }
 
         if let Some(x) = &self.system_frame_number {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 420, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14378,7 +14543,7 @@ impl PositioningMeasurementRequest {
         }
 
         if let Some(x) = &self.slot_number {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 421, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14395,6 +14560,7 @@ impl PositioningMeasurementRequest {
 }
 
 impl PerCodec for PositioningMeasurementRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningMeasurementRequest");
@@ -14461,9 +14627,9 @@ impl PositioningMeasurementResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14471,7 +14637,7 @@ impl PositioningMeasurementResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14479,7 +14645,7 @@ impl PositioningMeasurementResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14488,7 +14654,7 @@ impl PositioningMeasurementResponse {
         num_ies += 1;
 
         if let Some(x) = &self.pos_measurement_result_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 397, false)?;
             Criticality::Reject.encode(ies)?;
@@ -14498,7 +14664,7 @@ impl PositioningMeasurementResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14515,6 +14681,7 @@ impl PositioningMeasurementResponse {
 }
 
 impl PerCodec for PositioningMeasurementResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningMeasurementResponse");
@@ -14582,9 +14749,9 @@ impl PositioningMeasurementFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14592,7 +14759,7 @@ impl PositioningMeasurementFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14600,7 +14767,7 @@ impl PositioningMeasurementFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14608,7 +14775,7 @@ impl PositioningMeasurementFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -14617,7 +14784,7 @@ impl PositioningMeasurementFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -14634,6 +14801,7 @@ impl PositioningMeasurementFailure {
 }
 
 impl PerCodec for PositioningMeasurementFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningMeasurementFailure");
@@ -14699,9 +14867,9 @@ impl PositioningMeasurementReport {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14709,7 +14877,7 @@ impl PositioningMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14717,7 +14885,7 @@ impl PositioningMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14725,7 +14893,7 @@ impl PositioningMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.pos_measurement_result_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 397, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14741,6 +14909,7 @@ impl PositioningMeasurementReport {
 }
 
 impl PerCodec for PositioningMeasurementReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningMeasurementReport");
@@ -14799,9 +14968,9 @@ impl PositioningMeasurementAbort {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14809,7 +14978,7 @@ impl PositioningMeasurementAbort {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14817,7 +14986,7 @@ impl PositioningMeasurementAbort {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14833,6 +15002,7 @@ impl PositioningMeasurementAbort {
 }
 
 impl PerCodec for PositioningMeasurementAbort {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementAbort::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningMeasurementAbort");
@@ -14896,9 +15066,9 @@ impl PositioningMeasurementFailureIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14906,7 +15076,7 @@ impl PositioningMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14914,7 +15084,7 @@ impl PositioningMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -14922,7 +15092,7 @@ impl PositioningMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -14938,6 +15108,7 @@ impl PositioningMeasurementFailureIndication {
 }
 
 impl PerCodec for PositioningMeasurementFailureIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementFailureIndication::decode_inner(data).map_err(
             |mut e: PerCodecError| {
@@ -15002,9 +15173,9 @@ impl PositioningMeasurementUpdate {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15012,7 +15183,7 @@ impl PositioningMeasurementUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 402, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15020,7 +15191,7 @@ impl PositioningMeasurementUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 411, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15029,7 +15200,7 @@ impl PositioningMeasurementUpdate {
         num_ies += 1;
 
         if let Some(x) = &self.srs_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 407, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15046,6 +15217,7 @@ impl PositioningMeasurementUpdate {
 }
 
 impl PerCodec for PositioningMeasurementUpdate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningMeasurementUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningMeasurementUpdate");
@@ -15105,9 +15277,9 @@ impl TrpInformationRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15116,7 +15288,7 @@ impl TrpInformationRequest {
         num_ies += 1;
 
         if let Some(x) = &self.trp_list {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 410, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15125,7 +15297,7 @@ impl TrpInformationRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trp_information_type_list_trp_req.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 398, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15141,6 +15313,7 @@ impl TrpInformationRequest {
 }
 
 impl PerCodec for TrpInformationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrpInformationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrpInformationRequest");
@@ -15175,7 +15348,7 @@ impl TrpInformationTypeListTrpReq {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 399, false)?;
             Criticality::Reject.encode(data)?;
@@ -15187,6 +15360,7 @@ impl TrpInformationTypeListTrpReq {
 }
 
 impl PerCodec for TrpInformationTypeListTrpReq {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrpInformationTypeListTrpReq::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrpInformationTypeListTrpReq");
@@ -15245,9 +15419,9 @@ impl TrpInformationResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15255,7 +15429,7 @@ impl TrpInformationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.trp_information_list_trp_resp.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 400, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -15264,7 +15438,7 @@ impl TrpInformationResponse {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15281,6 +15455,7 @@ impl TrpInformationResponse {
 }
 
 impl PerCodec for TrpInformationResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrpInformationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrpInformationResponse");
@@ -15315,7 +15490,7 @@ impl TrpInformationListTrpResp {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         encode::encode_length_determinent(data, Some(1), Some(65535), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(data, Some(0), Some(65535), false, 401, false)?;
             Criticality::Ignore.encode(data)?;
@@ -15327,6 +15502,7 @@ impl TrpInformationListTrpResp {
 }
 
 impl PerCodec for TrpInformationListTrpResp {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrpInformationListTrpResp::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrpInformationListTrpResp");
@@ -15380,9 +15556,9 @@ impl TrpInformationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.transaction_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15390,7 +15566,7 @@ impl TrpInformationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -15399,7 +15575,7 @@ impl TrpInformationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15416,6 +15592,7 @@ impl TrpInformationFailure {
 }
 
 impl PerCodec for TrpInformationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TrpInformationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TrpInformationFailure");
@@ -15476,9 +15653,9 @@ impl PositioningInformationRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15486,7 +15663,7 @@ impl PositioningInformationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15495,7 +15672,7 @@ impl PositioningInformationRequest {
         num_ies += 1;
 
         if let Some(x) = &self.requested_srs_transmission_characteristics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 391, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15512,6 +15689,7 @@ impl PositioningInformationRequest {
 }
 
 impl PerCodec for PositioningInformationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningInformationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningInformationRequest");
@@ -15575,9 +15753,9 @@ impl PositioningInformationResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15585,7 +15763,7 @@ impl PositioningInformationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15594,7 +15772,7 @@ impl PositioningInformationResponse {
         num_ies += 1;
 
         if let Some(x) = &self.srs_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 407, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15604,7 +15782,7 @@ impl PositioningInformationResponse {
         }
 
         if let Some(x) = &self.sfn_initialisation_time {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 419, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15614,7 +15792,7 @@ impl PositioningInformationResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15631,6 +15809,7 @@ impl PositioningInformationResponse {
 }
 
 impl PerCodec for PositioningInformationResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningInformationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningInformationResponse");
@@ -15691,9 +15870,9 @@ impl PositioningInformationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15701,7 +15880,7 @@ impl PositioningInformationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15709,7 +15888,7 @@ impl PositioningInformationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -15718,7 +15897,7 @@ impl PositioningInformationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15735,6 +15914,7 @@ impl PositioningInformationFailure {
 }
 
 impl PerCodec for PositioningInformationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningInformationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningInformationFailure");
@@ -15796,9 +15976,9 @@ impl PositioningActivationRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15806,7 +15986,7 @@ impl PositioningActivationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15814,7 +15994,7 @@ impl PositioningActivationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.srs_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 403, false)?;
         Criticality::Reject.encode(ies)?;
@@ -15823,7 +16003,7 @@ impl PositioningActivationRequest {
         num_ies += 1;
 
         if let Some(x) = &self.activation_time {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 404, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -15840,6 +16020,7 @@ impl PositioningActivationRequest {
 }
 
 impl PerCodec for PositioningActivationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningActivationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningActivationRequest");
@@ -15890,6 +16071,7 @@ impl SrsType {
 }
 
 impl PerCodec for SrsType {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SrsType::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SrsType");
@@ -15954,6 +16136,7 @@ impl SemipersistentSrs {
 }
 
 impl PerCodec for SemipersistentSrs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SemipersistentSrs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SemipersistentSrs");
@@ -16018,6 +16201,7 @@ impl AperiodicSrs {
 }
 
 impl PerCodec for AperiodicSrs {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         AperiodicSrs::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("AperiodicSrs");
@@ -16081,9 +16265,9 @@ impl PositioningActivationResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16091,7 +16275,7 @@ impl PositioningActivationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16100,7 +16284,7 @@ impl PositioningActivationResponse {
         num_ies += 1;
 
         if let Some(x) = &self.system_frame_number {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 420, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16110,7 +16294,7 @@ impl PositioningActivationResponse {
         }
 
         if let Some(x) = &self.slot_number {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 421, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16120,7 +16304,7 @@ impl PositioningActivationResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16137,6 +16321,7 @@ impl PositioningActivationResponse {
 }
 
 impl PerCodec for PositioningActivationResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningActivationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningActivationResponse");
@@ -16197,9 +16382,9 @@ impl PositioningActivationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16207,7 +16392,7 @@ impl PositioningActivationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16215,7 +16400,7 @@ impl PositioningActivationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -16224,7 +16409,7 @@ impl PositioningActivationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16241,6 +16426,7 @@ impl PositioningActivationFailure {
 }
 
 impl PerCodec for PositioningActivationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningActivationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningActivationFailure");
@@ -16299,9 +16485,9 @@ impl PositioningDeactivation {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16309,7 +16495,7 @@ impl PositioningDeactivation {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16317,7 +16503,7 @@ impl PositioningDeactivation {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.abort_transmission.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 405, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -16333,6 +16519,7 @@ impl PositioningDeactivation {
 }
 
 impl PerCodec for PositioningDeactivation {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningDeactivation::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningDeactivation");
@@ -16392,9 +16579,9 @@ impl PositioningInformationUpdate {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16402,7 +16589,7 @@ impl PositioningInformationUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16411,7 +16598,7 @@ impl PositioningInformationUpdate {
         num_ies += 1;
 
         if let Some(x) = &self.srs_configuration {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 407, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16421,7 +16608,7 @@ impl PositioningInformationUpdate {
         }
 
         if let Some(x) = &self.sfn_initialisation_time {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 419, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16438,6 +16625,7 @@ impl PositioningInformationUpdate {
 }
 
 impl PerCodec for PositioningInformationUpdate {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PositioningInformationUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PositioningInformationUpdate");
@@ -16525,9 +16713,9 @@ impl ECidMeasurementInitiationRequest {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16535,7 +16723,7 @@ impl ECidMeasurementInitiationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16543,7 +16731,7 @@ impl ECidMeasurementInitiationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 412, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16551,7 +16739,7 @@ impl ECidMeasurementInitiationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 413, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16559,7 +16747,7 @@ impl ECidMeasurementInitiationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.e_cid_report_characteristics.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 424, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16568,7 +16756,7 @@ impl ECidMeasurementInitiationRequest {
         num_ies += 1;
 
         if let Some(x) = &self.e_cid_measurement_periodicity {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 416, false)?;
             Criticality::Reject.encode(ies)?;
@@ -16577,7 +16765,7 @@ impl ECidMeasurementInitiationRequest {
             num_ies += 1;
         }
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.e_cid_measurement_quantities.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 414, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16593,6 +16781,7 @@ impl ECidMeasurementInitiationRequest {
 }
 
 impl PerCodec for ECidMeasurementInitiationRequest {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ECidMeasurementInitiationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ECidMeasurementInitiationRequest");
@@ -16670,9 +16859,9 @@ impl ECidMeasurementInitiationResponse {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16680,7 +16869,7 @@ impl ECidMeasurementInitiationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16688,7 +16877,7 @@ impl ECidMeasurementInitiationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 412, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16696,7 +16885,7 @@ impl ECidMeasurementInitiationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 413, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16705,7 +16894,7 @@ impl ECidMeasurementInitiationResponse {
         num_ies += 1;
 
         if let Some(x) = &self.e_cid_measurement_result {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 417, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16715,7 +16904,7 @@ impl ECidMeasurementInitiationResponse {
         }
 
         if let Some(x) = &self.cell_portion_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 418, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16725,7 +16914,7 @@ impl ECidMeasurementInitiationResponse {
         }
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16742,6 +16931,7 @@ impl ECidMeasurementInitiationResponse {
 }
 
 impl PerCodec for ECidMeasurementInitiationResponse {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ECidMeasurementInitiationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ECidMeasurementInitiationResponse");
@@ -16816,9 +17006,9 @@ impl ECidMeasurementInitiationFailure {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16826,7 +17016,7 @@ impl ECidMeasurementInitiationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16834,7 +17024,7 @@ impl ECidMeasurementInitiationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 412, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16842,7 +17032,7 @@ impl ECidMeasurementInitiationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 413, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16850,7 +17040,7 @@ impl ECidMeasurementInitiationFailure {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -16859,7 +17049,7 @@ impl ECidMeasurementInitiationFailure {
         num_ies += 1;
 
         if let Some(x) = &self.criticality_diagnostics {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -16876,6 +17066,7 @@ impl ECidMeasurementInitiationFailure {
 }
 
 impl PerCodec for ECidMeasurementInitiationFailure {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ECidMeasurementInitiationFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ECidMeasurementInitiationFailure");
@@ -16946,9 +17137,9 @@ impl ECidMeasurementFailureIndication {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16956,7 +17147,7 @@ impl ECidMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16964,7 +17155,7 @@ impl ECidMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 412, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16972,7 +17163,7 @@ impl ECidMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 413, false)?;
         Criticality::Reject.encode(ies)?;
@@ -16980,7 +17171,7 @@ impl ECidMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.cause.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -16996,6 +17187,7 @@ impl ECidMeasurementFailureIndication {
 }
 
 impl PerCodec for ECidMeasurementFailureIndication {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ECidMeasurementFailureIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ECidMeasurementFailureIndication");
@@ -17072,9 +17264,9 @@ impl ECidMeasurementReport {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17082,7 +17274,7 @@ impl ECidMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17090,7 +17282,7 @@ impl ECidMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 412, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17098,7 +17290,7 @@ impl ECidMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 413, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17106,7 +17298,7 @@ impl ECidMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.e_cid_measurement_result.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 417, false)?;
         Criticality::Ignore.encode(ies)?;
@@ -17115,7 +17307,7 @@ impl ECidMeasurementReport {
         num_ies += 1;
 
         if let Some(x) = &self.cell_portion_id {
-            let ie = &mut new_codec_data();
+            let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 418, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -17132,6 +17324,7 @@ impl ECidMeasurementReport {
 }
 
 impl PerCodec for ECidMeasurementReport {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ECidMeasurementReport::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ECidMeasurementReport");
@@ -17197,9 +17390,9 @@ impl ECidMeasurementTerminationCommand {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut new_codec_data();
+        let ies = &mut Allocator::new();
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_cu_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17207,7 +17400,7 @@ impl ECidMeasurementTerminationCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.gnb_du_ue_f1ap_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17215,7 +17408,7 @@ impl ECidMeasurementTerminationCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.lmf_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 412, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17223,7 +17416,7 @@ impl ECidMeasurementTerminationCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let ie = &mut new_codec_data();
+        let ie = &mut Allocator::new();
         self.ran_ue_measurement_id.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 413, false)?;
         Criticality::Reject.encode(ies)?;
@@ -17239,6 +17432,7 @@ impl ECidMeasurementTerminationCommand {
 }
 
 impl PerCodec for ECidMeasurementTerminationCommand {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ECidMeasurementTerminationCommand::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ECidMeasurementTerminationCommand");
@@ -17273,6 +17467,7 @@ impl Aperiodic {
 }
 
 impl PerCodec for Aperiodic {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Aperiodic::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Aperiodic");

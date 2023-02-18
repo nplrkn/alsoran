@@ -4,7 +4,6 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{bail, Result};
 use bitvec::prelude::*;
 use e1ap::*;
-use net::AperSerde;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
 
@@ -79,7 +78,7 @@ impl MockCuUp {
             },
         ));
         info!(self.logger, "GnbCuUpE1SetupRequest >>");
-        self.send(pdu.into_bytes()?, None).await;
+        self.send(pdu, None).await;
         Ok(())
     }
 
@@ -164,7 +163,7 @@ impl MockCuUp {
         );
 
         info!(self.logger, "GnbCuCpConfigurationUpdateAcknowledge >>");
-        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
+        self.send(pdu, Some(assoc_id)).await;
         Ok(())
     }
 
@@ -174,7 +173,7 @@ impl MockCuUp {
         info!(self.logger, "BearerContextSetupRequest <<");
         let pdu = self.build_bearer_context_setup_response(&ue_context);
         info!(self.logger, "BearerContextSetupResponse >>");
-        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
+        self.send(pdu, Some(assoc_id)).await;
         Ok(ue_context)
     }
 
@@ -246,7 +245,7 @@ impl MockCuUp {
         info!(self.logger, "BearerContextModificationRequest <<");
         let pdu = self.build_bearer_context_modification_response(ue_context);
         info!(self.logger, "BearerContextModificationResponse >>");
-        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
+        self.send(pdu, Some(assoc_id)).await;
         Ok(())
     }
 

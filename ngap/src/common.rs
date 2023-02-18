@@ -24,6 +24,7 @@ impl Criticality {
 }
 
 impl PerCodec for Criticality {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Criticality::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Criticality");
@@ -60,6 +61,7 @@ impl Presence {
 }
 
 impl PerCodec for Presence {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Presence::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("Presence");
@@ -111,6 +113,7 @@ impl PrivateIeId {
 }
 
 impl PerCodec for PrivateIeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         PrivateIeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PrivateIeId");
@@ -140,6 +143,7 @@ impl ProcedureCode {
 }
 
 impl PerCodec for ProcedureCode {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ProcedureCode::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ProcedureCode");
@@ -169,6 +173,7 @@ impl ProtocolExtensionId {
 }
 
 impl PerCodec for ProtocolExtensionId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ProtocolExtensionId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ProtocolExtensionId");
@@ -198,6 +203,7 @@ impl ProtocolIeId {
 }
 
 impl PerCodec for ProtocolIeId {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         ProtocolIeId::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("ProtocolIeId");
@@ -234,6 +240,7 @@ impl TriggeringMessage {
 }
 
 impl PerCodec for TriggeringMessage {
+    type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         TriggeringMessage::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("TriggeringMessage");

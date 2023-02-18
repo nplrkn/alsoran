@@ -1,6 +1,6 @@
 //! transactions - allows definition of procedures using individual ASN.1 requests and responses
 
-use crate::{PerCodec, PerCodecData, PerCodecError};
+use crate::{PerCodecError, SerDes};
 use anyhow::Result;
 use async_channel::RecvError;
 use async_trait::async_trait;
@@ -11,7 +11,7 @@ use thiserror::Error;
 #[async_trait]
 pub trait Procedure {
     const CODE: u8;
-    type TopPdu: AperSerde + Send + Sync + 'static;
+    type TopPdu: SerDes + Send + Sync + 'static;
     type Request: Send + Sync + 'static + Debug;
     type Success;
     type Failure;
@@ -27,7 +27,7 @@ pub trait Procedure {
 #[async_trait]
 pub trait Indication {
     const CODE: u8;
-    type TopPdu: AperSerde + Send + Sync + 'static;
+    type TopPdu: SerDes + Send + Sync + 'static;
     type Request: Send + Sync + 'static + Debug;
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError>;
     async fn call_provider<T: IndicationHandler<Self>>(
@@ -37,25 +37,7 @@ pub trait Indication {
     );
 }
 
-pub trait AperSerde: Sized {
-    fn into_bytes(self) -> Result<Vec<u8>, PerCodecError>;
-    fn from_bytes(bytes: &[u8]) -> Result<Self, PerCodecError>;
-}
-
 pub type ResponseAction<T> = (T, Option<Pin<Box<dyn Future<Output = ()> + Send>>>);
-
-impl<T: PerCodec> AperSerde for T {
-    fn into_bytes(self) -> Result<Vec<u8>, PerCodecError> {
-        let mut d = PerCodecData::new_aper();
-        self.encode(&mut d)?;
-        Ok(d.into_bytes())
-    }
-
-    fn from_bytes(bytes: &[u8]) -> Result<Self, PerCodecError> {
-        let mut d = PerCodecData::from_slice_aper(bytes);
-        Self::decode(&mut d)
-    }
-}
 
 #[derive(Error, Debug)]
 pub enum RequestError<U> {
@@ -107,7 +89,7 @@ pub trait IndicationHandler<I: Indication + ?Sized>: Send + Sync {
 /// Trait representing the ability to handle multiple procedures that use the same top level PDU.
 #[async_trait]
 pub trait InterfaceProvider: Send + Sync {
-    type TopPdu: AperSerde;
+    type TopPdu: SerDes;
     async fn route_request(
         &self,
         p: Self::TopPdu,
@@ -127,7 +109,7 @@ pub trait RequestMessageHandler: Send + Sync {
 
 // An interface provider is a request message handler.
 #[async_trait]
-impl<T: AperSerde + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
+impl<T: SerDes + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
     async fn handle_request(
         &self,
         message: &[u8],

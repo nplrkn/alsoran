@@ -3,7 +3,7 @@
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, Result};
 use bitvec::prelude::*;
-use net::{AperSerde, Binding, TransportProvider};
+use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::Deref;
@@ -96,7 +96,7 @@ impl MockAmf {
             }));
 
         info!(logger, "<< NgSetupResponse");
-        self.send(response.into_bytes()?, Some(assoc_id)).await;
+        self.send(response, Some(assoc_id)).await;
 
         Ok(())
     }
@@ -123,7 +123,7 @@ impl MockAmf {
             ));
 
         info!(logger, "<< RanConfigurationUpdateAcknowledge");
-        self.send(response.into_bytes()?, Some(assoc_id)).await;
+        self.send(response, Some(assoc_id)).await;
 
         Ok(())
     }
@@ -231,8 +231,7 @@ impl MockAmf {
         ));
 
         info!(logger, "<< InitialContextSetupRequest");
-        self.send(pdu.into_bytes()?, Some(ue_context.binding.assoc_id))
-            .await;
+        self.send(pdu, Some(ue_context.binding.assoc_id)).await;
         Ok(())
     }
 
@@ -265,7 +264,7 @@ impl MockAmf {
                 }]),
             },
         ));
-        self.send(pdu.into_bytes()?, None).await;
+        self.send(pdu, None).await;
         Ok(())
     }
 
@@ -339,8 +338,7 @@ impl MockAmf {
                 ue_aggregate_maximum_bit_rate: None,
             },
         ));
-        self.send(pdu.into_bytes()?, Some(ue_context.binding.assoc_id))
-            .await;
+        self.send(pdu, Some(ue_context.binding.assoc_id)).await;
         Ok(())
     }
 

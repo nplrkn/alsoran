@@ -4,6 +4,9 @@ mod sctp_transport_provider;
 mod stack;
 mod tnla_event_handler;
 mod transport_provider;
+pub use asn1_per::{
+    Indication, IndicationHandler, Procedure, RequestError, RequestProvider, ResponseAction, SerDes,
+};
 pub use common::ShutdownHandle;
 pub use ip_bits_from_string::ip_bits_from_string;
 pub use sctp::Message;
