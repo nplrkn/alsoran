@@ -10,5 +10,5 @@ async-trait = "0.1.51"
 anyhow = "1.0.52"
 slog = "2.7.0"
 asn1-per = { path = "../asn1-per"}
-num_enum = "0.5.7"
+num_enum = "0.5.11"
 net = { path = "../net" }
