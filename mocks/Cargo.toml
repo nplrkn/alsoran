@@ -8,6 +8,7 @@ doctest = false
 
 [dependencies]
 net = { path = "../net" }
+#asn1-per = { path = "../asn1-per" }
 f1ap = {path = "../f1ap" }
 e1ap = {path = "../e1ap" }
 ngap = {path = "../ngap" }

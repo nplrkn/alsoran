@@ -53,6 +53,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "asn1-per"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "asn1-codecs",
+ "async-channel",
+ "async-trait",
+ "bitvec",
+ "num_enum",
+ "slog",
+ "thiserror",
+]
+
+[[package]]
 name = "async-attributes"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -631,9 +645,8 @@ name = "e1ap"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "asn1-codecs",
+ "asn1-per",
  "async-trait",
- "bitvec",
  "net",
  "num_enum",
  "slog",
@@ -701,9 +714,8 @@ name = "f1ap"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "asn1-codecs",
+ "asn1-per",
  "async-trait",
- "bitvec",
  "hex",
  "net",
  "num_enum",
@@ -1049,6 +1061,7 @@ name = "gnb-cu-cp"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "asn1-per",
  "async-channel",
  "async-std",
  "async-trait",
@@ -1564,7 +1577,7 @@ name = "net"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "asn1-codecs",
+ "asn1-per",
  "async-channel",
  "async-io",
  "async-net",
@@ -1581,7 +1594,6 @@ dependencies = [
  "sctp",
  "slog",
  "stop-token",
- "thiserror",
 ]
 
 [[package]]
@@ -1589,9 +1601,8 @@ name = "ngap"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "asn1-codecs",
+ "asn1-per",
  "async-trait",
- "bitvec",
  "hex",
  "net",
  "num_enum",
@@ -2008,9 +2019,9 @@ dependencies = [
 name = "rrc"
 version = "0.1.0"
 dependencies = [
- "asn1-codecs",
+ "asn1-per",
  "async-trait",
- "bitvec",
+ "hex",
  "net",
  "num_enum",
  "slog",

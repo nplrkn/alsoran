@@ -1,8 +1,7 @@
 use super::ies::*;
 use super::pdu::*;
 use super::top_pdu::*;
-use bitvec::prelude::*;
-use net::{AperSerde, PerCodecError};
+use asn1_per::*;
 
 fn make_ng_setup() -> NgSetupRequest {
     let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);

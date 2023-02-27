@@ -5,8 +5,9 @@ use super::RrcHandler;
 use crate::workflows::Workflow;
 use async_trait::async_trait;
 use f1ap::*;
-use net::ResponseAction;
-use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
+use net::{
+    EventHandler, IndicationHandler, RequestError, RequestProvider, ResponseAction, TnlaEvent,
+};
 use pdcp::PdcpPdu;
 use slog::{debug, info, warn, Logger};
 

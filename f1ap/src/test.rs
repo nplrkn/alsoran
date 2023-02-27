@@ -1,5 +1,5 @@
 use crate::F1apPdu;
-use net::{AperSerde, PerCodecError};
+use asn1_per::*;
 
 #[test]
 fn test_oran_du_f1_setup() -> Result<(), PerCodecError> {

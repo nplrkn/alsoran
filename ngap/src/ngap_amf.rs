@@ -2,8 +2,8 @@
 
 use super::top_pdu::*;
 use crate::{InitiatingMessage, NgapPdu};
+use asn1_per::*;
 use async_trait::async_trait;
-use net::{InterfaceProvider, Procedure, RequestProvider, ResponseAction};
 use slog::Logger;
 
 pub struct NgapAmf<T>(pub T)

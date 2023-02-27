@@ -9,7 +9,7 @@ use f1ap::{
     DrbsToBeSetupItem, DrbsToBeSetupList, GnbCuUeF1apId, QosInformation, UeContextSetupProcedure,
     UeContextSetupRequest,
 };
-use net::AperSerde;
+use net::SerDes;
 use ngap::{
     PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
     PduSessionResourceSetupItemSuReq, PduSessionResourceSetupItemSuRes,

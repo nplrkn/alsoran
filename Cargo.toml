@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "asn1-per",
     "common",
     "sctp",
     "net",
