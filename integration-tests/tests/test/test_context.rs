@@ -11,7 +11,6 @@ use mocks::{MockAmf, MockCuUp, MockDu};
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::time::Duration;
-use std::{panic, process};
 use uuid::Uuid;
 
 const IP_OR_PORT_RETRIES: usize = 10;
@@ -82,14 +81,8 @@ impl TestContextBuilder {
     }
 
     pub async fn spawn(&self) -> Result<TestContext> {
+        common::panic::exit_on_panic();
         let logger = common::logging::test_init();
-
-        // Exit on panic
-        let orig_hook = panic::take_hook();
-        panic::set_hook(Box::new(move |panic_info| {
-            orig_hook(panic_info);
-            process::exit(1);
-        }));
 
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
         let amf = start_amf_with_random_ips(&logger, self.amf_endpoint_count).await;
