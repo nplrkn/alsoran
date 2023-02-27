@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
-use common::{logging, signal};
+use common::{logging, panic, signal};
 use gnb_cu_cp::{Config, RedisUeStore};
 use slog::info;
 use std::net::IpAddr;
@@ -16,6 +16,8 @@ struct Args {
 
 #[async_std::main]
 async fn main() -> Result<()> {
+    panic::exit_on_panic();
+
     let args = Args::parse();
     let config = Config {
         ip_addr: args.local_ip,

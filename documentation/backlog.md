@@ -1,7 +1,6 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- [EstablishmentCause.RrcSetupRequestIEs.RrcSetupRequest.C1_4.UlCcchMessageType.UlCcchMessage]:PerCodec:DecodeError:Requested Bits to decode 4, Remaining bits 1
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -30,6 +29,7 @@
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 ## MAINTAINABILITY
 - Errors are too easy to miss - call_provider() to optionally warn! on failure
+  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
@@ -67,6 +67,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- 'Worker startup failure' (e.g. when specifying wrong --local-ip) should be fatal
+- RRC is UPER not APER
 - Call TnlaEventHandler serially for a given association allowing message ordering control by upper layers (...meaning that intermittent reordering in scripted tests can be avoided)
 - Tolerate missing mandatory IE TransactionId on InitialULRrcMessageTransfer for ORAN ODU interop
 - Respond to GNBDUConfigurationUpdate
