@@ -2,6 +2,7 @@
 
 members = [
     "asn1-per",
+    "amf-sim",
     "common",
     "sctp",
     "net",

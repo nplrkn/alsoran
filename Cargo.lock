@@ -12,6 +12,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "amf-sim"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "common",
+ "hex",
+ "mocks",
+ "slog",
+]
+
+[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

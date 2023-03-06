@@ -19,6 +19,7 @@ pub struct Mock<P: Pdu> {
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Vec<ShutdownHandle>,
+    wait_forever: bool,
 }
 
 pub enum MockEvent<P: Pdu> {
@@ -60,7 +61,13 @@ impl<P: Pdu> Mock<P> {
             logger,
             handler: Handler(sender),
             transport_tasks: Vec::new(),
+            wait_forever: false,
         }
+    }
+
+    pub fn wait_forever(&mut self) -> &mut Self {
+        self.wait_forever = true;
+        self
     }
 
     pub async fn serve(&mut self, address: String, ppid: u32) -> Result<()> {
@@ -130,7 +137,11 @@ impl<P: Pdu> Mock<P> {
     /// Receive a Pdu, with a 0.5s timeout.
     pub async fn receive_pdu_with_assoc_id(&self) -> Result<ReceivedPdu<P>> {
         let f = self.receiver.recv();
-        let event = async_std::future::timeout(std::time::Duration::from_millis(500), f).await??;
+        let event = if self.wait_forever {
+            f.await
+        } else {
+            async_std::future::timeout(std::time::Duration::from_millis(500), f).await?
+        }?;
         match event {
             MockEvent::Pdu(p) => Ok(p),
             MockEvent::Connection => bail!("Expected Pdu but got connection"),

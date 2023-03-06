@@ -1,6 +1,8 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- Remove reference to malformed packet errors from free5GC-testing.md
+- Fix hang on Ctrl-C when AMF connect doesn't complete
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
