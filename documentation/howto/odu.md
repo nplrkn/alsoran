@@ -58,19 +58,17 @@ Solution: ODU rebuilt to run on 127.0.0.2 and connect to 127.0.0.1.
 # In terminal 1, projects/alsoran/amf-sim
 cargo run
 
-# In terminal 1, projects/alsoran/gnb-cu-cp
+# In terminal 2, projects/alsoran/gnb-cu-cp
 redis-server &
-cargo run --local-ip=127.0.0.1
+cargo run -- --local-ip=127.0.0.1
 
-
-# in terminal 3, in o-du-l2 directory
-```
-bin/ric_stub/ric_stub
-```
-
-# in terminal 4, in alsoran/gnb-cu-cp directory
-cargo run -- --local-ip=192.168.130.82
-# In terminal 2, in the alsoran directory, capture wireshark.
+# in terminal 3, 
 ```
 sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
+```
+
+# in terminal 5, in o-du-l2 directory
+(This needs the rebuilt ODU which listens on 127.0.0.2 and connects to 127.0.0.1.)
+```
+sudo bin/odu/odu
 ```

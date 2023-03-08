@@ -1,6 +1,9 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- Rrc Reject!!
+- Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
+- Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
 - Remove reference to malformed packet errors from free5GC-testing.md
 - Fix hang on Ctrl-C when AMF connect doesn't complete
 

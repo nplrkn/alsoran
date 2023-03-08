@@ -305,6 +305,19 @@ impl MockAmf {
         Ok(())
     }
 
+    pub async fn receive_uplink_nas_transport(&self, _ue_context: &UeContext) -> Result<Vec<u8>> {
+        info!(&self.logger, ">> UplinkNasTransport");
+        match self.receive_pdu().await.unwrap() {
+            NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNasTransport(
+                UplinkNasTransport { nas_pdu, .. },
+            )) => Ok(nas_pdu.0),
+            x => Err(anyhow!(
+                "Expecting UplinkNasTransport, got unexpected message {:?}",
+                x
+            )),
+        }
+    }
+
     pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
 
