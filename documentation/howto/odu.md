@@ -72,3 +72,40 @@ sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
 ```
 sudo bin/odu/odu
 ```
+
+
+# O-DU testing call flow
+We start with the standard O-RAN-SC DU test documented at https://github.com/o-ran-sc/o-du-l2 in section F: How to execute.
+
+This test used scripted, hardcoded messages to drive the O-DU.  The uplink Rrc messages are injected by the Phy Stub.  The downlink F1AP messages are injected by the Cu Stub.  
+
+Our strategy is to swap out the Cu Stub, and in its place swap in Alsoran GNB-CU and our simulated AMF (amf-sim).  The result is that we have two real components under test (O-RAN-SC ODU and Alsoran CU) and two scripted mocks (Phy Stub and amf-sim).
+
+To avoid the need to modify the Phy Stub, our amf-sim message sequence is designed to trigger Alsoran CU to produce the same call flow as the O-RAN-SC Cu Stub.  That means the following.
+
+```mermaid
+sequenceDiagram
+  participant DU
+  participant CU
+  participant AMF
+  DU->>CU: Rrc Setup Request
+  CU->>DU: Rrc Setup
+  DU->>CU: Rrc Setup Complete + Nas Registration Request
+  CU->>AMF: Ngap InitialUeMessage + Nas Registration Request
+  AMF->>CU: Nas Authentication Request
+  CU->>DU: Nas Authentication Request
+  DU->>CU: Nas Authentication Response
+  CU->>AMF: Nas Authentication Response
+  AMF->>CU: Nas Security Mode Command 
+  CU->>DU: Nas Security Mode Command
+  DU->> CU: Nas Security Mode Complete
+  CU->>AMF: Nas Security Mode Complete
+  AMF->>CU: Ngap InitialContextSetupRequest
+  CU->>DU: Rrc Security Mode Command
+  DU->>CU: Rrc Security Mode Complete
+  CU->>AMF: Ngap InitialContextSetupResponse
+  AMF->>CU: Nas Registration Accept 
+  CU->>DU: Nas Registration Accept
+  DU->>CU: Nas Registration Complete
+  CU->>AMF: Nas Registration Complete
+```
