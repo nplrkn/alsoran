@@ -10,7 +10,7 @@ use slog::info;
 async fn main() -> Result<()> {
     let logger = common::logging::init();
     let mut amf = MockAmf::new(&logger).await;
-    amf.wait_forever();
+    amf.disable_receive_timeouts();
 
     // Wait for connection and do NG Setup.
     amf.add_endpoint("127.0.0.1").await?;

@@ -19,7 +19,7 @@ pub struct Mock<P: Pdu> {
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Vec<ShutdownHandle>,
-    wait_forever: bool,
+    disable_receive_timeouts: bool,
 }
 
 pub enum MockEvent<P: Pdu> {
@@ -61,12 +61,12 @@ impl<P: Pdu> Mock<P> {
             logger,
             handler: Handler(sender),
             transport_tasks: Vec::new(),
-            wait_forever: false,
+            disable_receive_timeouts: false,
         }
     }
 
-    pub fn wait_forever(&mut self) -> &mut Self {
-        self.wait_forever = true;
+    pub fn disable_receive_timeouts(&mut self) -> &mut Self {
+        self.disable_receive_timeouts = true;
         self
     }
 
@@ -137,7 +137,7 @@ impl<P: Pdu> Mock<P> {
     /// Receive a Pdu, with a 0.5s timeout.
     pub async fn receive_pdu_with_assoc_id(&self) -> Result<ReceivedPdu<P>> {
         let f = self.receiver.recv();
-        let event = if self.wait_forever {
+        let event = if self.disable_receive_timeouts {
             f.await
         } else {
             async_std::future::timeout(std::time::Duration::from_millis(500), f).await?

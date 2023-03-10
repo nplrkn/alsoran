@@ -1,9 +1,10 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Rrc Reject!!
-- state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
+- Rrc Reject!!  according to wireshark.  of course ODU doesn't care.
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
+- avoid need for recompile of ODU by enabling O1
+- state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
 - Remove reference to malformed packet errors from free5GC-testing.md
 - Fix hang on Ctrl-C when AMF connect doesn't complete
