@@ -1,9 +1,9 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Rrc Reject!!  according to wireshark.  of course ODU doesn't care.
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - avoid need for recompile of ODU by enabling O1
+- use proper messages from CU stub to make wireshark look correct
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
 - Remove reference to malformed packet errors from free5GC-testing.md
@@ -74,6 +74,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- DL-CCCH-Message should not be PDCP encapsulated
 - 'Worker startup failure' (e.g. when specifying wrong --local-ip) should be fatal
 - RRC is UPER not APER
 - Call TnlaEventHandler serially for a given association allowing message ordering control by upper layers (...meaning that intermittent reordering in scripted tests can be avoided)

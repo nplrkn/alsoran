@@ -5,13 +5,13 @@ use net::SerDes;
 use pdcp::PdcpPdu;
 use rrc::*;
 
-pub fn make_rrc_container<T: SerDes>(rrc: T) -> Result<f1ap::RrcContainer> {
+pub fn make_pdcp_encapsulated_rrc_container<T: SerDes>(rrc: T) -> Result<f1ap::RrcContainer> {
     let rrc_bytes = rrc.into_bytes()?;
     Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).into()))
 }
 
 pub fn build_rrc_setup(rrc_transaction_identifier: u8) -> Result<f1ap::RrcContainer> {
-    make_rrc_container(DlCcchMessage {
+    let message_bytes = DlCcchMessage {
         message: DlCcchMessageType::C1(C1_1::RrcSetup(RrcSetup {
             rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
             critical_extensions: CriticalExtensions21::RrcSetup(RrcSetupIEs {
@@ -26,7 +26,12 @@ pub fn build_rrc_setup(rrc_transaction_identifier: u8) -> Result<f1ap::RrcContai
                 late_non_critical_extension: None,
             }),
         })),
-    })
+    }
+    .into_bytes()?;
+
+    // As per TS38.473, 9.2.3.2, a DL-CCCH-Message is _not_ encoded in a PDCP PDU (unlike a DL-DCCH-Message).
+    // This is why we don't use make_pdcp_encapsulted_rrc_container().
+    Ok(f1ap::RrcContainer(message_bytes))
 }
 
 pub fn build_rrc_security_mode_command(
@@ -34,7 +39,7 @@ pub fn build_rrc_security_mode_command(
 ) -> Result<f1ap::RrcContainer> {
     let rrc_transaction_identifier = RrcTransactionIdentifier(rrc_transaction_identifier);
 
-    make_rrc_container(DlDcchMessage {
+    make_pdcp_encapsulated_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::SecurityModeCommand(rrc::SecurityModeCommand {
             rrc_transaction_identifier,
             critical_extensions: CriticalExtensions26::SecurityModeCommand(
@@ -56,7 +61,7 @@ pub fn build_rrc_dl_information_transfer(
     rrc_transaction_identifier: u8,
     dedicated_nas_message: Option<DedicatedNasMessage>,
 ) -> Result<f1ap::RrcContainer> {
-    make_rrc_container(DlDcchMessage {
+    make_pdcp_encapsulated_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
             rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
             critical_extensions: CriticalExtensions4::DlInformationTransfer(
@@ -77,7 +82,7 @@ pub fn build_rrc_reconfiguration(
     let dedicated_nas_message_list =
         nas_messages.map(|x| (x.into_iter().map(DedicatedNasMessage).collect()));
 
-    make_rrc_container(DlDcchMessage {
+    make_pdcp_encapsulated_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::RrcReconfiguration(rrc::RrcReconfiguration {
             rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
             critical_extensions: CriticalExtensions15::RrcReconfiguration(RrcReconfigurationIEs {

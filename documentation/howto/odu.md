@@ -108,4 +108,12 @@ sequenceDiagram
   CU->>DU: Nas Registration Accept
   DU->>CU: Nas Registration Complete
   CU->>AMF: Nas Registration Complete
+  AMF->>CU: Ngap PduSessionResourceSetupRequest
+  CU->>DU: F1ap UeContextSetupRequest
+  DU->>CU: F1ap UeContextSetupResponse
+  CU->>DU: Rrc Reconfiguration
+  DU->>CU: Rrc Reconfiguration Complete
+  CU->>DU: F1ap UeContextModificationRequest
+  DU->>CU: F1ap UeContextModificationResponse
+  CU->>AMF: Ngap PduSessionResourceSetupResponse
 ```
