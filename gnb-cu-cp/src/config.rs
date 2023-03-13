@@ -10,11 +10,10 @@ pub struct Config {
     // single system, each can be given a different 127.0.0.0/8 IP address.
     pub ip_addr: Option<IpAddr>,
 
-    // Set this to ConnectToAmf("<address>:<port>"") to have a single worker that
-    // connects immediately to AMF on the given IP address and port.
+    // Set this to Autonomous to have a single worker that connects immediately to AMF on the given
+    // IP address.
     //
-    // Set this to ServeConnectionApi(<bind_port>) to enable external control of
-    // connection management.
+    // Set this to Coordinated to enable external control of connection management.
     pub connection_style: ConnectionStyle,
 
     // TTL to set on the UE state during the initial access procedure

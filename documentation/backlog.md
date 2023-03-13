@@ -1,6 +1,7 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- Send UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - avoid need for recompile of ODU by enabling O1
 - use proper messages from CU stub to make wireshark look correct
@@ -8,6 +9,8 @@
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
 - Remove reference to malformed packet errors from free5GC-testing.md
 - Fix hang on Ctrl-C when AMF connect doesn't complete
+- Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
+  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -35,8 +38,6 @@
 - Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 ## MAINTAINABILITY
-- Errors are too easy to miss - call_provider() to optionally warn! on failure
-  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu

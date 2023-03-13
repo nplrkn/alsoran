@@ -57,6 +57,9 @@ async fn main() -> Result<()> {
     let _nas = amf.receive_uplink_nas_transport(&ue).await?;
     info!(&logger, ">> Nas Registration complete");
 
+    amf.send_pdu_session_resource_setup(&ue).await?;
+    amf.receive_pdu_session_resource_setup_response(&ue).await?;
+
     amf.terminate().await;
 
     Ok(())

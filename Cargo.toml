@@ -13,6 +13,7 @@ members = [
     "rrc",
     "pdcp",
     "gnb-cu-cp",
+    "gnb-cu-up",
     "connection-api",
     "coordination-api",
     "gnb-cu-cp-coordinator",

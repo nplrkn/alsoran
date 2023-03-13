@@ -62,7 +62,10 @@ cargo run
 redis-server &
 cargo run -- --local-ip=127.0.0.1
 
-# in terminal 3, 
+# In terminal 3, projects/alsoran/gnb-cu-up
+cargo run
+
+# in terminal 4, 
 ```
 sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
 ```

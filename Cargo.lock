@@ -1105,6 +1105,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "gnb-cu-up"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "async-trait",
+ "common",
+ "e1ap",
+ "net",
+ "slog",
+ "stop-token",
+]
+
+[[package]]
 name = "gnb-du-sim"
 version = "0.1.0"
 dependencies = [

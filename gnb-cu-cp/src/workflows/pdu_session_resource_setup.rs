@@ -40,15 +40,16 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> PduSessionResourceSetupResponse {
         debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-        let (successful, unsuccessful) = self
-            .pdu_session_resource_setup_inner(&r)
-            .await
-            .unwrap_or_else(|_| {
+        let (successful, unsuccessful) = match self.pdu_session_resource_setup_inner(&r).await {
+            Ok(x) => x,
+            Err(e) => {
+                debug!(self.logger, "Failed resource setup - {}", e);
                 (
                     Vec::new(),
                     r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
                 )
-            });
+            }
+        };
 
         // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
 
