@@ -48,7 +48,10 @@ where
             }
         };
         match initiating_message {
-            _ => todo!(),
+            InitiatingMessage::BearerContextSetupRequest(req) => {
+                BearerContextSetupProcedure::call_provider(&self.0, req, logger).await
+            }
+            e => panic!("Missing implementation for {:?}", e),
         }
     }
 }
