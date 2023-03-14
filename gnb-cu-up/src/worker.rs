@@ -78,7 +78,7 @@ impl Worker {
 
                     break;
                 },
-                Err(e) => warn!(logger, "Connection to GNB-CU-CP {} failed - error: {}", cp_address, e)
+                Err(e) => warn!(logger, "Connection to GNB-CU-CP {} failed - {}", cp_address, e)
             },
 
             // Stopped while waiting for connection - break out and shut down
