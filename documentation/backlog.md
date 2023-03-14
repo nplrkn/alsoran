@@ -1,6 +1,7 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- Tear down requests when a connection dies
 - Send UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - avoid need for recompile of ODU by enabling O1
