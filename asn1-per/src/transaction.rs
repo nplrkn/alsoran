@@ -43,7 +43,7 @@ pub type ResponseAction<T> = (T, Option<Pin<Box<dyn Future<Output = ()> + Send>>
 pub enum RequestError<U> {
     #[error("Unsuccessful outcome")]
     UnsuccessfulOutcome(U),
-    #[error("Other error {0}")]
+    #[error("{0}")]
     Other(String),
 }
 

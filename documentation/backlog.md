@@ -1,12 +1,12 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Tear down requests when a connection dies
 - Send UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - avoid need for recompile of ODU by enabling O1
 - use proper messages from CU stub to make wireshark look correct
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
+- Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
 - Remove reference to malformed packet errors from free5GC-testing.md
 - Fix hang on Ctrl-C when AMF connect doesn't complete
@@ -76,6 +76,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Tear down requests when a connection dies (e.g. if gnb-cu-up aborts while handling a request)
 - DL-CCCH-Message should not be PDCP encapsulated
 - 'Worker startup failure' (e.g. when specifying wrong --local-ip) should be fatal
 - RRC is UPER not APER

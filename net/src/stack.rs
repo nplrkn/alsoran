@@ -154,6 +154,24 @@ impl<A: Application> StackReceiver<A> {
 #[async_trait]
 impl<A: Application> TnlaEventHandler for StackReceiver<A> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        if let TnlaEvent::Terminated = event {
+            // Drop all pending requests - which will fail all the workflows in progress
+            let mut found_request = false;
+            for r in self.pending_requests.lock().await.drain(..) {
+                drop(r);
+                found_request = true
+            }
+
+            if found_request {
+                warn!(
+                    logger,
+                    "Failing all requests because of TNLA {} termination. \
+                     Note that current blanket implementation may drop requests \
+                     on other TNLAs that could have survived",
+                    tnla_id
+                );
+            }
+        }
         self.application.handle_event(event, tnla_id, logger).await
     }
 

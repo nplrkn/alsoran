@@ -4,6 +4,6 @@ mod handlers;
 mod worker;
 mod workflows;
 
+use crate::gnb_cu_up::GnbCuUp;
 pub use config::Config;
-pub use gnb_cu_up::GnbCuUp;
 pub use worker::spawn;
