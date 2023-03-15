@@ -1,7 +1,7 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Send UeContextSetupRequest
+- Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - avoid need for recompile of ODU by enabling O1
 - use proper messages from CU stub to make wireshark look correct
@@ -12,6 +12,7 @@
 - Fix hang on Ctrl-C when AMF connect doesn't complete
 - Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
+- use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -77,6 +78,7 @@
 
 # DONE
 - Tear down requests when a connection dies (e.g. if gnb-cu-up aborts while handling a request)
+- Add GNB-CU-UP
 - DL-CCCH-Message should not be PDCP encapsulated
 - 'Worker startup failure' (e.g. when specifying wrong --local-ip) should be fatal
 - RRC is UPER not APER

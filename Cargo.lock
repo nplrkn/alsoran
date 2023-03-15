@@ -1111,6 +1111,7 @@ dependencies = [
  "anyhow",
  "async-std",
  "async-trait",
+ "bitvec",
  "common",
  "e1ap",
  "futures",

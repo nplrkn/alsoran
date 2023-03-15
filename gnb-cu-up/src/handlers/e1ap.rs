@@ -6,7 +6,7 @@ use crate::GnbCuUp;
 use async_trait::async_trait;
 use e1ap::*;
 use net::{EventHandler, RequestError, RequestProvider, ResponseAction, TnlaEvent};
-use slog::{debug, Logger};
+use slog::{info, Logger};
 
 #[derive(Clone)]
 pub struct E1apHandler<G: GnbCuUp> {
@@ -21,8 +21,8 @@ impl<G: GnbCuUp> E1apHandler<G> {
 
 #[async_trait]
 impl<G: GnbCuUp> EventHandler for E1apHandler<G> {
-    async fn handle_event(&self, event: TnlaEvent, _tnla_id: u32, logger: &Logger) {
-        debug!(logger, "TNLA event {:?}", event)
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        info!(logger, "E1AP TNLA {} {:?}", tnla_id, event)
     }
 }
 
