@@ -1,11 +1,11 @@
 //! redis_ue_store - storage of UE state in Redis
 
+use super::SerDes;
 use anyhow::{Context, Result};
 use async_trait::async_trait;
 use redis::{AsyncCommands, Client};
-use speedy::{Readable, Writable};
 
-use super::{ue_state::UeStateSerializable, UeState, UeStateStore};
+use super::{StateStore, UeState, UeStateStore};
 
 #[derive(Clone)]
 pub struct RedisUeStore {
@@ -20,12 +20,10 @@ impl RedisUeStore {
 }
 
 #[async_trait]
-impl UeStateStore for RedisUeStore {
+impl StateStore<UeState> for RedisUeStore {
     async fn store(&self, k: u32, v: UeState, ttl_secs: usize) -> Result<()> {
         let mut conn = self.client.get_async_connection().await?;
-        let v: UeStateSerializable = v.into();
-        let v = v.write_to_vec()?;
-        conn.set_ex(k, v, ttl_secs).await?;
+        conn.set_ex(k, v.into_bytes()?, ttl_secs).await?;
         Ok(())
     }
     async fn retrieve(&self, k: &u32) -> Result<UeState> {
@@ -34,7 +32,7 @@ impl UeStateStore for RedisUeStore {
             .get(k)
             .await
             .with_context(|| format!("Failed Redis get on UE {:#010x}?", k))?;
-        let v = UeStateSerializable::read_from_buffer(&v)?;
+        let v = UeState::from_bytes(&v)?;
         Ok(v.into())
     }
     async fn delete(&self, k: &u32) -> Result<()> {
@@ -43,3 +41,4 @@ impl UeStateStore for RedisUeStore {
         Ok(())
     }
 }
+impl UeStateStore for RedisUeStore {}

@@ -1,8 +1,12 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- Store served cell (NR-CGI) 
+  - is this stored by the RAN on a UE context?
+  - it doesn't appear to be in the NGAP session establishment
 - Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
+- Move Serdes to common
 - avoid need for recompile of ODU by enabling O1
 - use proper messages from CU stub to make wireshark look correct
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
@@ -12,6 +16,7 @@
 - Fix hang on Ctrl-C when AMF connect doesn't complete
 - Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
+- two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md]
 - use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
 
 ## SCALE OUT / MULTIPLE TNLA

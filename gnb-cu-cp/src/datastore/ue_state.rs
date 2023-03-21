@@ -1,10 +1,15 @@
 //! ue_state - serializable model of GNB-CU's per UE state
 
+use super::SerDes;
+use super::StateStore;
+use anyhow::Result;
 use e1ap::GnbCuUpUeE1apId;
 use f1ap::GnbDuUeF1apId;
 use ngap::AmfUeNgapId;
 use rand::Rng;
 use speedy::{Readable, Writable};
+
+pub trait UeStateStore: StateStore<UeState> {}
 
 #[derive(Clone, Debug)]
 pub struct UeState {
@@ -30,6 +35,17 @@ impl UeState {
             gnb_cu_up_ue_e1ap_id: None,
             amf_ue_ngap_id: None,
         }
+    }
+}
+
+impl SerDes for UeState {
+    fn into_bytes(self) -> Result<Vec<u8>> {
+        let s: UeStateSerializable = self.into();
+        Ok(s.write_to_vec()?)
+    }
+    fn from_bytes(v: &[u8]) -> Result<Self> {
+        let s = UeStateSerializable::read_from_buffer(v)?;
+        Ok(s.into())
     }
 }
 

@@ -5,6 +5,7 @@ use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use super::Config;
+use crate::datastore::StateStore;
 use crate::handlers::connection_api::ConnectionApiHandler;
 use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
 use crate::{GnbCuCp, WorkerConnectionManagementConfig};
@@ -293,7 +294,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
 #[async_trait]
 impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
-    UeStateStore for Worker<A, U>
+    StateStore<UeState> for Worker<A, U>
 {
     async fn store(&self, k: u32, s: UeState, ttl_secs: usize) -> Result<()> {
         self.ue_store.store(k, s, ttl_secs).await
@@ -304,6 +305,10 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     async fn delete(&self, k: &u32) -> Result<()> {
         self.ue_store.delete(k).await
     }
+}
+impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
+    UeStateStore for Worker<A, U>
+{
 }
 
 #[async_trait]
