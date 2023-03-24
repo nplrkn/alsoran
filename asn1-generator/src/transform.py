@@ -47,7 +47,6 @@ class TypeNameFinder(Visitor):
         self.add(tree.children[0])
 
     def object_def(self, tree):
-        print("GOT ME A " + tree.children[0])
         self.ie_dict[tree.children[0]] = tree.children[1]
 
 
@@ -88,10 +87,43 @@ class IeContainerMerger(Transformer):
         #
         # The ies section will then get broken out into a separate choice_pdu in a later
         # stage - see transform_type().
+        #
+        #  @@@
+        # For a CHOICE with an extension container with an ie in it, we go from
+        #  choice
+        #    choice_field
+        #      SomeSelector
+        #      SomeType
+        #    choice_extension_container
+        #      choice-extension                        <- tree.children[0].children[0]
+        #      single_ie_container  Something-ExtIEs   <- tree.children[0].children[1] and tree.children[0].children[1].children[0]
+        #  object_def
+        #    Something-ExtIEs
+        #    ies
+        #      ie
+        #
+        # to
+        #  choice
+        #    choice_field
+        #      SomeSelector
+        #      SomeType
+        #    choice_field
+        #      Something-ExtIEs
+        #      ies
+        #        ie
+        #
+
         for child in tree.children:
             if child.data == "choice_ie_container":
                 child.data = "choice_field"
                 child.children[1] = self.ie_dict[child.children[1]]
+            elif child.data == "choice_extension_container" and len(child.children) == 2:
+                name = child.children[1].children[0]
+                ies = self.ie_dict[name]
+                if len(ies.children) > 0 and ies.children[0].data == "ie":
+                    child.data = "choice_field"
+                    child.children[0] = name
+                    child.children[1] = self.ie_dict[name]
         return tree
 
     def sequence(self, tree):
@@ -1101,6 +1133,18 @@ document
           extension_marker
       extension_marker
 """, constants={"id-HandoverPreparationInformation": 232, "id-UEAssistanceInformationEUTRA": 233})
+
+    def test_choice_extension(self):
+        self.should_generate("""\
+QoSInformation ::= CHOICE {
+	eUTRANQoS					EUTRANQoS,
+	choice-extension			ProtocolIE-SingleContainer { { QoSInformation-ExtIEs } }
+}
+
+QoSInformation-ExtIEs F1AP-PROTOCOL-IES ::= {
+	{	ID id-DRB-Information		CRITICALITY ignore TYPE DRB-Information		PRESENCE mandatory } ,
+	...
+}""", "", constants={"id-DRB-Information": 111})
 
 
 if __name__ == '__main__':

@@ -1723,6 +1723,10 @@ GNB-ID ::= CHOICE {
 	gNB-ID		BIT STRING (SIZE (22..32)),
 	choice-Extensions		ProtocolIE-SingleContainer { {GNB-ID-ExtIEs } }
 }
+GNB-ID-ExtIEs NGAP-PROTOCOL-IES ::= {
+	...
+}
+
 """, """\
 
 // GnbId
@@ -2701,7 +2705,11 @@ EUTRAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
 NG-RAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
 	{ ID id-PDU-Session-Resource-To-Setup-List		CRITICALITY reject	 TYPE PDU-Session-Resource-To-Setup-List		PRESENCE mandatory } ,
 	...
-}""", """
+}
+System-BearerContextSetupRequest-ExtIEs E1AP-PROTOCOL-IES ::= {
+	...
+}
+""", """
 // SystemBearerContextSetupRequest
 # [derive(Clone, Debug)]
 pub enum SystemBearerContextSetupRequest {

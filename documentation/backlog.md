@@ -1,6 +1,7 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- ASN.1 generator copes with F1AP choice extensions
 - Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 - Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
