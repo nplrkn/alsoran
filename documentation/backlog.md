@@ -1,9 +1,7 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Store served cell (NR-CGI) 
-  - is this stored by the RAN on a UE context?
-  - it doesn't appear to be in the NGAP session establishment
+- Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 - Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - Move Serdes to common
@@ -16,7 +14,7 @@
 - Fix hang on Ctrl-C when AMF connect doesn't complete
 - Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
-- two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md]
+- two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
 - use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
 
 ## SCALE OUT / MULTIPLE TNLA
@@ -82,6 +80,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Store cell (NR-CGI) on UE context and pass on UeContextSetupRequest
 - Tear down requests when a connection dies (e.g. if gnb-cu-up aborts while handling a request)
 - Add GNB-CU-UP
 - DL-CCCH-Message should not be PDCP encapsulated

@@ -22,7 +22,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let _rrc_setup_request = expect_rrc_setup_request(&r.rrc_container.0)?;
         self.log_message(">> Rrc RrcSetupRequest");
 
-        let ue = UeState::new(r.gnb_du_ue_f1ap_id);
+        let ue = UeState::new(r.gnb_du_ue_f1ap_id, r.nr_cgi);
         debug!(self.logger, "Created UE {:#010x}", ue.key);
 
         let rrc_setup_complete = self.perform_rrc_setup_procedure(&ue).await?;

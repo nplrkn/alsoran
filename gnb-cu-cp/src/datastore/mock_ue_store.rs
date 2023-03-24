@@ -48,16 +48,21 @@ impl UeStateStore for MockUeStore {}
 
 #[cfg(test)]
 mod tests {
-    use f1ap::GnbDuUeF1apId;
-
-    use crate::datastore::UeState;
-
     use super::*;
+    use crate::datastore::UeState;
+    use bitvec::prelude::*;
+    use f1ap::GnbDuUeF1apId;
 
     #[async_std::test]
     async fn test_mock_store() -> Result<()> {
         let m = MockUeStore::new();
-        let ue_state = UeState::new(GnbDuUeF1apId(3));
+        let ue_state = UeState::new(
+            GnbDuUeF1apId(3),
+            f1ap::NrCgi {
+                plmn_identity: f1ap::PlmnIdentity(vec![2, 3, 2]),
+                nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
+            },
+        );
         let key = ue_state.key;
         m.store(key, ue_state, 0).await?;
         let _ue_state = m.retrieve(&key).await.unwrap();

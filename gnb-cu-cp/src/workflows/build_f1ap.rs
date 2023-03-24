@@ -2,12 +2,11 @@
 
 use super::GnbCuCp;
 use crate::datastore::UeState;
-use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, UeContextSetupRequest};
 use ngap::*;
 
 pub fn build_ue_context_setup_request<G: GnbCuCp>(
-    gnb_cu_cp: &G,
+    _gnb_cu_cp: &G,
     _r: &InitialContextSetupRequest,
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
@@ -17,10 +16,7 @@ pub fn build_ue_context_setup_request<G: GnbCuCp>(
     UeContextSetupRequest {
         gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
         gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id),
-        sp_cell_id: f1ap::NrCgi {
-            plmn_identity: f1ap::PlmnIdentity(gnb_cu_cp.config().plmn.clone()),
-            nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
-        },
+        sp_cell_id: ue.nr_cgi.clone(),
         serv_cell_index: f1ap::ServCellIndex(0),
         sp_cell_ul_configured: None,
         cu_to_du_rrc_information: f1ap::CuToDuRrcInformation {
