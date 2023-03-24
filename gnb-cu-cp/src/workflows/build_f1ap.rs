@@ -2,16 +2,47 @@
 
 use super::GnbCuCp;
 use crate::datastore::UeState;
-use f1ap::{GnbCuUeF1apId, UeContextSetupRequest};
-use ngap::*;
+use f1ap::*;
+//use ngap::*;
+
+pub fn build_drb_to_be_setup_item() -> DrbsToBeSetupItem {
+    DrbsToBeSetupItem {
+        drb_id: DrbId(1),
+        qos_information: todo!(), // wait for ASN.1 generator support for choice extensions
+        uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList(vec![
+            UluptnlInformationToBeSetupItem {
+                uluptnl_information: todo!(),
+                bh_info: todo!(),
+            },
+        ]),
+        rlc_mode: RlcMode::RlcUmBidirectional,
+        ul_configuration: None,
+        duplication_activation: None,
+        dc_based_duplication_configured: None,
+        dc_based_duplication_activation: None,
+        dlpdcpsn_length: None,
+        ulpdcpsn_length: None,
+        additional_pdcp_duplication_tnl_list: None,
+        rlc_duplication_information: None,
+    }
+}
+
+fn build_scell_to_be_setup_item(nr_cgi: NrCgi) -> SCellToBeSetupItem {
+    SCellToBeSetupItem {
+        s_cell_id: nr_cgi,
+        s_cell_index: SCellIndex(1), // TODO
+        s_cell_ul_configured: None,
+        serving_cell_mo: None,
+    }
+}
 
 pub fn build_ue_context_setup_request<G: GnbCuCp>(
     _gnb_cu_cp: &G,
-    _r: &InitialContextSetupRequest,
+    _r: &ngap::InitialContextSetupRequest,
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> UeContextSetupRequest {
-    // TODO: derive and use frunk for the common ngap / f1ap structures seen here.
+    // TODO: derive and use frunk for the common ngap / f1ap structures seen here?
 
     UeContextSetupRequest {
         gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
