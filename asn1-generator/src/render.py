@@ -853,7 +853,7 @@ impl {name} {{
     def ie(self, tree):
         pass
 
-    def choice_pdu(self, tree):
+    def choice_ies(self, tree):
         self.ies_common(tree, is_sequence=False)
 
     def pdu(self, tree):
@@ -2862,6 +2862,116 @@ impl PerCodec for NgRanBearerContextSetupRequest {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("NgRanBearerContextSetupRequest"); e})
     }
 }""", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
+
+    def test_choice_extension(self):
+        self.should_generate("""\
+QoSInformation ::= CHOICE {
+	eUTRANQoS					EUTRANQoS,
+	choice-extension			ProtocolIE-SingleContainer { { QoSInformation-ExtIEs } }
+}
+
+QoSInformation-ExtIEs F1AP-PROTOCOL-IES ::= {
+	{	ID id-DRB-Information		CRITICALITY ignore TYPE DRB-Information		PRESENCE mandatory } ,
+	...
+}""", """\
+
+// QosInformation
+# [derive(Clone, Debug)]
+pub enum QosInformation {
+    EutranQos(EutranQos),
+    QosInformationExtIEs(QosInformationExtIEs),
+}
+
+impl QosInformation {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::EutranQos(EutranQos::decode(data)?)),
+            1 => Ok(Self::QosInformationExtIEs(QosInformationExtIEs::decode(data)?)),
+            _ => Err(PerCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        match self {
+            Self::EutranQos(x) => {
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::QosInformationExtIEs(x) => {
+                encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl PerCodec for QosInformation {
+    type Allocator = Allocator;
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        QosInformation::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformation"); e})
+    }
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformation"); e})
+    }
+}
+// QosInformationExtIEs
+# [derive(Clone, Debug)]
+pub struct QosInformationExtIEs {
+    pub drb_information: DrbInformation,
+}
+
+impl QosInformationExtIEs {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_information: Option<DrbInformation> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                111 => drb_information = Some(DrbInformation::decode(data)?),
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
+            }
+        }
+        let drb_information = drb_information.ok_or(PerCodecError::new(format!(
+            "Missing mandatory IE drb_information"
+        )))?;
+        Ok(Self {
+            drb_information,
+        })
+    }
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new();
+
+        let ie = &mut Allocator::new();
+        self.drb_information.encode(ie)?;
+        encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
+        Criticality::Ignore.encode(ies)?;
+        encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl PerCodec for QosInformationExtIEs {
+    type Allocator = Allocator;
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        QosInformationExtIEs::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformationExtIEs"); e})
+    }
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformationExtIEs"); e})
+    }
+}""", constants={"id-DRB-Information": 111})
 
 
 if __name__ == '__main__':

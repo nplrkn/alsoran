@@ -1,7 +1,6 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- ASN.1 generator copes with F1AP choice extensions
 - Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 - Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
@@ -81,6 +80,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- ASN.1 generator copes with F1AP choice extensions
 - Store cell (NR-CGI) on UE context and pass on UeContextSetupRequest
 - Tear down requests when a connection dies (e.g. if gnb-cu-up aborts while handling a request)
 - Add GNB-CU-UP

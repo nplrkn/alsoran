@@ -85,11 +85,10 @@ class IeContainerMerger(Transformer):
         #     choice_field
         #       ...etc
         #
-        # The ies section will then get broken out into a separate choice_pdu in a later
+        # The ies section will then get broken out into a separate choice_ies in a later
         # stage - see transform_type().
         #
-        #  @@@
-        # For a CHOICE with an extension container with an ie in it, we go from
+        # Similarly, for a CHOICE with an extension container with an ie in it, we go from
         #  choice
         #    choice_field
         #      SomeSelector
@@ -112,7 +111,6 @@ class IeContainerMerger(Transformer):
         #      ies
         #        ie
         #
-
         for child in tree.children:
             if child.data == "choice_ie_container":
                 child.data = "choice_field"
@@ -123,7 +121,7 @@ class IeContainerMerger(Transformer):
                 if len(ies.children) > 0 and ies.children[0].data == "ie":
                     child.data = "choice_field"
                     child.children[0] = name
-                    child.children[1] = self.ie_dict[name]
+                    child.children[1] = ies
         return tree
 
     def sequence(self, tree):
@@ -351,7 +349,7 @@ class TypeTransformer(Transformer):
             tree = name
         elif tree.data == 'ies':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('choice_pdu', [name, tree])
+            new_def = Tree('choice_ies', [name, tree])
             self.extra_defs.append(new_def)
             tree = name
         else:
@@ -1066,7 +1064,7 @@ document
       extension_container
         choice-extension
         single_ie_container\tSystem-BearerContextSetupRequest-ExtIEs
-  choice_pdu
+  choice_ies
     EutranBearerContextSetupRequest
     ies
       ie
@@ -1085,7 +1083,7 @@ document
         ignore
         AdditionalRrmPriorityIndex
       extension_marker
-  choice_pdu
+  choice_ies
     NgRanBearerContextSetupRequest
     ies
       ie
@@ -1144,7 +1142,27 @@ QoSInformation ::= CHOICE {
 QoSInformation-ExtIEs F1AP-PROTOCOL-IES ::= {
 	{	ID id-DRB-Information		CRITICALITY ignore TYPE DRB-Information		PRESENCE mandatory } ,
 	...
-}""", "", constants={"id-DRB-Information": 111})
+}""", """\
+document
+  choice_def
+    QosInformation
+    choice
+      choice_field
+        EutranQos
+        EutranQos
+      choice_field
+        QosInformationExtIEs
+        QosInformationExtIEs
+  choice_ies
+    QosInformationExtIEs
+    ies
+      ie
+        drb_information
+        111
+        ignore
+        DrbInformation
+      extension_marker
+""", constants={"id-DRB-Information": 111})
 
 
 if __name__ == '__main__':
