@@ -50,7 +50,11 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 r,
                 &ue,
                 Some(rrc_container),
-            );
+            )
+            .map_err(|e| {
+                self.log_message_error(&format!("Failed to build context setup request - {}", e));
+                Cause::Misc(CauseMisc::Unspecified)
+            })?;
 
             // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
             self.log_message("<< UeContextSetup(SecurityModeCommand)");

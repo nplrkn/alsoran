@@ -1,5 +1,5 @@
 use super::GnbCuCp;
-use slog::{debug, Logger};
+use slog::{debug, warn, Logger};
 
 mod amf_status_indication;
 mod build_f1ap;
@@ -29,6 +29,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     }
     pub fn log_message(&self, s: &str) {
         debug!(self.logger, "{}", s)
+    }
+    pub fn log_message_error(&self, s: &str) {
+        warn!(self.logger, "{}", s)
     }
 }
 
