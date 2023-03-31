@@ -102,9 +102,26 @@ fn build_scell_to_be_setup_item(nr_cgi: NrCgi) -> SCellToBeSetupItem {
     }
 }
 
-pub fn build_ue_context_setup_request<G: GnbCuCp>(
-    _gnb_cu_cp: &G,
+pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
+    gnb_cu_cp: &G,
     _r: &ngap::InitialContextSetupRequest,
+    ue: &UeState,
+    rrc_container: Option<f1ap::RrcContainer>,
+) -> Result<UeContextSetupRequest> {
+    build_ue_context_setup_request(gnb_cu_cp, ue, rrc_container)
+}
+
+pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
+    gnb_cu_cp: &G,
+    _r: &ngap::PduSessionResourceSetupRequest,
+    ue: &UeState,
+    rrc_container: Option<f1ap::RrcContainer>,
+) -> Result<UeContextSetupRequest> {
+    build_ue_context_setup_request(gnb_cu_cp, ue, rrc_container)
+}
+
+fn build_ue_context_setup_request<G: GnbCuCp>(
+    _gnb_cu_cp: &G,
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> Result<UeContextSetupRequest> {

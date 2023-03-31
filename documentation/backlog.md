@@ -1,7 +1,11 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
+- Run render.py and fix to produce an IE encode / decode in the match statement for choice extension single container
+-  Error { msg: "5 Padding bits at Offset 1163 not all '0'.", context: ["QosInformationExtIEs", "QosInformation", "DrbsToBeSetupItem", "DrbsToBeSetupList", "UeContextSetupRequest", "InitiatingMessage", "F1apPdu"] }', /home/npl/projects/alsoran/mocks/src/mock.rs:174:46
+- CUtoDURRCInformation doesn't show up correctly in wireshark so is probably malformed
 - Supply DRBs-to-be-Setup-List on UeContextSetupRequest
+-  In ASN.1 generator, transformer, an ie field should be made to look like a sequence field, and 'ie_container_sequence' should be removed 
 - Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - Move Serdes to common

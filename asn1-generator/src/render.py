@@ -31,7 +31,7 @@ def type_and_constraints(node):
 
     if isinstance(type_info.typ, Tree):
         if type_info.typ.data in ["ie", "optional_ie"]:
-            # The ProtocolIE-SingleContainer case where an IE is inside a sequence of.
+            # The ProtocolIE-SingleContainer case where an IE is inside a sequence of or choice.
             parent = type_info.typ
             type_info = type_and_constraints(parent.children[3])
             type_info.code = parent.children[1]
@@ -193,7 +193,7 @@ class StructFieldsFrom(Interpreter):
         self.optional_idx += 1
         self.self_fields += fields_from.self_fields
 
-    def empty_sequence(self, tree):
+    def empty_sequence_field(self, tree):
         self.optional_idx += 1
 
 
@@ -216,7 +216,7 @@ class StructFindOptionals(Interpreter):
 """
         self.num_optionals += 1
 
-    def empty_sequence(self, tree):
+    def empty_sequence_field(self, tree):
         self.has_empty_sequence = True
         self.num_optionals += 1
 
@@ -252,7 +252,7 @@ class ChoiceFields(Interpreter):
     {name}{"("+typ+")" if typ != "null" else ""},
 """
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
         self.choice_fields += f"""
@@ -273,7 +273,7 @@ class ChoiceFieldsTo(Interpreter):
     def choice_field(self, tree):
         self.choice_field_common(tree)
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         self.choice_field_common(tree)
 
     def choice_field_common(self, tree):
@@ -289,7 +289,7 @@ class ChoiceFieldsTo(Interpreter):
 """
         self.field_index += 1
 
-    def choice_extension_container(self, tree):
+    def empty_sequence_field(self, tree):
         self.field_index += 1
 
 
@@ -301,7 +301,7 @@ class ChoiceFieldsFrom(Interpreter):
     def choice_field(self, tree):
         self.choice_field_common(tree)
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         self.choice_field_common(tree)
 
     def choice_field_common(self, tree):
@@ -318,7 +318,7 @@ class ChoiceFieldsFrom(Interpreter):
 """
         self.field_index += 1
 
-    def choice_extension_container(self, tree):
+    def empty_sequence_field(self, tree):
         self.fields_from += f"""\
             {self.field_index} => Err(PerCodecError::new("Choice extension container not implemented")),
 """
@@ -516,7 +516,7 @@ class StructFieldsTo(Interpreter):
     def extension_ies(self, tree):
         self.add_optional_to_bitfield("false")
 
-    def empty_sequence(self, tree):
+    def empty_sequence_field(self, tree):
         self.add_optional_to_bitfield("false")
 
 
@@ -828,7 +828,7 @@ impl {name} {{
 
 """ + xper_CODEC_IMPL_FORMAT.format(name=name)
 
-    def tuple_struct(self, tree):
+    def primitive_def(self, tree):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
@@ -853,13 +853,13 @@ impl {name} {{
     def ie(self, tree):
         pass
 
-    def choice_ies(self, tree):
-        self.ies_common(tree, is_sequence=False)
+    def protocol_ie_container(self, tree):
+        self.protocol_ie_container2(tree, is_sequence=False)
 
     def pdu(self, tree):
-        self.ies_common(tree, is_sequence=True)
+        self.protocol_ie_container2(tree, is_sequence=True)
 
-    def ies_common(self, tree, is_sequence):
+    def protocol_ie_container2(self, tree, is_sequence):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
@@ -931,7 +931,7 @@ impl {orig_name} {{
 
 """ + xper_CODEC_IMPL_FORMAT.format(name=name)
 
-    def struct(self, tree):
+    def sequence_def(self, tree):
         if tree.children[1].data == "ie_container_sequence":
             self.pdu(tree)
             return
@@ -1046,6 +1046,7 @@ class TestGenerator(unittest.TestCase):
             self.assertEqual(output, expected)
         finally:
             if output != expected:
+                print("!!! Unexpected output !!!: dumping original parsed tree")
                 print(tree.pretty())
 
     def test_procedure(self):
@@ -2879,7 +2880,7 @@ QoSInformation-ExtIEs F1AP-PROTOCOL-IES ::= {
 # [derive(Clone, Debug)]
 pub enum QosInformation {
     EutranQos(EutranQos),
-    QosInformationExtIEs(QosInformationExtIEs),
+    DrbInformation(DrbInformation),
 }
 
 impl QosInformation {
@@ -2890,7 +2891,7 @@ impl QosInformation {
         }
         match idx {
             0 => Ok(Self::EutranQos(EutranQos::decode(data)?)),
-            1 => Ok(Self::QosInformationExtIEs(QosInformationExtIEs::decode(data)?)),
+            1 => this should do an IE decode!,
             _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
@@ -2900,8 +2901,9 @@ impl QosInformation {
                 encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
-            Self::QosInformationExtIEs(x) => {
+            Self::DrbInformation(x) => {
                 encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                1 => this should do an IE encode!,
                 x.encode(data)
             }
         }
@@ -2915,61 +2917,6 @@ impl PerCodec for QosInformation {
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformation"); e})
-    }
-}
-// QosInformationExtIEs
-# [derive(Clone, Debug)]
-pub struct QosInformationExtIEs {
-    pub drb_information: DrbInformation,
-}
-
-impl QosInformationExtIEs {
-    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
-
-        let mut drb_information: Option<DrbInformation> = None;
-
-        for _ in 0..len {
-            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
-            let _ = decode::decode_length_determinent(data, None, None, false)?;
-            match id {
-                111 => drb_information = Some(DrbInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
-            }
-        }
-        let drb_information = drb_information.ok_or(PerCodecError::new(format!(
-            "Missing mandatory IE drb_information"
-        )))?;
-        Ok(Self {
-            drb_information,
-        })
-    }
-    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut num_ies = 0;
-        let ies = &mut Allocator::new();
-
-        let ie = &mut Allocator::new();
-        self.drb_information.encode(ie)?;
-        encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
-        Criticality::Ignore.encode(ies)?;
-        encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-        ies.append_aligned(ie);
-        num_ies += 1;
-
-        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
-        data.append_aligned(ies);
-        Ok(())
-    }
-}
-
-impl PerCodec for QosInformationExtIEs {
-    type Allocator = Allocator;
-    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        QosInformationExtIEs::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformationExtIEs"); e})
-    }
-    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformationExtIEs"); e})
     }
 }""", constants={"id-DRB-Information": 111})
 

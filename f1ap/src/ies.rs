@@ -24332,7 +24332,7 @@ impl PerCodec for QosFlowMappingIndication {
 #[derive(Clone, Debug)]
 pub enum QosInformation {
     EutranQos(EutranQos),
-    QosInformationExtIEs(QosInformationExtIEs),
+    DrbInformation(DrbInformation),
 }
 
 impl QosInformation {
@@ -24343,9 +24343,15 @@ impl QosInformation {
         }
         match idx {
             0 => Ok(Self::EutranQos(EutranQos::decode(data)?)),
-            1 => Ok(Self::QosInformationExtIEs(QosInformationExtIEs::decode(
-                data,
-            )?)),
+            1 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    164 => Ok(Self::DrbInformation(DrbInformation::decode(data)?)),
+                    x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -24355,9 +24361,14 @@ impl QosInformation {
                 encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
-            Self::QosInformationExtIEs(x) => {
+            Self::DrbInformation(x) => {
                 encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
-                x.encode(data)
+                encode::encode_integer(data, Some(0), Some(65535), false, 164, false)?;
+                Criticality::Ignore.encode(data)?;
+                let ie = &mut Allocator::new();
+                x.encode(ie)?;
+                encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+                Ok(data.append_aligned(ie))
             }
         }
     }
@@ -39306,7 +39317,7 @@ pub struct QosInformationExtIEs {
 
 impl QosInformationExtIEs {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let len = 1;
 
         let mut drb_information: Option<DrbInformation> = None;
 
@@ -39336,7 +39347,7 @@ impl QosInformationExtIEs {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        //encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }

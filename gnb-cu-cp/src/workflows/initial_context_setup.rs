@@ -45,16 +45,20 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             // TODO: implementation incomplete and this arm not tested
 
             // Build Ue Context Setup request and include the Rrc security mode command.
-            let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
-                self.gnb_cu_cp,
-                r,
-                &ue,
-                Some(rrc_container),
-            )
-            .map_err(|e| {
-                self.log_message_error(&format!("Failed to build context setup request - {}", e));
-                Cause::Misc(CauseMisc::Unspecified)
-            })?;
+            let ue_context_setup_request =
+                super::build_f1ap::build_ue_context_setup_request_from_initial_context_setup(
+                    self.gnb_cu_cp,
+                    r,
+                    &ue,
+                    Some(rrc_container),
+                )
+                .map_err(|e| {
+                    self.log_message_error(&format!(
+                        "Failed to build context setup request - {}",
+                        e
+                    ));
+                    Cause::Misc(CauseMisc::Unspecified)
+                })?;
 
             // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
             self.log_message("<< UeContextSetup(SecurityModeCommand)");
