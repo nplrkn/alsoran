@@ -88,12 +88,12 @@ class IeContainerMerger(Transformer):
         # The ies section will then get broken out into a separate protocol_ie_container in a later
         # stage - see transform_type().
         #
-        # For a CHOICE with an extension container with one or more ies in it, we graft each of those in as choice_field_ie.
+        # For a CHOICE with an extension container with one or more ies in it, we graft those in as choice_field_extension_ies.
         #  choice
         #    choice_field
         #      SomeSelector
         #      SomeType
-        #    choice_extension_container
+        #    choice_field_ie_extension
         #      choice-extension                        <- tree.children[0].children[0]
         #      single_ie_container  Something-ExtIEs   <- tree.children[0].children[1] and tree.children[0].children[1].children[0]
         #  object_def
@@ -109,38 +109,36 @@ class IeContainerMerger(Transformer):
         #    choice_field
         #      SomeSelector
         #      SomeType
-        #    choice_field_ie
+        #    choice_field_extension_ies
         #      ie
         #        ...thing 1...
-        #    choice_field_ie
         #      ie
         #        ...thing 2...
         #
-        new_children = []
         for child in tree.children:
             if child.data == "choice_field_ie_container":
                 child.data = "choice_field"
                 child.children[1] = self.ie_dict[child.children[1]]
-                new_children.append(child)
             elif child.data == "choice_field_ie_extension":
                 # Look up the object def defining the extension IEs.
+                child.data = "choice_field_extension_ies"
                 name = child.children[1].children[0]
                 ies = self.ie_dict[name]
+                child.children = ies.children
 
-                # Create a new child.
-                found_ies = 0
-                for ie in ies.children:
-                    if ie.data == "ie":
-                        # the name comes the third field of the ie
-                        name = ie.children[2]
-                        new_child = Tree("choice_field", [name, ie])
-                        new_children.append(new_child)
-                        found_ies += 1
-                if found_ies == 0:
-                    new_children.append(Tree("empty_sequence_field", []))
-            else:
-                new_children.append(child)
-        tree.children = new_children
+                #         # Create a new child.
+                #         found_ies = 0
+                #         for ie in ies.children:
+                #             if ie.data == "ie":
+                #                 # the name comes the third field of the ie
+                #                 name = ie.children[2]
+                #                 new_child = Tree("choice_field", [name, ie])
+                #                 new_children.append(new_child)
+                #                 found_ies += 1
+                #         if found_ies == 0:
+                #             new_children.append(Tree("empty_sequence_field", []))
+                #     else:
+                #         new_children.append(child)
         return tree
 
     def sequence(self, tree):
@@ -1168,13 +1166,13 @@ document
       choice_field
         EutranQos
         EutranQos
-      choice_field
-        DrbInformation
+      choice_field_extension_ies
         ie
           drb_information
           111
           ignore
           DrbInformation
+        extension_marker
 """, constants={"id-DRB-Information": 111})
 
     def test_choice_extension_empty(self):
@@ -1195,7 +1193,8 @@ document
         BitString
           22
           32
-      empty_sequence_field
+      choice_field_extension_ies
+        extension_marker
 """)
 
 

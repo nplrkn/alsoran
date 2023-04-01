@@ -22,9 +22,14 @@ impl ActivityInformation {
                 PduSessionResourceActivityList::decode(data)?,
             )),
             2 => Ok(Self::UeActivity(UeActivity::decode(data)?)),
-            3 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            3 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -470,9 +475,14 @@ impl Cause {
             1 => Ok(Self::Transport(CauseTransport::decode(data)?)),
             2 => Ok(Self::Protocol(CauseProtocol::decode(data)?)),
             3 => Ok(Self::Misc(CauseMisc::decode(data)?)),
-            4 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            4 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -1093,7 +1103,7 @@ impl PerCodec for ConfidentialityProtectionResult {
 #[derive(Clone, Debug)]
 pub enum CpTnlInformation {
     EndpointIpAddress(TransportLayerAddress),
-    CpTnlInformationExtIEs(CpTnlInformationExtIEs),
+    EndpointIpAddressAndPort(EndpointIpAddressAndPort),
 }
 
 impl CpTnlInformation {
@@ -1106,9 +1116,17 @@ impl CpTnlInformation {
             0 => Ok(Self::EndpointIpAddress(TransportLayerAddress::decode(
                 data,
             )?)),
-            1 => Ok(Self::CpTnlInformationExtIEs(
-                CpTnlInformationExtIEs::decode(data)?,
-            )),
+            1 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    74 => Ok(Self::EndpointIpAddressAndPort(
+                        EndpointIpAddressAndPort::decode(data)?,
+                    )),
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -1118,9 +1136,14 @@ impl CpTnlInformation {
                 encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
-            Self::CpTnlInformationExtIEs(x) => {
+            Self::EndpointIpAddressAndPort(x) => {
                 encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
-                x.encode(data)
+                encode::encode_integer(data, Some(0), Some(65535), false, 74, false)?;
+                Criticality::Reject.encode(data)?;
+                let ie = &mut Allocator::new();
+                x.encode(ie)?;
+                encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+                Ok(data.append_aligned(ie))
             }
         }
     }
@@ -6467,9 +6490,14 @@ impl EarlyForwardingCountInfo {
         match idx {
             0 => Ok(Self::FirstDlCount(FirstDlCount::decode(data)?)),
             1 => Ok(Self::DlDiscardingCount(DlDiscarding::decode(data)?)),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -9783,9 +9811,14 @@ impl MdtMode {
         }
         match idx {
             0 => Ok(Self::ImmediateMdt(ImmediateMdt::decode(data)?)),
-            1 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            1 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -10254,9 +10287,14 @@ impl NpnSupportInfo {
         }
         match idx {
             0 => Ok(Self::Snpn(NpnSupportInfoSnpn::decode(data)?)),
-            1 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            1 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -10351,9 +10389,14 @@ impl NpnContextInfo {
         }
         match idx {
             0 => Ok(Self::Snpn(NpnContextInfoSnpn::decode(data)?)),
-            1 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            1 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -13886,9 +13929,14 @@ impl QosCharacteristics {
         match idx {
             0 => Ok(Self::NonDynamic5qi(NonDynamic5qiDescriptor::decode(data)?)),
             1 => Ok(Self::Dynamic5qi(Dynamic5qiDescriptor::decode(data)?)),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -15478,9 +15526,14 @@ impl RohcParameters {
         match idx {
             0 => Ok(Self::Rohc(Rohc::decode(data)?)),
             1 => Ok(Self::UPlinkOnlyRohc(UplinkOnlyRohc::decode(data)?)),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -17638,9 +17691,14 @@ impl UpTnlInformation {
         }
         match idx {
             0 => Ok(Self::GtpTunnel(GtpTunnel::decode(data)?)),
-            1 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            1 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -17778,67 +17836,6 @@ impl PerCodec for UrIaddress {
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UrIaddress");
-            e
-        })
-    }
-}
-// CpTnlInformationExtIEs
-#[derive(Clone, Debug)]
-pub struct CpTnlInformationExtIEs {
-    pub endpoint_ip_address_and_port: EndpointIpAddressAndPort,
-}
-
-impl CpTnlInformationExtIEs {
-    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
-
-        let mut endpoint_ip_address_and_port: Option<EndpointIpAddressAndPort> = None;
-
-        for _ in 0..len {
-            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
-            let _ = decode::decode_length_determinent(data, None, None, false)?;
-            match id {
-                74 => endpoint_ip_address_and_port = Some(EndpointIpAddressAndPort::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-            }
-        }
-        let endpoint_ip_address_and_port = endpoint_ip_address_and_port.ok_or(
-            PerCodecError::new(format!("Missing mandatory IE endpoint_ip_address_and_port")),
-        )?;
-        Ok(Self {
-            endpoint_ip_address_and_port,
-        })
-    }
-    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut num_ies = 0;
-        let ies = &mut Allocator::new();
-
-        let ie = &mut Allocator::new();
-        self.endpoint_ip_address_and_port.encode(ie)?;
-        encode::encode_integer(ies, Some(0), Some(65535), false, 74, false)?;
-        Criticality::Reject.encode(ies)?;
-        encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-        ies.append_aligned(ie);
-        num_ies += 1;
-
-        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
-        data.append_aligned(ies);
-        Ok(())
-    }
-}
-
-impl PerCodec for CpTnlInformationExtIEs {
-    type Allocator = Allocator;
-    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        CpTnlInformationExtIEs::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("CpTnlInformationExtIEs");
-            e
-        })
-    }
-    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("CpTnlInformationExtIEs");
             e
         })
     }

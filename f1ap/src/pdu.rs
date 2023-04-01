@@ -112,9 +112,14 @@ impl ResetType {
             1 => Ok(Self::PartOfF1Interface(
                 UeAssociatedLogicalF1ConnectionListRes::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -16050,9 +16055,14 @@ impl SrsType {
         match idx {
             0 => Ok(Self::SemipersistentSrs(SemipersistentSrs::decode(data)?)),
             1 => Ok(Self::AperiodicSrs(AperiodicSrs::decode(data)?)),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                }
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }

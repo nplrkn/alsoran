@@ -20,9 +20,32 @@ fn build_drb_to_be_setup_item(
 
     Ok(DrbsToBeSetupItem {
         drb_id,
-        qos_information: QosInformation::QosInformationExtIEs(QosInformationExtIEs {
-            drb_information: DrbInformation {
-                drb_qos: QosFlowLevelQosParameters {
+        qos_information: QosInformation::DrbInformation(DrbInformation {
+            drb_qos: QosFlowLevelQosParameters {
+                qos_characteristics: QosCharacteristics::NonDynamic5qi(NonDynamic5qiDescriptor {
+                    five_qi: 9,
+                    qos_priority_level: None,
+                    averaging_window: None,
+                    max_data_burst_volume: None,
+                    cn_packet_delay_budget_downlink: None,
+                    cn_packet_delay_budget_uplink: None,
+                }),
+                ngran_allocation_retention_priority: NgranAllocationAndRetentionPriority {
+                    priority_level: PriorityLevel(14),
+                    pre_emption_capability: PreEmptionCapability::MayTriggerPreEmption,
+                    pre_emption_vulnerability: PreEmptionVulnerability::NotPreEmptable,
+                },
+                gbr_qos_flow_information: None,
+                reflective_qos_attribute: None,
+                pdu_session_id: Some(PduSessionId(1)),
+                ulpdu_session_aggregate_maximum_bit_rate: None,
+                qos_monitoring_request: None,
+            },
+            snssai,
+            notification_control: None,
+            flows_mapped_to_drb_list: FlowsMappedToDrbList(vec![FlowsMappedToDrbItem {
+                qos_flow_identifier: QosFlowIdentifier(0),
+                qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
                     qos_characteristics: QosCharacteristics::NonDynamic5qi(
                         NonDynamic5qiDescriptor {
                             five_qi: 9,
@@ -40,40 +63,13 @@ fn build_drb_to_be_setup_item(
                     },
                     gbr_qos_flow_information: None,
                     reflective_qos_attribute: None,
-                    pdu_session_id: Some(PduSessionId(1)),
+                    pdu_session_id: None,
                     ulpdu_session_aggregate_maximum_bit_rate: None,
                     qos_monitoring_request: None,
                 },
-                snssai,
-                notification_control: None,
-                flows_mapped_to_drb_list: FlowsMappedToDrbList(vec![FlowsMappedToDrbItem {
-                    qos_flow_identifier: QosFlowIdentifier(0),
-                    qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
-                        qos_characteristics: QosCharacteristics::NonDynamic5qi(
-                            NonDynamic5qiDescriptor {
-                                five_qi: 9,
-                                qos_priority_level: None,
-                                averaging_window: None,
-                                max_data_burst_volume: None,
-                                cn_packet_delay_budget_downlink: None,
-                                cn_packet_delay_budget_uplink: None,
-                            },
-                        ),
-                        ngran_allocation_retention_priority: NgranAllocationAndRetentionPriority {
-                            priority_level: PriorityLevel(14),
-                            pre_emption_capability: PreEmptionCapability::MayTriggerPreEmption,
-                            pre_emption_vulnerability: PreEmptionVulnerability::NotPreEmptable,
-                        },
-                        gbr_qos_flow_information: None,
-                        reflective_qos_attribute: None,
-                        pdu_session_id: None,
-                        ulpdu_session_aggregate_maximum_bit_rate: None,
-                        qos_monitoring_request: None,
-                    },
-                    qos_flow_mapping_indication: None,
-                    tsc_traffic_characteristics: None,
-                }]),
-            },
+                qos_flow_mapping_indication: None,
+                tsc_traffic_characteristics: None,
+            }]),
         }),
         uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList(vec![
             UluptnlInformationToBeSetupItem {

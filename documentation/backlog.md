@@ -1,8 +1,6 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Run render.py and fix to produce an IE encode / decode in the match statement for choice extension single container
--  Error { msg: "5 Padding bits at Offset 1163 not all '0'.", context: ["QosInformationExtIEs", "QosInformation", "DrbsToBeSetupItem", "DrbsToBeSetupList", "UeContextSetupRequest", "InitiatingMessage", "F1apPdu"] }', /home/npl/projects/alsoran/mocks/src/mock.rs:174:46
 - CUtoDURRCInformation doesn't show up correctly in wireshark so is probably malformed
 - Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 -  In ASN.1 generator, transformer, an ie field should be made to look like a sequence field, and 'ie_container_sequence' should be removed 
@@ -84,7 +82,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
-- ASN.1 generator copes with F1AP choice extensions
+- ASN.1 generator copes with choice IE extensions
 - Store cell (NR-CGI) on UE context and pass on UeContextSetupRequest
 - Tear down requests when a connection dies (e.g. if gnb-cu-up aborts while handling a request)
 - Add GNB-CU-UP
