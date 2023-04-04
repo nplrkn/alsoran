@@ -802,9 +802,11 @@ impl AmfPagingTarget {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -2183,9 +2185,11 @@ impl AreaScopeOfMdtNr {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -2251,9 +2255,11 @@ impl AreaScopeOfMdtEutra {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -2470,9 +2476,11 @@ impl BroadcastCancelledAreaList {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -2556,9 +2564,11 @@ impl BroadcastCompletedAreaList {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -3546,9 +3556,11 @@ impl CandidateCell {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -3733,9 +3745,11 @@ impl Cause {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -4508,9 +4522,11 @@ impl CellIdListForRestart {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -5741,12 +5757,14 @@ impl CpTransportLayerInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     169 => Ok(Self::EndpointIpAddressAndPort(
                         EndpointIpAddressAndPort::decode(data)?,
                     )),
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -7069,9 +7087,11 @@ impl DrbStatusDl {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -7229,9 +7249,11 @@ impl DrbStatusUl {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -7698,9 +7720,11 @@ impl ProcedureStageChoice {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -8596,9 +8620,11 @@ impl EnbId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -10154,9 +10180,11 @@ impl EventTrigger {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -10272,9 +10300,11 @@ impl MeasurementThresholdL1LoggedMdt {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -11223,12 +11253,14 @@ impl GlobalRanNodeId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     240 => Ok(Self::GlobalTngfId(GlobalTngfId::decode(data)?)),
                     241 => Ok(Self::GlobalTwifId(GlobalTwifId::decode(data)?)),
                     242 => Ok(Self::GlobalWAgfId(GlobalWAgfId::decode(data)?)),
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -11490,9 +11522,11 @@ impl GnbId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -13073,9 +13107,11 @@ impl IntersystemSonTransferType {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -13245,9 +13281,11 @@ impl IntersystemSonInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -13301,9 +13339,11 @@ impl IntersystemSonInformationReport {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -13415,9 +13455,11 @@ impl InterSystemHandoverReportType {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -13637,9 +13679,11 @@ impl LastVisitedCellInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -14342,9 +14386,11 @@ impl LoggedMdtTrigger {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -15201,9 +15247,11 @@ impl MdtModeNr {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -15485,9 +15533,11 @@ impl M1ThresholdType {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -16081,9 +16131,11 @@ impl N3IwfId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -16608,9 +16660,11 @@ impl NgEnbId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -16703,9 +16757,11 @@ impl NgranCgi {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -17136,9 +17192,11 @@ impl NpnAccessInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -17192,9 +17250,11 @@ impl NpnMobilityInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -17248,9 +17308,11 @@ impl NpnPagingAssistanceInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -17298,9 +17360,11 @@ impl NpnSupport {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -18202,9 +18266,11 @@ impl OverloadResponse {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -25595,9 +25661,11 @@ impl PwsFailedCellIdList {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -25651,9 +25719,11 @@ impl QosCharacteristics {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -28576,9 +28646,11 @@ impl ResetType {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -29765,9 +29837,11 @@ impl SensorNameConfig {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -30492,12 +30566,14 @@ impl SonInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     252 => Ok(Self::SonInformationReport(SonInformationReport::decode(
                         data,
                     )?)),
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -30623,9 +30699,11 @@ impl SonInformationReport {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -32202,10 +32280,12 @@ impl TargetId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     178 => Ok(Self::TargetRncId(TargetRncId::decode(data)?)),
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -32768,9 +32848,11 @@ impl TngfId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -33619,9 +33701,11 @@ impl TwifId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -34381,9 +34465,11 @@ impl UeHistoryInformationFromTheUe {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -34436,9 +34522,11 @@ impl UeIdentityIndexValue {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -34488,9 +34576,11 @@ impl UeNgapIDs {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -34600,9 +34690,11 @@ impl UePagingIdentity {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -35042,9 +35134,11 @@ impl UeRlfReportContainer {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -35616,9 +35710,11 @@ impl UpTransportLayerInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -35899,7 +35995,7 @@ impl UserLocationInformation {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     244 => Ok(Self::UserLocationInformationTngf(
                         UserLocationInformationTngf::decode(data)?,
                     )),
@@ -35910,7 +36006,9 @@ impl UserLocationInformation {
                         UserLocationInformationWAgf::decode(data)?,
                     )),
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -36265,10 +36363,12 @@ impl UserLocationInformationWAgf {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     275 => Ok(Self::GlobalCableId(GlobalCableId::decode(data)?)),
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -36588,9 +36688,11 @@ impl WAgfId {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
@@ -36683,9 +36785,11 @@ impl WarningAreaList {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }

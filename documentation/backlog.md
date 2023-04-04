@@ -2,7 +2,6 @@
 
 ## O-RAN O-DU interop
 - CUtoDURRCInformation doesn't show up correctly in wireshark so is probably malformed
-- Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 -  In ASN.1 generator, transformer, an ie field should be made to look like a sequence field, and 'ie_container_sequence' should be removed 
 - Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
@@ -82,6 +81,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 - ASN.1 generator copes with choice IE extensions
 - Store cell (NR-CGI) on UE context and pass on UeContextSetupRequest
 - Tear down requests when a connection dies (e.g. if gnb-cu-up aborts while handling a request)

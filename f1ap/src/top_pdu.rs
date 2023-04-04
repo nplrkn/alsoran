@@ -30,9 +30,11 @@ impl F1apPdu {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
+                let result = match id {
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
-                }
+                };
+                data.decode_align()?;
+                result
             }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
