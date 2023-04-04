@@ -40,7 +40,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let rrc_container = super::build_rrc::build_rrc_security_mode_command(2)
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
 
-        if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {
+        let session_setup_info = if let Some(sessions) = &r.pdu_session_resource_setup_list_cxt_req
+        {
             // --- Sessions needed ---
             // TODO: implementation incomplete and this arm not tested
 
@@ -62,17 +63,25 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
             // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
             self.log_message("<< UeContextSetup(SecurityModeCommand)");
-            let _ue_context_setup_response = self
+            let ue_context_setup_response = self
                 .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
                 .await
                 .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
             self.log_message(">> UeContextSetupResponse");
+            Some((
+                sessions,
+                ue_context_setup_response
+                    .du_to_cu_rrc_information
+                    .cell_group_config
+                    .0,
+            ))
         } else {
             // --- No sessions needed ---
             self.log_message("<< SecurityModeCommand");
             self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
                 .await;
-        }
+            None
+        };
 
         // Receive Security Mode Complete.
         let _rrc_security_mode_complete = rrc_transaction
@@ -81,7 +90,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
         self.log_message(">> SecurityModeComplete");
 
-        if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {
+        if let Some((_sessions, cell_group_config)) = session_setup_info {
             // --- Sessions needed ---
             // TODO: implementation incomplete and this arm not tested
 
@@ -90,6 +99,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             let rrc_container = super::build_rrc::build_rrc_reconfiguration(
                 3,
                 r.nas_pdu.clone().map(|x| vec![x.0]),
+                cell_group_config,
             )
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
 

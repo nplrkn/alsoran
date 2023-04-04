@@ -1,7 +1,6 @@
 # NEXT UP
 
 ## O-RAN O-DU interop
-- Segmentation fault in O-DU on receipt of (incorrect) UeContextSetupRequest
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - Move Serdes to common
 - avoid need for recompile of ODU by enabling O1
@@ -78,6 +77,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Support for BearerContextModificationRequest in CU-UP
+- Pass CellGroupConfig from DU to UE in Rrc Reconfiguration Request
 - Use proper NAS messages from AMF-SIM to improve Wireshark trace of ODU interop
 - Form CUtoDURRCInformation correctly in UeContextSetupRequest
 - Supply DRBs-to-be-Setup-List on UeContextSetupRequest

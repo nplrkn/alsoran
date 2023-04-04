@@ -1,4 +1,5 @@
-//! initial_context_setup - in which the secure signaling channel is established between UE and 5G core through the GNB
+//! bearer_context_setup - creation of userplane session (supplying the UPF tunnel info)
+//! and allocation of GTP tunnel at the CU-UP
 
 use super::{GnbCuUp, Workflow};
 use anyhow::Result;

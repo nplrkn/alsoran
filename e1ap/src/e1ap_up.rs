@@ -29,14 +29,21 @@ where
 }
 
 impl<T> Application for E1apUp<T> where
-    T: RequestProvider<BearerContextSetupProcedure> + EventHandler + Clone
+    T: RequestProvider<BearerContextSetupProcedure>
+        + RequestProvider<BearerContextModificationProcedure>
+        + EventHandler
+        + Clone
 {
 }
 
 #[async_trait]
 impl<T> InterfaceProvider for E1apUp<T>
 where
-    T: Send + Sync + EventHandler + RequestProvider<BearerContextSetupProcedure>, // Todo - add all other procedures
+    T: Send
+        + Sync
+        + EventHandler
+        + RequestProvider<BearerContextSetupProcedure>
+        + RequestProvider<BearerContextModificationProcedure>, // Todo - add all other procedures
 {
     type TopPdu = E1apPdu;
     async fn route_request(&self, p: E1apPdu, logger: &Logger) -> Option<ResponseAction<E1apPdu>> {
@@ -50,6 +57,9 @@ where
         match initiating_message {
             InitiatingMessage::BearerContextSetupRequest(req) => {
                 BearerContextSetupProcedure::call_provider(&self.0, req, logger).await
+            }
+            InitiatingMessage::BearerContextModificationRequest(req) => {
+                BearerContextModificationProcedure::call_provider(&self.0, req, logger).await
             }
             e => panic!("Missing implementation for {:?}", e),
         }

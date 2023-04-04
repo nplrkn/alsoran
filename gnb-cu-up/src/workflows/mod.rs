@@ -1,5 +1,6 @@
 use crate::GnbCuUp;
 use slog::{debug, Logger};
+mod bearer_context_modification;
 mod bearer_context_setup;
 
 pub struct Workflow<'a, G: GnbCuUp> {

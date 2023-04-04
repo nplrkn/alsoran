@@ -78,6 +78,7 @@ pub fn build_rrc_dl_information_transfer(
 pub fn build_rrc_reconfiguration(
     rrc_transaction_identifier: u8,
     nas_messages: Option<Vec<Vec<u8>>>,
+    cell_group_config: Vec<u8>,
 ) -> Result<f1ap::RrcContainer> {
     let dedicated_nas_message_list =
         nas_messages.map(|x| (x.into_iter().map(DedicatedNasMessage).collect()));
@@ -91,7 +92,7 @@ pub fn build_rrc_reconfiguration(
                 meas_config: None,
                 late_non_critical_extension: None,
                 non_critical_extension: Some(RrcReconfigurationV1530IEs {
-                    master_cell_group: None,
+                    master_cell_group: Some(cell_group_config),
                     full_config: None,
                     dedicated_nas_message_list,
                     master_key_update: None,

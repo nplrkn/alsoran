@@ -39,3 +39,19 @@ impl<G: GnbCuUp> RequestProvider<BearerContextSetupProcedure> for E1apHandler<G>
             .await
     }
 }
+
+#[async_trait]
+impl<G: GnbCuUp> RequestProvider<BearerContextModificationProcedure> for E1apHandler<G> {
+    async fn request(
+        &self,
+        r: BearerContextModificationRequest,
+        logger: &Logger,
+    ) -> Result<
+        ResponseAction<BearerContextModificationResponse>,
+        RequestError<BearerContextModificationFailure>,
+    > {
+        Workflow::new(&self.gnb_cu_up, logger)
+            .bearer_context_modification(&r)
+            .await
+    }
+}

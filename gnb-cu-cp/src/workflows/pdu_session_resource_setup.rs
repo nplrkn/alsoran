@@ -154,9 +154,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let bearer_context_modification = self.build_bearer_context_modification(
             &ue,
             gnb_cu_up_ue_e1ap_id,
-            ue_context_setup_response,
+            &ue_context_setup_response,
         );
-        self.log_message("<< BearerContextMdificationRequest");
+        self.log_message("<< BearerContextModificationRequest");
         let _response = self
             .e1ap_request::<BearerContextModificationProcedure>(
                 bearer_context_modification,
@@ -173,9 +173,18 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .filter_map(|x| x.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
             .collect();
 
-        // Perform Rrc Reconfiguration including the Nas message from earlier.
+        // TS38.473, 8.3.1.2: "If the CellGroupConfig IE is included in the DU to CU RRC Information IE contained in the UE CONTEXT SETUP RESPONSE message,
+        // the gNB-CU shall perform RRC Reconfiguration or RRC connection resume as described in TS 38.331 [8]. The CellGroupConfig IE shall
+        // transparently be signaled to the UE as specified in TS 38.331 [8]."
+        let cell_group_config = ue_context_setup_response
+            .du_to_cu_rrc_information
+            .cell_group_config
+            .0;
+
+        // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
-        let rrc_container = super::build_rrc::build_rrc_reconfiguration(3, Some(nas_messages))?;
+        let rrc_container =
+            super::build_rrc::build_rrc_reconfiguration(3, Some(nas_messages), cell_group_config)?;
         self.log_message("<< RrcReconfiguration");
         self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;
@@ -349,7 +358,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         &self,
         ue: &UeState,
         gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId,
-        _ue_context_setup_response: f1ap::UeContextSetupResponse,
+        _ue_context_setup_response: &f1ap::UeContextSetupResponse,
     ) -> BearerContextModificationRequest {
         // TODO incomplete - for example need to supply a system_bearer_context_modification_request
         // with DrbToModifyListNgRan containing the UpTransportLayerInformation received in the
