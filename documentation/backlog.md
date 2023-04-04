@@ -5,7 +5,6 @@
 - Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
 - Move Serdes to common
 - avoid need for recompile of ODU by enabling O1
-- use proper messages from CU stub to make wireshark look correct
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
@@ -79,6 +78,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Use proper NAS messages from AMF-SIM to improve Wireshark trace of ODU interop
 - Form CUtoDURRCInformation correctly in UeContextSetupRequest
 - Supply DRBs-to-be-Setup-List on UeContextSetupRequest
 - ASN.1 generator copes with choice IE extensions

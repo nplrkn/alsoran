@@ -180,7 +180,11 @@ impl MockAmf {
         }
     }
 
-    pub async fn send_initial_context_setup_request(&self, ue_context: &UeContext) -> Result<()> {
+    pub async fn send_initial_context_setup_request(
+        &self,
+        ue_context: &UeContext,
+        nas_pdu: Vec<u8>,
+    ) -> Result<()> {
         let logger = &self.logger;
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(
             InitialContextSetupRequest {
@@ -210,7 +214,7 @@ impl MockAmf {
                 ue_radio_capability: None,
                 index_to_rfsp: None,
                 masked_imeisv: None,
-                nas_pdu: Some(NasPdu(Vec::new())),
+                nas_pdu: Some(NasPdu(nas_pdu)),
                 emergency_fallback_indicator: None,
                 rrc_inactive_transition_report_request: None,
                 ue_radio_capability_for_paging: None,

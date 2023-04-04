@@ -22,11 +22,10 @@ async fn main() -> Result<()> {
     info!(&logger, ">> Registration request");
 
     // Send Nas Authentication Request
-    info!(
-        &logger,
-        "<< Empty NAS standing in for Authentication request"
-    );
-    let nas = vec![];
+    info!(&logger, "<< Nas Authentication request");
+    let nas = hex::decode(
+        "7e005602020000217ac1c891b8aba0b2646e9cad34f4a0192010037859caf5e58000d58e09fc227bbf19",
+    )?;
     amf.send_downlink_nas_transport(&ue, nas).await?;
 
     // Receive Nas Authentication Response
@@ -34,24 +33,24 @@ async fn main() -> Result<()> {
     info!(&logger, ">> Nas Authentication Response");
 
     // Send Nas Security Mode Command
-    info!(&logger, "<< NAS standing in for Security Mode Comamnd");
-    let nas = vec![];
+    info!(&logger, "<< Nas Security Mode Comamnd");
+    let nas = hex::decode("7e03e8e277e4007e005d010204f070f070e1360102")?;
     amf.send_downlink_nas_transport(&ue, nas).await?;
 
     // Receive Nas Security Mode Complete
     let _nas = amf.receive_uplink_nas_transport(&ue).await?;
     info!(&logger, ">> Nas Security Mode Complete");
 
-    // Send Ngap InitialContextSetupRequest
-    amf.send_initial_context_setup_request(&ue).await?;
+    // Send Ngap InitialContextSetupRequest + Nas Registration Accept
+    let nas = hex::decode("7e00420101")?;
+    amf.send_initial_context_setup_request(&ue, nas).await?;
 
     // Receive Ngap InitialContextSetupResponse
     amf.receive_initial_context_setup_response(&ue).await?;
 
     // Send Nas Registration Accept
-    info!(&logger, "<< NAS standing in for Registration Accept");
-    let nas = vec![];
-    amf.send_downlink_nas_transport(&ue, nas).await?;
+    //info!(&logger, "<< Nas Registration Accept");
+    //amf.send_downlink_nas_transport(&ue, nas).await?;
 
     // Receive Nas Registration Complete
     let _nas = amf.receive_uplink_nas_transport(&ue).await?;
