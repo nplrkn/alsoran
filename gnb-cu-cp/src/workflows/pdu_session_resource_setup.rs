@@ -168,7 +168,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // Collect the Nas messages from the successful setups.
         // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
         // so that it doesn't have to clone.
-        let nas_messages = successful
+        let nas_messages: Vec<Vec<u8>> = successful
             .iter()
             .filter_map(|x| x.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
             .collect();
@@ -183,8 +183,13 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
+        let nas_messages = if nas_messages.is_empty() {
+            None
+        } else {
+            Some(nas_messages)
+        };
         let rrc_container =
-            super::build_rrc::build_rrc_reconfiguration(3, Some(nas_messages), cell_group_config)?;
+            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config)?;
         self.log_message("<< RrcReconfiguration");
         self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;
