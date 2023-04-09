@@ -134,6 +134,7 @@ impl MockCuUp {
             CpTnlInformation::EndpointIpAddress(ref x) => {
                 assert_eq!(x.0, expected_address.0);
             }
+            _ => unimplemented!(),
         };
 
         Ok((cu_cp_configuration_update.transaction_id, assoc_id))

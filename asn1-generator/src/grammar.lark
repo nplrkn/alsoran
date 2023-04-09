@@ -17,6 +17,12 @@ _OID:                   /{[^}]+}/
 //_OBJECT_CLASS:          /\w+/
 _IMPORTS:                /[^;]+;/
 extension_marker:       "..." [","]
+_size:                  "(" "SIZE" "(" _constraints ")" ")"
+_constraints:           _range_options+
+_range_options:         _range["|" _range] * [","]
+_range:                 extension_marker | (BOUND [".." BOUND])        
+named_values:           _nested_braces
+_nested_braces:         "{" (_nested_braces|/[^\{\}]+/) * "}"
 
 // For testability, we make the parts before and after the definitions optional
 // This means we can just run small fragments through the grammar.
@@ -26,8 +32,8 @@ _fragment:              _definitions
 module_name:            IDENTIFIER
 _begin:                 "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
 
-_definitions:           ( tuple_struct 
-                        | struct 
+_definitions:           ( primitive_def 
+                        | sequence_def 
                         | enum_def 
                         | choice_def 
                         | generic_choice_def
@@ -38,8 +44,8 @@ _definitions:           ( tuple_struct
                         | top_level_enum_def
                         | class_instance)+
 ?assign:                IDENTIFIER "::="
-tuple_struct:           assign _primitive
-struct:                 assign sequence
+primitive_def:           assign _primitive
+sequence_def:           assign sequence
 enum_def:               assign enumerated
 choice_def:             assign choice
 generic_choice_def:     IDENTIFIER type_parameter "::=" choice
@@ -54,17 +60,19 @@ _bracketed_group{x}:    ("[[" _comma_separated{x} "]]") | x
 
 sequence_of:            "SEQUENCE" [_size] "OF" (_field_type | single_ie_container)
 sequence:               "SEQUENCE" _items{_sequence_item}
-_sequence_item:         optional_field | field | extension_container | private_ie_container | ie_container | single_ie_container | (empty_sequence "OPTIONAL")
+_sequence_item:         optional_field | field | extension_container_field | private_ie_container_field | protocol_ies_field | single_ie_container | (empty_sequence_field "OPTIONAL")
 optional_field.2:       _identifier _field_type ("OPTIONAL" | "DEFAULT" _identifier)
 field.1:                _identifier _field_type
+
+_empty_sequence.3:       "SEQUENCE" "{}"
+empty_sequence_field.1:  _identifier _empty_sequence
 
 enumerated.1:             "ENUMERATED" _items{enum_field}
 enum_field:              _identifier
 
 choice:                 "CHOICE" _items{_choice_item}
-_choice_item:            choice_field | choice_ie_container | choice_extension_container
+_choice_item:            choice_field | choice_field_ie_container | choice_field_ie_extension | empty_sequence_field
 choice_field:           _identifier _field_type
-empty_sequence.3:       _identifier "SEQUENCE" "{}"
 
 integer:                "INTEGER" named_values? ["(" _constraints ")"]
 printable_string:       "PrintableString" [_size]
@@ -92,26 +100,24 @@ _field_type:            _primitive | enumerated | sequence | choice
 type_parameter:         "{" _identifier "}"
 type_parameterized_identifier: _identifier type_parameter
 
-ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
-choice_ie_container:    _identifier "ProtocolIE-Container" "{" "{" _identifier "}" "}"
+// XXAP IE and protocol containers
+_protocol_ie_container: "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 single_ie_container.1:  "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"
+_private_ie_container:  "PrivateIE-Container" "{" "{" _identifier "}" "}" "OPTIONAL"? ","?
+_extension_container:   "ProtocolExtensionContainer" "{" "{" _identifier "}" "}" "OPTIONAL"? ","?
+
+extension_container_field.0:             _IDENTIFIER _extension_container
+choice_field_ie_extension:               _identifier single_ie_container
+choice_field_ie_container:               _identifier _protocol_ie_container
+private_ie_container_field.0:            _identifier _private_ie_container
+protocol_ies_field.1:                    "protocolIEs" _protocol_ie_container
+
 ies:                    "{" (ie | optional_ie)* [","] extension_marker? "}"
 _ie{p}:                 "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _field_type+ "PRESENCE" p "}" ["|" | ","]
 optional_ie:            _ie{"optional"} | _ie{"conditional"}
 ie:                      _ie{"mandatory"}
 
-extension_container.0:  _IDENTIFIER "ProtocolExtensionContainer" "{" "{" _identifier "}" "}" "OPTIONAL"? ","?
-private_ie_container.0: _identifier "PrivateIE-Container" "{" "{" _identifier "}" "}" "OPTIONAL"? ","?
-choice_extension_container: _identifier single_ie_container | empty_sequence
-
-_size:                  "(" "SIZE" "(" _constraints ")" ")"
-_constraints:           _range_options+
-_range_options:         _range["|" _range] * [","]
-_range:                 extension_marker | (BOUND [".." BOUND])        
-
-named_values:           _nested_braces
-_nested_braces:         "{" (_nested_braces|/[^\{\}]+/) * "}"
-
+// XXAP procedures
 family:                 /\w*-ELEMENTARY-PROCEDURE/
 procedure_def.2:        procedure_name family "::=" "{" initiating successful? unsuccessful? procedure_code criticality "}"
 procedure_name:         IDENTIFIER

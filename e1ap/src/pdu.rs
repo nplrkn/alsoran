@@ -112,9 +112,16 @@ impl ResetType {
             1 => Ok(Self::PartOfE1Interface(
                 UeAssociatedLogicalE1ConnectionListRes::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -2820,9 +2827,16 @@ impl SystemBearerContextSetupRequest {
             1 => Ok(Self::NgRanBearerContextSetupRequest(
                 NgRanBearerContextSetupRequest::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -2973,9 +2987,16 @@ impl SystemBearerContextSetupResponse {
             1 => Ok(Self::NgRanBearerContextSetupResponse(
                 NgRanBearerContextSetupResponse::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -3372,9 +3393,16 @@ impl SystemBearerContextModificationRequest {
             1 => Ok(Self::NgRanBearerContextModificationRequest(
                 NgRanBearerContextModificationRequest::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -3527,9 +3555,16 @@ impl SystemBearerContextModificationResponse {
             1 => Ok(Self::NgRanBearerContextModificationResponse(
                 NgRanBearerContextModificationResponse::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -3789,9 +3824,16 @@ impl SystemBearerContextModificationRequired {
             1 => Ok(Self::NgRanBearerContextModificationRequired(
                 NgRanBearerContextModificationRequired::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -3943,9 +3985,16 @@ impl SystemBearerContextModificationConfirm {
             1 => Ok(Self::NgRanBearerContextModificationConfirm(
                 NgRanBearerContextModificationConfirm::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
@@ -4827,9 +4876,16 @@ impl SystemGnbCuUpCounterCheckRequest {
             1 => Ok(Self::NgRanGnbCuUpCounterCheckRequest(
                 NgRanGnbCuUpCounterCheckRequest::decode(data)?,
             )),
-            2 => Err(PerCodecError::new(
-                "Choice extension container not implemented",
-            )),
+            2 => {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            }
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }

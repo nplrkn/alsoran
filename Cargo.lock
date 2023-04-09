@@ -12,6 +12,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "amf-sim"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "common",
+ "hex",
+ "mocks",
+ "slog",
+]
+
+[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1090,6 +1102,22 @@ dependencies = [
  "tokio-openssl 0.4.0",
  "url",
  "uuid 1.3.0",
+]
+
+[[package]]
+name = "gnb-cu-up"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "async-trait",
+ "bitvec",
+ "common",
+ "e1ap",
+ "futures",
+ "net",
+ "slog",
+ "stop-token",
 ]
 
 [[package]]

@@ -6,7 +6,7 @@ use bitvec::prelude::*;
 use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 impl Pdu for NgapPdu {}
 
@@ -26,6 +26,11 @@ impl Deref for MockAmf {
 
     fn deref(&self) -> &Self::Target {
         &self.mock
+    }
+}
+impl DerefMut for MockAmf {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.mock
     }
 }
 
@@ -175,7 +180,11 @@ impl MockAmf {
         }
     }
 
-    pub async fn send_initial_context_setup_request(&self, ue_context: &UeContext) -> Result<()> {
+    pub async fn send_initial_context_setup_request(
+        &self,
+        ue_context: &UeContext,
+        nas_pdu: Vec<u8>,
+    ) -> Result<()> {
         let logger = &self.logger;
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(
             InitialContextSetupRequest {
@@ -205,7 +214,7 @@ impl MockAmf {
                 ue_radio_capability: None,
                 index_to_rfsp: None,
                 masked_imeisv: None,
-                nas_pdu: Some(NasPdu(Vec::new())),
+                nas_pdu: Some(NasPdu(nas_pdu)),
                 emergency_fallback_indicator: None,
                 rrc_inactive_transition_report_request: None,
                 ue_radio_capability_for_paging: None,
@@ -266,6 +275,51 @@ impl MockAmf {
         ));
         self.send(pdu, None).await;
         Ok(())
+    }
+
+    pub async fn send_downlink_nas_transport(
+        &self,
+        ue_context: &UeContext,
+        nas_pdu: Vec<u8>,
+    ) -> Result<()> {
+        info!(&self.logger, "<< DownlinkNasTransport");
+        let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkNasTransport(
+            DownlinkNasTransport {
+                amf_ue_ngap_id: AmfUeNgapId(ue_context.ue_id as u64),
+                ran_ue_ngap_id: ue_context.ran_ue_ngap_id,
+                old_amf: None,
+                ran_paging_priority: None,
+                nas_pdu: NasPdu(nas_pdu),
+                mobility_restriction_list: None,
+                index_to_rfsp: None,
+                ue_aggregate_maximum_bit_rate: None,
+                allowed_nssai: None,
+                srvcc_operation_possible: None,
+                enhanced_coverage_restriction: None,
+                extended_connected_time: None,
+                ue_differentiation_info: None,
+                c_emode_brestricted: None,
+                ue_radio_capability: None,
+                ue_capability_info_request: None,
+                end_indication: None,
+                ue_radio_capability_id: None,
+            },
+        ));
+        self.send(pdu, None).await;
+        Ok(())
+    }
+
+    pub async fn receive_uplink_nas_transport(&self, _ue_context: &UeContext) -> Result<Vec<u8>> {
+        info!(&self.logger, ">> UplinkNasTransport");
+        match self.receive_pdu().await.unwrap() {
+            NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNasTransport(
+                UplinkNasTransport { nas_pdu, .. },
+            )) => Ok(nas_pdu.0),
+            x => Err(anyhow!(
+                "Expecting UplinkNasTransport, got unexpected message {:?}",
+                x
+            )),
+        }
     }
 
     pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {

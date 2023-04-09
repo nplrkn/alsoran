@@ -43,7 +43,7 @@ pub struct SetupUe(WithAmfContext);
 impl SetupUe {
     pub async fn initiate_registration(self, tc: &TestContext) -> Result<HalfRegisteredUe> {
         tc.amf
-            .send_initial_context_setup_request(&self.0.amf_ue_context)
+            .send_initial_context_setup_request(&self.0.amf_ue_context, vec![])
             .await?;
         let security_mode_command = tc
             .du

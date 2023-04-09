@@ -7,20 +7,32 @@ The gNodeB is the component that manages the radio access of 5G User Equipment (
 This project is currently a proof of concept and not yet a fully functional gNB-CU.
 
 ## Current support
-
 - UE registration demo against free5GC.
 - Session setup (TS 23.502, figure 4.3.2.2.1-1).
 - UE state in Redis datastore.
 - ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
 - Connection management stack 
 - Scale-out of GNB-CU-CP workers using multiple TNLAs.
-- Procedures: NG Setup, RAN Configuration Update, F1 Setup, E1 Setup, Initial Access, Uplink NAS, Downlink NAS, Initial Context Setup, Pdu Session Resource Setup, AMF Status Indication, GNB CU Configuration Update, GNB DU Configuration Update, GNB CU CP Configuration Update.
 - [Triangular redirection](documentation/design/triangular-redirection.md)
 - Rust ASN.1 autogenerator (written in Python).
 
-The gNB-CU-UP does not exist yet.
-
+The gNB-CU-UP is currently a simple stub that replies to E1AP requests but does not process userplane packets.
 Generally only the success cases are covered, and there are a lot of 'To Dos'.  
+### Procedure support
+-  NG Setup
+-  RAN Configuration Update
+-  F1 Setup
+-  E1 Setup
+-  Initial Access
+-  Uplink NAS
+-  Downlink NAS
+-  Initial Context Setup
+-  Pdu Session Resource Setup (Bearer Context Setup)
+-  AMF Status Indication
+-  GNB CU Configuration Update
+-  GNB DU Configuration Update
+-  GNB CU CP Configuration Update.
+
 
 ## What's different about Alsoran?
 

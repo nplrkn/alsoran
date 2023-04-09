@@ -37,17 +37,16 @@ class TypeNameFinder(Visitor):
     def choice_def(self, tree):
         self.add(tree.children[0])
 
-    def tuple_struct(self, tree):
+    def primitive_def(self, tree):
         self.add(tree.children[0])
 
     def enum_def(self, tree):
         self.add(tree.children[0])
 
-    def struct(self, tree):
+    def sequence_def(self, tree):
         self.add(tree.children[0])
 
     def object_def(self, tree):
-        print("GOT ME A " + tree.children[0])
         self.ie_dict[tree.children[0]] = tree.children[1]
 
 
@@ -67,10 +66,10 @@ class IeContainerMerger(Transformer):
     def choice(self, tree):
         # For a CHOICE of ProtocolIeContainer, we go fronm
         #   choice
-        #     choice_ie_container                 <- tree.children[0]
+        #     choice_field_ie_container                 <- tree.children[0]
         #       EutranBearerContextSetupRequest
         #       EutranBearerContextSetupRequest   <- tree.children[0].children[1]
-        #     choice_ie_container
+        #     choice_field_ie_container
         #       ...etc
         #  object_def
         #    EutranBearerContextSetupRequest
@@ -86,18 +85,66 @@ class IeContainerMerger(Transformer):
         #     choice_field
         #       ...etc
         #
-        # The ies section will then get broken out into a separate choice_pdu in a later
+        # The ies section will then get broken out into a separate protocol_ie_container in a later
         # stage - see transform_type().
+        #
+        # For a CHOICE with an extension container with one or more ies in it, we graft those in as choice_field_extension_ies.
+        #  choice
+        #    choice_field
+        #      SomeSelector
+        #      SomeType
+        #    choice_field_ie_extension
+        #      choice-extension                        <- tree.children[0].children[0]
+        #      single_ie_container  Something-ExtIEs   <- tree.children[0].children[1] and tree.children[0].children[1].children[0]
+        #  object_def
+        #    Something-ExtIEs
+        #    ies
+        #      ie
+        #        ...thing 1...
+        #      ie
+        #        ...thing 2...
+        #
+        # to
+        #  choice
+        #    choice_field
+        #      SomeSelector
+        #      SomeType
+        #    choice_field_extension_ies
+        #      ie
+        #        ...thing 1...
+        #      ie
+        #        ...thing 2...
+        #
         for child in tree.children:
-            if child.data == "choice_ie_container":
+            if child.data == "choice_field_ie_container":
                 child.data = "choice_field"
                 child.children[1] = self.ie_dict[child.children[1]]
+            elif child.data == "choice_field_ie_extension":
+                # Look up the object def defining the extension IEs.
+                child.data = "choice_field_extension_ies"
+                name = child.children[1].children[0]
+                ies = self.ie_dict[name]
+                child.children = ies.children
+
+                #         # Create a new child.
+                #         found_ies = 0
+                #         for ie in ies.children:
+                #             if ie.data == "ie":
+                #                 # the name comes the third field of the ie
+                #                 name = ie.children[2]
+                #                 new_child = Tree("choice_field", [name, ie])
+                #                 new_children.append(new_child)
+                #                 found_ies += 1
+                #         if found_ies == 0:
+                #             new_children.append(Tree("empty_sequence_field", []))
+                #     else:
+                #         new_children.append(child)
         return tree
 
     def sequence(self, tree):
         # For Sequence-like IE containers, convert a structure like
         #    sequence
-        #      ie_container      PDUSessionResourceSetupRequestIEs
+        #      ie_container_field      PDUSessionResourceSetupRequestIEs
         #      extension_marker
         #  object_def
         #    PDUSessionResourceSetupRequestIEs
@@ -110,17 +157,17 @@ class IeContainerMerger(Transformer):
         #      ies
         #        ie
         #      extension_marker
-        if len(tree.children) > 0 and tree.children[0].data == "ie_container":
+        if len(tree.children) > 0 and tree.children[0].data == "protocol_ies_field":
             tree.children[0] = self.ie_dict[tree.children[0].children[0]]
             tree.data = "ie_container_sequence"
         return tree
 
-    def extension_container(self, tree):
+    def extension_container_field(self, tree):
         # We convert from this
         #
         #  sequence
         #    ...
-        #   extension_container CUtoDURRCInformation-ExtIEs
+        #   extension_container_field CUtoDURRCInformation-ExtIEs
         #
         #  object_def
         #    CUtoDURRCInformation-ExtIEs
@@ -244,7 +291,7 @@ class TypeTransformer(Transformer):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         tree.children[1] = self.transform_type(
             tree.children[1], tree.children[0])
         tree.children[0] = pascal_case(tree.children[0])
@@ -256,7 +303,7 @@ class TypeTransformer(Transformer):
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
-    def tuple_struct(self, tree):
+    def primitive_def(self, tree):
         tree.children[0] = self.convert(tree.children[0])
         tree.children[1] = self.transform_type(
             tree.children[1], tree.children[0])
@@ -270,7 +317,7 @@ class TypeTransformer(Transformer):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
-    def struct(self, tree):
+    def sequence_def(self, tree):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
@@ -307,7 +354,7 @@ class TypeTransformer(Transformer):
             tree = name
         elif tree.data == 'sequence':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('struct', [name, tree])
+            new_def = Tree('sequence_def', [name, tree])
             self.extra_defs.append(new_def)
             tree = name
         elif tree.data == 'null':
@@ -319,7 +366,7 @@ class TypeTransformer(Transformer):
             tree = name
         elif tree.data == 'ies':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('choice_pdu', [name, tree])
+            new_def = Tree('protocol_ie_container', [name, tree])
             self.extra_defs.append(new_def)
             tree = name
         else:
@@ -490,7 +537,7 @@ class TestTransformer(unittest.TestCase):
         PriorityLevel ::= INTEGER { spare (0), highest (1), lowest (14), no-priority (15) } (0..15)
 """, """\
 document
-  tuple_struct
+  primitive_def
     PriorityLevel
     u8
       0
@@ -524,7 +571,7 @@ MaximumDataBurstVolume::= INTEGER(-234..maxFoo, ..., 4096.. 2000000)
 """
         output = """\
 document
-  tuple_struct
+  primitive_def
     MaximumDataBurstVolume
     i128
       -234
@@ -552,7 +599,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
 """
         output = """\
 document
-  struct
+  sequence_def
     WlanMeasurementConfiguration
     sequence
       field
@@ -587,7 +634,7 @@ document
     enumerated
       enum_field\tThing1
       extension_marker
-  struct
+  sequence_def
     N2
     sequence
       field
@@ -615,7 +662,7 @@ Child-Node-Cells-List-Item ::= SEQUENCE {
 }
 """, """\
 document
-  struct
+  sequence_def
     ChildNodeCellsListItem
     sequence
       optional_field
@@ -640,7 +687,7 @@ ActiveULBWP ::= SEQUENCE {
 SubcarrierSpacing ::= ENUMERATED { kHz15, kHz30, kHz60, kHz120, kHz240, spare3, spare2, spare1, ... }
 """, """\
 document
-  struct
+  sequence_def
     ActiveUlbwp
     sequence
       field
@@ -679,12 +726,12 @@ SRSResourceSet-List ::= SEQUENCE (SIZE (1..2)) OF Foo
 SRSResourceSetList ::= SEQUENCE (SIZE (1.. 3)) OF Foo
 """, """\
 document
-  tuple_struct
+  primitive_def
     Foo
     u8
       1
       16
-  struct
+  sequence_def
     SrsConfig
     sequence
       field
@@ -693,13 +740,13 @@ document
       field
         b
         SrsResourceSetList1
-  tuple_struct
+  primitive_def
     SrsResourceSetList
     sequence_of
       1
       2
       Foo
-  tuple_struct
+  primitive_def
     SrsResourceSetList1
     sequence_of
       1
@@ -721,7 +768,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 }
 """, """\
 document
-  struct
+  sequence_def
     PduSessionResourceSetupRequest
     ie_container_sequence
       ies
@@ -743,7 +790,7 @@ document
         self.should_generate(
             "URI-address ::= VisibleString", """\
 document
-  tuple_struct
+  primitive_def
     UriAddress
     VisibleString
 """)
@@ -755,7 +802,7 @@ SNSSAI ::= SEQUENCE {
 }
 """, """\
 document
-  struct
+  sequence_def
     Snssai
     sequence
       optional_field
@@ -770,7 +817,7 @@ document
 Activated-Cells-to-be-Updated-List ::= SEQUENCE (SIZE (1..maxnoofServedCellsIAB)) OF Activated-Cells-to-be-Updated-List-Item
 """, """\
 document
-  tuple_struct
+  primitive_def
     ActivatedCellsToBeUpdatedList
     sequence_of
       1
@@ -788,7 +835,7 @@ UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
 }
 """, """\
 document
-  tuple_struct
+  primitive_def
     UeAssociatedLogicalF1ConnectionListRes
     ie_container_sequence_of
       1
@@ -805,7 +852,7 @@ document
 foo ::= INTEGER(-1..0)
 """, """\
 document
-  tuple_struct
+  primitive_def
     Foo
     i8
       -1
@@ -859,8 +906,7 @@ document
       choice_field
         C1
         C1
-      choice_extension_container
-        empty_sequence\tmessageClassExtension
+      empty_sequence_field\tmessageClassExtension
   choice_def
     C1
     choice
@@ -880,13 +926,13 @@ UECapabilityInformationSidelink-IEs-r16 ::= SEQUENCE {
 }
 """, """\
 document
-  struct
+  sequence_def
     UeCapabilityInformationSidelinkIEsR16
     sequence
       field
         access_stratum_release_sidelink_r_16
         AccessStratumReleaseSidelinkR16
-      empty_sequence\tnonCriticalExtension
+      empty_sequence_field\tnonCriticalExtension
 """)
 
     def test_rrc_setup_release(self):
@@ -896,7 +942,7 @@ LocationMeasurementIndication-IEs ::=       SEQUENCE {
 }
 """, """\
 document
-  struct
+  sequence_def
     LocationMeasurementIndicationIEs
     sequence
       field
@@ -932,7 +978,7 @@ AvailabilityCombination-r16 ::=         SEQUENCE {
 }
 """, """\
 document
-  struct
+  sequence_def
     AvailabilityCombinationR16
     sequence
       field
@@ -954,7 +1000,7 @@ VarMeasReportSL-r16 ::=                   SEQUENCE {
     sl-NumberOfReportsSent-r16                INTEGER
 }""", """\
 document
-  struct
+  sequence_def
     VarMeasReportSlR16
     sequence
       field
@@ -970,7 +1016,7 @@ FeatureSetUplink-v1540 ::=           SEQUENCE {
 }
 """, """\
 document
-  struct
+  sequence_def
     FeatureSetUplinkV1540
     sequence
       optional_field
@@ -1034,7 +1080,7 @@ document
       extension_container
         choice-extension
         single_ie_container\tSystem-BearerContextSetupRequest-ExtIEs
-  choice_pdu
+  protocol_ie_container
     EutranBearerContextSetupRequest
     ies
       ie
@@ -1053,7 +1099,7 @@ document
         ignore
         AdditionalRrmPriorityIndex
       extension_marker
-  choice_pdu
+  protocol_ie_container
     NgRanBearerContextSetupRequest
     ies
       ie
@@ -1078,7 +1124,7 @@ CUtoDURRCInformation-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
 	...
 }""", """\
 document
-  struct
+  sequence_def
     CuToDuRrcInformation
     sequence
       field
@@ -1101,6 +1147,55 @@ document
           extension_marker
       extension_marker
 """, constants={"id-HandoverPreparationInformation": 232, "id-UEAssistanceInformationEUTRA": 233})
+
+    def test_choice_extension(self):
+        self.should_generate("""\
+QoSInformation ::= CHOICE {
+	eUTRANQoS					EUTRANQoS,
+	choice-extension			ProtocolIE-SingleContainer { { QoSInformation-ExtIEs } }
+}
+
+QoSInformation-ExtIEs F1AP-PROTOCOL-IES ::= {
+	{	ID id-DRB-Information		CRITICALITY ignore TYPE DRB-Information		PRESENCE mandatory } ,
+	...
+}""", """\
+document
+  choice_def
+    QosInformation
+    choice
+      choice_field
+        EutranQos
+        EutranQos
+      choice_field_extension_ies
+        ie
+          drb_information
+          111
+          ignore
+          DrbInformation
+        extension_marker
+""", constants={"id-DRB-Information": 111})
+
+    def test_choice_extension_empty(self):
+        self.should_generate("""\
+GNB-ID ::= CHOICE {
+	gNB-ID		BIT STRING (SIZE (22..32)),
+	choice-Extensions		ProtocolIE-SingleContainer { {GNB-ID-ExtIEs } }
+}
+GNB-ID-ExtIEs NGAP-PROTOCOL-IES ::= {
+	...
+}""", """\
+document
+  choice_def
+    GnbId
+    choice
+      choice_field
+        GnbId
+        BitString
+          22
+          32
+      choice_field_extension_ies
+        extension_marker
+""")
 
 
 if __name__ == '__main__':

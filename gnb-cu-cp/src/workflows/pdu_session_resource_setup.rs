@@ -5,10 +5,7 @@ use crate::datastore::UeState;
 use anyhow::Result;
 use bitvec::prelude::*;
 use e1ap::*;
-use f1ap::{
-    DrbsToBeSetupItem, DrbsToBeSetupList, GnbCuUeF1apId, QosInformation, UeContextSetupProcedure,
-    UeContextSetupRequest,
-};
+use f1ap::UeContextSetupProcedure;
 use net::SerDes;
 use ngap::{
     PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
@@ -40,15 +37,16 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> PduSessionResourceSetupResponse {
         debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-        let (successful, unsuccessful) = self
-            .pdu_session_resource_setup_inner(&r)
-            .await
-            .unwrap_or_else(|_| {
+        let (successful, unsuccessful) = match self.pdu_session_resource_setup_inner(&r).await {
+            Ok(x) => x,
+            Err(e) => {
+                debug!(self.logger, "Failed resource setup - {}", e);
                 (
                     Vec::new(),
                     r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
                 )
-            });
+            }
+        };
 
         // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
 
@@ -139,7 +137,13 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
 
         // Send UeContextSetupRequest to DU.
-        let ue_context_setup_request = self.build_ue_context_setup_request(&ue, None);
+        let ue_context_setup_request =
+            super::build_f1ap::build_ue_context_setup_request_from_pdu_session_setup(
+                self.gnb_cu_cp,
+                r,
+                &ue,
+                None,
+            )?;
         self.log_message("<< UeContextSetupRequest");
         let ue_context_setup_response = self
             .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
@@ -150,9 +154,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let bearer_context_modification = self.build_bearer_context_modification(
             &ue,
             gnb_cu_up_ue_e1ap_id,
-            ue_context_setup_response,
+            &ue_context_setup_response,
         );
-        self.log_message("<< BearerContextMdificationRequest");
+        self.log_message("<< BearerContextModificationRequest");
         let _response = self
             .e1ap_request::<BearerContextModificationProcedure>(
                 bearer_context_modification,
@@ -164,14 +168,28 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // Collect the Nas messages from the successful setups.
         // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
         // so that it doesn't have to clone.
-        let nas_messages = successful
+        let nas_messages: Vec<Vec<u8>> = successful
             .iter()
             .filter_map(|x| x.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
             .collect();
 
-        // Perform Rrc Reconfiguration including the Nas message from earlier.
+        // TS38.473, 8.3.1.2: "If the CellGroupConfig IE is included in the DU to CU RRC Information IE contained in the UE CONTEXT SETUP RESPONSE message,
+        // the gNB-CU shall perform RRC Reconfiguration or RRC connection resume as described in TS 38.331 [8]. The CellGroupConfig IE shall
+        // transparently be signaled to the UE as specified in TS 38.331 [8]."
+        let cell_group_config = ue_context_setup_response
+            .du_to_cu_rrc_information
+            .cell_group_config
+            .0;
+
+        // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
-        let rrc_container = super::build_rrc::build_rrc_reconfiguration(3, Some(nas_messages))?;
+        let nas_messages = if nas_messages.is_empty() {
+            None
+        } else {
+            Some(nas_messages)
+        };
+        let rrc_container =
+            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config)?;
         self.log_message("<< RrcReconfiguration");
         self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;
@@ -345,7 +363,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         &self,
         ue: &UeState,
         gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId,
-        _ue_context_setup_response: f1ap::UeContextSetupResponse,
+        _ue_context_setup_response: &f1ap::UeContextSetupResponse,
     ) -> BearerContextModificationRequest {
         // TODO incomplete - for example need to supply a system_bearer_context_modification_request
         // with DrbToModifyListNgRan containing the UpTransportLayerInformation received in the
@@ -365,100 +383,6 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             ran_ue_id: None,
             gnb_du_id: None,
             activity_notification_level: None,
-        }
-    }
-
-    fn build_ue_context_setup_request(
-        &self,
-        ue: &UeState,
-        rrc_container: Option<f1ap::RrcContainer>,
-    ) -> UeContextSetupRequest {
-        // TODO: derive and use frunk transmogrify for the common ngap / f1ap structures seen here.
-
-        UeContextSetupRequest {
-            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
-            gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id),
-            sp_cell_id: f1ap::NrCgi {
-                plmn_identity: f1ap::PlmnIdentity(self.config().plmn.clone()),
-                nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
-            },
-            serv_cell_index: f1ap::ServCellIndex(0),
-            sp_cell_ul_configured: None,
-            cu_to_du_rrc_information: f1ap::CuToDuRrcInformation {
-                cg_config_info: None,
-                ue_capability_rat_container_list: None,
-                meas_config: None,
-                handover_preparation_information: None,
-                cell_group_config: None,
-                measurement_timing_configuration: None,
-                ue_assistance_information: None,
-                cg_config: None,
-                ue_assistance_information_eutra: None,
-            },
-            candidate_sp_cell_list: None,
-            drx_cycle: None,
-            resource_coordination_transfer_container: None,
-            s_cell_to_be_setup_list: None,
-            srbs_to_be_setup_list: None,
-            drbs_to_be_setup_list: Some(DrbsToBeSetupList(vec![DrbsToBeSetupItem {
-                drb_id: f1ap::DrbId(1),
-                qos_information: QosInformation::EutranQos(f1ap::EutranQos {
-                    qci: f1ap::Qci(1),
-                    allocation_and_retention_priority: f1ap::AllocationAndRetentionPriority {
-                        priority_level: f1ap::PriorityLevel(1),
-                        pre_emption_capability: f1ap::PreEmptionCapability::MayTriggerPreEmption,
-                        pre_emption_vulnerability: f1ap::PreEmptionVulnerability::NotPreEmptable,
-                    },
-                    gbr_qos_information: None,
-                }),
-                uluptnl_information_to_be_setup_list: f1ap::UluptnlInformationToBeSetupList(vec![
-                    f1ap::UluptnlInformationToBeSetupItem {
-                        uluptnl_information: f1ap::UpTransportLayerInformation::GtpTunnel(
-                            f1ap::GtpTunnel {
-                                transport_layer_address: f1ap::TransportLayerAddress(
-                                    bitvec![u8,Msb0;0,1,1,0],
-                                ),
-                                gtp_teid: f1ap::GtpTeid(vec![1, 2, 3, 4]),
-                            },
-                        ),
-                        bh_info: None,
-                    },
-                ]),
-                rlc_mode: f1ap::RlcMode::RlcUmBidirectional,
-                ul_configuration: None,
-                duplication_activation: None,
-                dc_based_duplication_configured: None,
-                dc_based_duplication_activation: None,
-                dlpdcpsn_length: None,
-                ulpdcpsn_length: None,
-                additional_pdcp_duplication_tnl_list: None,
-                rlc_duplication_information: None,
-            }])),
-            inactivity_monitoring_request: None,
-            rat_frequency_priority_information: None,
-            rrc_container,
-            masked_imeisv: None, // r.masked_imeisv,
-            serving_plmn: None,
-            gnb_du_ue_ambr_ul: None,
-            rrc_delivery_status_request: None,
-            resource_coordination_transfer_information: None,
-            serving_cell_mo: None,
-            new_gnb_cu_ue_f1ap_id: None,
-            ran_ue_id: None,
-            trace_activation: None,
-            additional_rrm_priority_index: None,
-            bh_channels_to_be_setup_list: None,
-            configured_bap_address: None,
-            nr_v2x_services_authorized: None, // r.nr_v2x_services_authorized,
-            ltev2x_services_authorized: None, // r.ltev2x_services_authorized,
-            nr_ue_sidelink_aggregate_maximum_bitrate: None, // r.nr_ue_sidelink_aggregate_maximum_bitrate,
-            lte_ue_sidelink_aggregate_maximum_bitrate: None, // r.lte_ue_sidelink_aggregate_maximum_bitrate,
-            pc5_link_ambr: None, // r.pc5_qos_parameters.and_then(|x| x.pc_5_link_aggregate_bit_rates),
-            sl_drbs_to_be_setup_list: None,
-            conditional_inter_du_mobility_information: None,
-            management_based_mdt_plmn_list: None,
-            serving_nid: None,
-            f1c_transfer_path: None,
         }
     }
 }

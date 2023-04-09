@@ -19,6 +19,7 @@ pub struct Mock<P: Pdu> {
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Vec<ShutdownHandle>,
+    disable_receive_timeouts: bool,
 }
 
 pub enum MockEvent<P: Pdu> {
@@ -60,7 +61,13 @@ impl<P: Pdu> Mock<P> {
             logger,
             handler: Handler(sender),
             transport_tasks: Vec::new(),
+            disable_receive_timeouts: false,
         }
+    }
+
+    pub fn disable_receive_timeouts(&mut self) -> &mut Self {
+        self.disable_receive_timeouts = true;
+        self
     }
 
     pub async fn serve(&mut self, address: String, ppid: u32) -> Result<()> {
@@ -130,7 +137,11 @@ impl<P: Pdu> Mock<P> {
     /// Receive a Pdu, with a 0.5s timeout.
     pub async fn receive_pdu_with_assoc_id(&self) -> Result<ReceivedPdu<P>> {
         let f = self.receiver.recv();
-        let event = async_std::future::timeout(std::time::Duration::from_millis(500), f).await??;
+        let event = if self.disable_receive_timeouts {
+            f.await
+        } else {
+            async_std::future::timeout(std::time::Duration::from_millis(500), f).await?
+        }?;
         match event {
             MockEvent::Pdu(p) => Ok(p),
             MockEvent::Connection => bail!("Expected Pdu but got connection"),

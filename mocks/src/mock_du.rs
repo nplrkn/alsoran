@@ -159,15 +159,13 @@ impl MockDu {
             bail!("Unexpected F1ap message {:?}", pdu)
         };
 
-        // A Rrc Setup flows as a DlCcchMessage on SRB0.  Check this is indeed for SRB0.
+        // A Rrc Setup flows as a DlCcchMessage on SRB0 (non PDCP encapsulated).  Check this is indeed for SRB0.
         assert_eq!(dl_rrc_message_transfer.srb_id.0, 0);
 
         ue_context.gnb_cu_ue_f1ap_id = Some(dl_rrc_message_transfer.gnb_cu_ue_f1ap_id);
-        let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
-        let rrc_message_bytes = pdcp_pdu.view_inner()?;
+        let rrc_message_bytes = dl_rrc_message_transfer.rrc_container.0;
 
-        // TODO - how to verify that this is indeed a DlCcchMessage rather than a DlDcchMessage.
-        let message = DlCcchMessage::from_bytes(rrc_message_bytes)
+        let message = DlCcchMessage::from_bytes(&rrc_message_bytes)
             .unwrap()
             .message;
 

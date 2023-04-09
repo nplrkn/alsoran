@@ -1999,7 +1999,7 @@ InitialULRRCMessageTransferIEs F1AP-PROTOCOL-IES ::= {
 	{ ID id-RRCContainer						CRITICALITY reject	TYPE RRCContainer							PRESENCE mandatory } |
 	{ ID id-DUtoCURRCContainer					CRITICALITY reject	TYPE DUtoCURRCContainer						PRESENCE optional } |
 	{ ID id-SULAccessIndication					CRITICALITY ignore	TYPE SULAccessIndication					PRESENCE optional } |
-	-- To work around bug in O-RAN ODU, we have transaction ID is set to optional here when it is actually mandatory
+	-- To work with rel 15 peers such as O-RAN-SC O-DU, transaction ID is set to optional here when it is actually defined as mandatory
 	{ ID id-TransactionID						CRITICALITY ignore	TYPE TransactionID							PRESENCE optional --mandatory-- } |
 	{ ID id-RANUEID								CRITICALITY ignore	TYPE RANUEID								PRESENCE optional } |
 	{ ID id-RRCContainer-RRCSetupComplete		CRITICALITY ignore	TYPE RRCContainer-RRCSetupComplete 		PRESENCE optional } ,

@@ -22,6 +22,7 @@ class TypeInfo:
         self.criticality = None
         self.code = None
         self.inner_type_info = None
+        self.is_ie = None
 
 
 # TODO - replace with a visitor?
@@ -31,9 +32,10 @@ def type_and_constraints(node):
 
     if isinstance(type_info.typ, Tree):
         if type_info.typ.data in ["ie", "optional_ie"]:
-            # The ProtocolIE-SingleContainer case where an IE is inside a sequence of.
+            # The ProtocolIE-SingleContainer case where an IE is inside a sequence of or choice.
             parent = type_info.typ
             type_info = type_and_constraints(parent.children[3])
+            type_info.is_ie = True
             type_info.code = parent.children[1]
             type_info.criticality = parent.children[2]
             return type_info
@@ -121,7 +123,7 @@ def encode_expression_fn(tree):
 encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             let ie = &mut Allocator::new();
-            {encode_expression_fn(tree.children[2])("x", "ie")}?;
+            x.encode(ie)?;
             encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.inner_type_info.code}, false)?;
             Criticality::{type_info.inner_type_info.criticality.title()}.encode({data})?;
             encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
@@ -135,7 +137,14 @@ encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
             {encode_expression_fn(tree.children[2])("x", data, "*")}?;
         }}
         Ok(())"""
-
+    elif type_info.is_ie:
+        return lambda x, data="data", copy_type_deref="": f"""\
+encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.code}, false)?;
+                Criticality::{type_info.criticality.title()}.encode({data})?;
+                let ie = &mut Allocator::new();
+                {encode_expression_fn(tree.children[2])("x", "ie")}?;
+                encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
+                Ok({data}.append_aligned(ie))"""
     if type_info.typ == "Vec<u8>":
         format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
     elif type_info.typ == "BitString":
@@ -193,7 +202,7 @@ class StructFieldsFrom(Interpreter):
         self.optional_idx += 1
         self.self_fields += fields_from.self_fields
 
-    def empty_sequence(self, tree):
+    def empty_sequence_field(self, tree):
         self.optional_idx += 1
 
 
@@ -216,7 +225,7 @@ class StructFindOptionals(Interpreter):
 """
         self.num_optionals += 1
 
-    def empty_sequence(self, tree):
+    def empty_sequence_field(self, tree):
         self.has_empty_sequence = True
         self.num_optionals += 1
 
@@ -252,12 +261,21 @@ class ChoiceFields(Interpreter):
     {name}{"("+typ+")" if typ != "null" else ""},
 """
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
         self.choice_fields += f"""
             {name}{"("+typ+")" if typ != "null" else ""},
         """
+
+    def choice_field_extension_ies(self, tree):
+        for ie in tree.children:
+            if ie.data != "extension_marker":
+                type_info = type_and_constraints(ie.children[3])
+                typ = type_info.typ
+                self.choice_fields += f"""\
+    {typ}{"("+typ+")" if typ != "null" else ""},
+"""
 
     def extension_marker(self, tree):
         self.extensible = True
@@ -273,8 +291,22 @@ class ChoiceFieldsTo(Interpreter):
     def choice_field(self, tree):
         self.choice_field_common(tree)
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         self.choice_field_common(tree)
+
+    def choice_field_extension_ies(self, tree):
+        for ie in tree.children:
+            if ie.data != "extension_marker":
+                type_info = type_and_constraints(ie.children[3])
+                typ = type_info.typ
+                self.fields_to += f"""\
+            Self::{typ}{"(x)" if typ != "null" else ""} => {{
+                encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, {self.field_index}, false)?;
+                {encode_expression_fn(ie)(
+                    "x", copy_type_deref="*") if typ != "null" else "Ok(())"}
+            }}
+"""
+        self.field_index += 1
 
     def choice_field_common(self, tree):
         name = tree.children[0]
@@ -287,9 +319,10 @@ class ChoiceFieldsTo(Interpreter):
                     "x", copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
             }}
 """
+        assert(not type_info.is_ie)
         self.field_index += 1
 
-    def choice_extension_container(self, tree):
+    def empty_sequence_field(self, tree):
         self.field_index += 1
 
 
@@ -301,14 +334,38 @@ class ChoiceFieldsFrom(Interpreter):
     def choice_field(self, tree):
         self.choice_field_common(tree)
 
-    def choice_ie_container(self, tree):
+    def choice_field_ie_container(self, tree):
         self.choice_field_common(tree)
+
+    def choice_field_extension_ies(self, tree):
+        self.fields_from += f"""\
+            {self.field_index} => {{ 
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {{
+"""
+
+        for ie in tree.children:
+            if ie.data != "extension_marker":
+                type_info = type_and_constraints(ie)
+                self.fields_from += f"""\
+                    {type_info.code} => Ok(Self::{type_info.typ}({type_info.typ}::decode(data)?)),
+"""
+        self.fields_from += f"""\
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x))),
+                }};
+                data.decode_align()?;
+                result
+            }},
+"""
+        self.field_index += 1
 
     def choice_field_common(self, tree):
         name = tree.children[0]
-        typ = type_and_constraints(tree.children[1]).typ
+        type_info = type_and_constraints(tree.children[1])
 
-        if typ != "null":
+        if type_info.typ != "null":
             self.fields_from += f"""\
             {self.field_index} => Ok(Self::{name}({decode_expression(tree.children[1])})),
 """
@@ -318,7 +375,7 @@ class ChoiceFieldsFrom(Interpreter):
 """
         self.field_index += 1
 
-    def choice_extension_container(self, tree):
+    def empty_sequence_field(self, tree):
         self.fields_from += f"""\
             {self.field_index} => Err(PerCodecError::new("Choice extension container not implemented")),
 """
@@ -516,7 +573,7 @@ class StructFieldsTo(Interpreter):
     def extension_ies(self, tree):
         self.add_optional_to_bitfield("false")
 
-    def empty_sequence(self, tree):
+    def empty_sequence_field(self, tree):
         self.add_optional_to_bitfield("false")
 
 
@@ -828,7 +885,7 @@ impl {name} {{
 
 """ + xper_CODEC_IMPL_FORMAT.format(name=name)
 
-    def tuple_struct(self, tree):
+    def primitive_def(self, tree):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
@@ -853,13 +910,13 @@ impl {name} {{
     def ie(self, tree):
         pass
 
-    def choice_pdu(self, tree):
-        self.ies_common(tree, is_sequence=False)
+    def protocol_ie_container(self, tree):
+        self.protocol_ie_container2(tree, is_sequence=False)
 
     def pdu(self, tree):
-        self.ies_common(tree, is_sequence=True)
+        self.protocol_ie_container2(tree, is_sequence=True)
 
-    def ies_common(self, tree, is_sequence):
+    def protocol_ie_container2(self, tree, is_sequence):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
@@ -931,7 +988,7 @@ impl {orig_name} {{
 
 """ + xper_CODEC_IMPL_FORMAT.format(name=name)
 
-    def struct(self, tree):
+    def sequence_def(self, tree):
         if tree.children[1].data == "ie_container_sequence":
             self.pdu(tree)
             return
@@ -1046,6 +1103,7 @@ class TestGenerator(unittest.TestCase):
             self.assertEqual(output, expected)
         finally:
             if output != expected:
+                print("!!! Unexpected output !!!: dumping original parsed tree")
                 print(tree.pretty())
 
     def test_procedure(self):
@@ -1723,6 +1781,10 @@ GNB-ID ::= CHOICE {
 	gNB-ID		BIT STRING (SIZE (22..32)),
 	choice-Extensions		ProtocolIE-SingleContainer { {GNB-ID-ExtIEs } }
 }
+GNB-ID-ExtIEs NGAP-PROTOCOL-IES ::= {
+	...
+}
+
 """, """\
 
 // GnbId
@@ -1739,7 +1801,16 @@ impl GnbId {
         }
         match idx {
             0 => Ok(Self::GnbId(decode::decode_bitstring(data, Some(22), Some(32), false)?)),
-            1 => Err(PerCodecError::new("Choice extension container not implemented")),
+            1 => { 
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            },
             _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
@@ -2701,7 +2772,11 @@ EUTRAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
 NG-RAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
 	{ ID id-PDU-Session-Resource-To-Setup-List		CRITICALITY reject	 TYPE PDU-Session-Resource-To-Setup-List		PRESENCE mandatory } ,
 	...
-}""", """
+}
+System-BearerContextSetupRequest-ExtIEs E1AP-PROTOCOL-IES ::= {
+	...
+}
+""", """
 // SystemBearerContextSetupRequest
 # [derive(Clone, Debug)]
 pub enum SystemBearerContextSetupRequest {
@@ -2718,7 +2793,16 @@ impl SystemBearerContextSetupRequest {
         match idx {
             0 => Ok(Self::EutranBearerContextSetupRequest(EutranBearerContextSetupRequest::decode(data)?)),
             1 => Ok(Self::NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest::decode(data)?)),
-            2 => Err(PerCodecError::new("Choice extension container not implemented")),
+            2 => { 
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            },
             _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
@@ -2854,6 +2938,88 @@ impl PerCodec for NgRanBearerContextSetupRequest {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("NgRanBearerContextSetupRequest"); e})
     }
 }""", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
+
+    def test_choice_extension(self):
+        self.should_generate("""\
+QoSInformation ::= CHOICE {
+	eUTRANQoS					EUTRANQoS,
+	choice-extension			ProtocolIE-SingleContainer { { QoSInformation-ExtIEs } }
+}
+
+QoSInformation-ExtIEs F1AP-PROTOCOL-IES ::= {
+	{	ID id-DRB-Information		CRITICALITY ignore TYPE DRB-Information		PRESENCE mandatory } ,
+	{	ID id-Another-One		CRITICALITY ignore TYPE AnOtherType		PRESENCE mandatory } ,
+	...
+}""", """\
+
+// QosInformation
+# [derive(Clone, Debug)]
+pub enum QosInformation {
+    EutranQos(EutranQos),
+    DrbInformation(DrbInformation),
+    AnOtherType(AnOtherType),
+}
+
+impl QosInformation {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::EutranQos(EutranQos::decode(data)?)),
+            1 => { 
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    164 => Ok(Self::DrbInformation(DrbInformation::decode(data)?)),
+                    156 => Ok(Self::AnOtherType(AnOtherType::decode(data)?)),
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            },
+            _ => Err(PerCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        match self {
+            Self::EutranQos(x) => {
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::DrbInformation(x) => {
+                encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                encode::encode_integer(data, Some(0), Some(65535), false, 164, false)?;
+                Criticality::Ignore.encode(data)?;
+                let ie = &mut Allocator::new();
+                x.encode(ie)?;
+                encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+                Ok(data.append_aligned(ie))
+            }
+            Self::AnOtherType(x) => {
+                encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                encode::encode_integer(data, Some(0), Some(65535), false, 156, false)?;
+                Criticality::Ignore.encode(data)?;
+                let ie = &mut Allocator::new();
+                x.encode(ie)?;
+                encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+                Ok(data.append_aligned(ie))
+            }
+        }
+    }
+}
+
+impl PerCodec for QosInformation {
+    type Allocator = Allocator;
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        QosInformation::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformation"); e})
+    }
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformation"); e})
+    }
+}""", constants={"id-DRB-Information": 164, "id-Another-One": 156})
 
 
 if __name__ == '__main__':
