@@ -130,17 +130,6 @@ encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
             {data}.append_aligned(ie);
         }}
         Ok(())"""
-#         return lambda x, data="data", copy_type_deref="": f"""\
-# encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
-#         for x in &{x} {{
-#             let ie = &mut Allocator::new();
-#             {encode_expression_fn(tree.children[2])("x", "ie")}?;
-#             encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.inner_type_info.code}, false)?;
-#             Criticality::{type_info.inner_type_info.criticality.title()}.encode({data})?;
-#             encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
-#             {data}.append_aligned(ie);
-#         }}
-#         Ok(())"""
     elif type_info.seqof:
         return lambda x, data="data", copy_type_deref="": f"""\
 encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;

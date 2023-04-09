@@ -1,4 +1,4 @@
-//! e1ap_cp - Collects together the procedures that are served by a GNB-CU-CP on the E1 reference point.
+//! e1ap_up - Collects together the procedures that are served by a GNB-CU-UP on the E1 reference point.
 
 use super::top_pdu::*;
 use crate::E1apPdu;
