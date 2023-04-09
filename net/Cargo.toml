@@ -11,7 +11,7 @@ sctp = { path = "../sctp" }
 common = { path = "../common"}
 asn1-per = { path = "../asn1-per"}
 async-std = { version = "1.10.0", features = ["attributes"] }
-async-trait = "0.1.51"
+async-trait = "0.1.68"
 slog = "2.7.0"
 anyhow = "1.0.52"
 async-channel = "1.6.1"

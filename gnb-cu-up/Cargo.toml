@@ -10,7 +10,7 @@ slog = "2.7.0"
 anyhow = "1.0.52"
 common = { path = "../common" }
 async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
-async-trait = "0.1.24"
+async-trait = "0.1.68"
 stop-token = "0.7.0"
 e1ap = {path = "../e1ap" }
 net = { path = "../net" }

@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1.51"
+async-trait = "0.1.68"
 anyhow = "1.0.52"
 slog = "2.7.0"
 asn1-per = { path = "../asn1-per"}
