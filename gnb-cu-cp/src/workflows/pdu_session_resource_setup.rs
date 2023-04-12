@@ -3,7 +3,6 @@
 use super::{GnbCuCp, Workflow};
 use crate::datastore::UeState;
 use anyhow::Result;
-use bitvec::prelude::*;
 use e1ap::*;
 use f1ap::UeContextSetupProcedure;
 use net::SerDes;
@@ -225,10 +224,13 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 maximum_i_pdatarate: None,
             },
             pdu_session_resource_dl_ambr: None,
+            // TODO: get transport information from the request
             // TODO: Frunk transmogrify would be ideal
             ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
-                transport_layer_address: TransportLayerAddress(bitvec![u8,Msb0;0,1,1,0]),
-                gtp_teid: GtpTeid(vec![1, 2, 3, 4]),
+                transport_layer_address: TransportLayerAddress(net::ip_bits_from_string(
+                    "192.168.110.82",
+                )?),
+                gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
             }),
             pdu_session_data_forwarding_information_request: None,
             pdu_session_inactivity_timer: None,
@@ -237,7 +239,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             drb_to_setup_list_ng_ran: DrbToSetupListNgRan(vec![DrbToSetupItemNgRan {
                 drb_id: DrbId(1),
                 sdap_configuration: SdapConfiguration {
-                    default_drb: DefaultDrb::True,
+                    default_drb: DefaultDrb::True, // test
                     sdap_header_ul: SdapHeaderUl::Present,
                     sdap_header_dl: SdapHeaderDl::Present,
                 },

@@ -11,7 +11,7 @@ sudo ip addr add 192.168.130.81/32 dev eth0 label eth0:ODU
 sudo ip addr add 192.168.130.82/32 dev eth0 label eth0:CU_STUB
 
 # optional set up tcpdump
-sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412
+sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462
 
 # in terminal 1, projects/alsoran/gnb-cu-cp
 cargo run -- --local-ip=192.168.130.82
@@ -60,14 +60,14 @@ cargo run
 
 # In terminal 2, projects/alsoran/gnb-cu-cp
 redis-server &
-cargo run -- --local-ip=127.0.0.1
+RUST_LOG=debug cargo run -- --local-ip=127.0.0.1
 
 # In terminal 3, projects/alsoran/gnb-cu-up
-cargo run
+RUST_LOG=debug cargo run
 
 # in terminal 4, 
 ```
-sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
+sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412 or port 38462
 ```
 
 # in terminal 5, in o-du-l2 directory

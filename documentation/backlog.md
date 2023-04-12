@@ -13,6 +13,7 @@
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
 - use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
+- provide TransportAddress constructor from string (and use common struct for all XXAP libraries)
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -77,6 +78,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Use proper 32 bit bitstrings for TransportAddress in E1AP messages (avoids Wireshark decode issue) 
 - Support for BearerContextModificationRequest in CU-UP
 - Pass CellGroupConfig from DU to UE in Rrc Reconfiguration Request
 - Use proper NAS messages from AMF-SIM to improve Wireshark trace of ODU interop
