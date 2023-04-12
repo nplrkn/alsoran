@@ -67,7 +67,7 @@ RUST_LOG=info cargo test two_workers_base --test two_workers -- --nocapture
 
 You can packet capture during these tests by running the following in parallel. 
 ```
-sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462
+sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462 or port 38462
 ```
 ...then Ctrl-C at the end of the test and open alsoran.pcap in Wireshark.
 

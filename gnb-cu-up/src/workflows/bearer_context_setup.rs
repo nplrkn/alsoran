@@ -3,7 +3,6 @@
 
 use super::{GnbCuUp, Workflow};
 use anyhow::Result;
-use bitvec::prelude::*;
 use e1ap::*;
 use net::{RequestError, ResponseAction};
 
@@ -17,8 +16,8 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
 
         // The userplane processing doesn't exist yet, but let's suppose it will be designed to
         // use the same GTP TEID on both sides for each bearer.
-        let my_uplink_address = TransportLayerAddress(bitvec![u8,Msb0;3,3,3,3]);
-        let my_downlink_address = TransportLayerAddress(bitvec![u8,Msb0;4,4,4,4]);
+        let my_uplink_address = TransportLayerAddress(net::ip_bits_from_string("3.3.3.3")?);
+        let my_downlink_address = TransportLayerAddress(net::ip_bits_from_string("4.4.4.4")?);
         let bearer_1_gtp_teid = GtpTeid(vec![1, 2, 3, 4]);
 
         self.log_message("BearerContextSetupResponse >>");
