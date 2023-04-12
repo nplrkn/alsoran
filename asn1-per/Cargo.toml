@@ -11,6 +11,6 @@ slog = "2.7.0"
 anyhow = "1.0.52"
 async-channel = "1.6.1"
 asn1-codecs = { git = "https://github.com/nplrkn/hampi" }
-thiserror = "1.0.36"
+thiserror = "1.0.40"
 num_enum = "0.5.11"
 bitvec = "1.0.1"
