@@ -19,7 +19,7 @@ libc = "^0.2"
 async-io = "1.7.0"
 futures-lite = "1.12.0"
 log = "0.4.3"
-futures-core = "0.3.19"
+futures-core = "0.3.28"
 slog-envlogger = "2.2.0"
 stop-token = "0.7.0"
 
