@@ -384,7 +384,7 @@ impl MockAmf {
                 pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(vec![
                     PduSessionResourceSetupItemSuReq {
                         pdu_session_id: PduSessionId(1),
-                        pdu_session_nas_pdu: Some(NasPdu(vec![])),
+                        pdu_session_nas_pdu: None,
                         s_nssai: self.snssai(),
                         pdu_session_resource_setup_request_transfer,
                     },

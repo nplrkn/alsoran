@@ -1,9 +1,10 @@
-# NEXT UP
 
 ## O-RAN O-DU interop
-- Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
+- Form PDUSessionResourceSetupResponse correctly
+- Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
+  match a transaction.
 - Move Serdes to common
-- avoid need for recompile of ODU by enabling O1
+- avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
@@ -13,7 +14,14 @@
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
 - use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
+- ENUMERATED{True} OPTIONAL (as seen in RRC) should appear in Rust as a bool
 - provide TransportAddress constructor from string (and use common struct for all XXAP libraries)
+- don't set up SRB + 2 DBRs if all we need is one session = one DRB
+- ASN.1 E1 and NGAP PduSessionIds should be directly comparable?  by being the same type?  instead of item.pdu_session_id.0 == stage1.ngap_request.pdu_session_id.0
+
+# NEXT UP
+- Dataplane with O-RAN SC ODU
+- Proper UE software to enable development of correct RRC messages
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -77,6 +85,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Avoid missing NAS message Wireshark error on RrcReconfiguration
+- Find a way to get O-DU PHY stub to send ReconfigurationComplete in the right order (recompile with `ratio = 20`)
 - Common XXAP structures in Asn.1 generator (e.g. Snssai, GtpTunnel) to allow easy transfer between NGAP, F1AP, E1AP
 - Use proper 32 bit bitstrings for TransportAddress in E1AP messages (avoids Wireshark decode issue) 
 - Support for BearerContextModificationRequest in CU-UP

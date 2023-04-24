@@ -4,17 +4,204 @@ use super::{GnbCuCp, Workflow};
 use crate::datastore::UeState;
 use anyhow::Result;
 use e1ap::*;
-use f1ap::UeContextSetupProcedure;
+use f1ap::{DrbsToBeSetupList, UeContextSetupProcedure};
 use net::SerDes;
 use ngap::{
     PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
     PduSessionResourceSetupItemSuReq, PduSessionResourceSetupItemSuRes,
     PduSessionResourceSetupListSuRes, PduSessionResourceSetupRequest,
     PduSessionResourceSetupRequestTransfer, PduSessionResourceSetupResponse,
+    PduSessionResourceSetupResponseTransfer,
 };
-use slog::debug;
+use slog::{debug, warn};
+
+// We start with a list of session to set up.
+// At each stage we might bail out with a cause affecting all sessions.
+// Or we might knock out 1 session only.
+// Each stage has a new kind of result.
+// We always need to refer back to the original ask.
+
+// So
+
+struct SessionResult<S> {
+    pdu_session_id: u8,
+    result: Result<S, ngap::Cause>,
+}
+struct Stage1 {
+    ngap_request: ngap::PduSessionResourceSetupItemSuReq,
+}
+struct Stage2 {
+    stage1: Stage1,
+    e1_setup_response: e1ap::PduSessionResourceSetupItem,
+}
+struct Stage3 {
+    stage2: Stage2,
+    f1_setup_response: f1ap::DrbsSetupItem,
+}
+struct Stage4 {
+    stage3: Stage3,
+    e1_modify_response: e1ap::PduSessionResourceModifiedList,
+}
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
+    pub async fn pdu_session_resource_setup_stage_1(
+        &self,
+        ue: &mut UeState,
+        mut sessions: Vec<SessionResult<Stage1>>,
+    ) -> Vec<SessionResult<Stage2>> {
+        // TODO: convert each of these to subfunctions?
+
+        // Build E1 PduSessionResourceToSetupItems.
+        let mut items = vec![];
+        for session in &mut sessions {
+            match session
+                .result
+                .as_ref()
+                .map(|s| self.build_e1_setup_item(&ue, &s.ngap_request))
+            {
+                Ok(Ok(item)) => items.push(item),
+                // Case where E1 setup item failed
+                Ok(Err(_)) => {
+                    session.result = Err(ngap::Cause::Protocol(
+                        ngap::CauseProtocol::AbstractSyntaxErrorFalselyConstructedMessage,
+                    ))
+                }
+                // Case where the session had already failed
+                Err(e) => (),
+            }
+        }
+
+        // Send BearerContextSetup to CU-UP.
+        let bearer_context_setup = self.build_bearer_context_setup(&ue, items);
+        debug!(self.logger, "<< BearerContextSetupRequest");
+        let mut resource_setup_items = match self
+            .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, self.logger)
+            .await
+        {
+            Ok(BearerContextSetupResponse {
+                gnb_cu_up_ue_e1ap_id,
+                system_bearer_context_setup_response:
+                    SystemBearerContextSetupResponse::NgRanBearerContextSetupResponse(
+                        NgRanBearerContextSetupResponse {
+                            pdu_session_resource_setup_list: PduSessionResourceSetupList(x),
+                            ..
+                        },
+                    ),
+                ..
+            }) => {
+                // Success - store CU-UP's UE ID.
+                ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
+
+                x
+            }
+            Ok(m) => {
+                warn!(
+                    self.logger,
+                    "BearerContextSetupRequest without NGRAN resource setup items: {:?}", m
+                );
+                vec![]
+            }
+            Err(e) => {
+                debug!(self.logger, "Failed bearer context setup {:?}", e);
+                vec![]
+            }
+        };
+        debug!(self.logger, ">> BearerContextSetupResponse");
+
+        // Rebuild the session results vec, adding in the new info from the UP.
+        let mut new_sessions: Vec<SessionResult<Stage2>> = vec![];
+        for session in sessions.drain(..) {
+            let pdu_session_id = session.pdu_session_id;
+            let index = resource_setup_items
+                .iter()
+                .position(|item| item.pdu_session_id.0 == pdu_session_id);
+
+            let result = match (session.result, index) {
+                // Success case
+                (Ok(stage1), Some(index)) => Ok(Stage2 {
+                    stage1,
+                    e1_setup_response: resource_setup_items.swap_remove(index),
+                }),
+                // Case where the session had already failed even before we talked to the CU-UP
+                (Err(cause), _) => Err(cause),
+                // Case where the CU-UP failed (or didn't return) this session.
+                (Ok(_), None) => {
+                    warn!(
+                        self.logger,
+                        "Session {} failed bearer context setup", pdu_session_id
+                    );
+                    Err(ngap::Cause::RadioNetwork(
+                        ngap::CauseRadioNetwork::Unspecified,
+                    ))
+                }
+            };
+            new_sessions.push(SessionResult {
+                pdu_session_id,
+                result,
+            });
+        }
+
+        new_sessions
+    }
+
+    pub async fn pdu_session_resource_setup_stage_2(
+        &self,
+        ue: &UeState,
+        sessions: Vec<SessionResult<Stage2>>,
+    ) -> Vec<SessionResult<Stage3>> {
+        let mut items = vec![];
+        for session in &mut sessions {
+            match session {
+                SessionResult {
+                    pdu_session_id,
+                    result: Ok(x),
+                } => {
+                    // Pass the transport address of the CU-UP to the DU.
+                    // TODO: make these common structures
+                    let gtp_tunnel = f1ap::GtpTunnel {
+                        transport_layer_address: f1ap::TransportLayerAddress(
+                            net::ip_bits_from_string("192.168.130.82")?,
+                        ),
+                        gtp_teid: f1ap::GtpTeid(vec![0, 0, 0, 1]),
+                    };
+                    let drb_setup_item = super::build_f1ap::build_drb_to_be_setup_item(
+                        f1ap::DrbId(pdu_session_id),
+                        f1ap::Snssai(x.stage1.ngap_request.s_nssai.0),
+                        gtp_tunnel,
+                    );
+                    items.push(drb_setup_item);
+                }
+                Err(_) => {
+                    session.result = Err(ngap::Cause::Protocol(
+                        ngap::CauseProtocol::AbstractSyntaxErrorFalselyConstructedMessage,
+                    ));
+                }
+            }
+        }
+
+        // Send UeContextSetupRequest to DU.
+        let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
+            self.gnb_cu_cp,
+            &ue,
+            Some(DrbsToBeSetupList(items)),
+            None,
+        )?;
+        self.log_message("<< UeContextSetupRequest");
+        let ue_context_setup_response = self
+            .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
+            .await?;
+        self.log_message(">> UeContextSetupResponse");
+        todo!()
+    }
+
+    pub async fn pdu_session_resource_setup_stage_3(
+        &self,
+        ue: &UeState,
+        sessions: Vec<Result<Stage3, ngap::Cause>>,
+    ) -> Vec<Result<Stage4, ngap::Cause>> {
+        todo!()
+    }
+
     // Pdu session resource setup procedure.
     //
     // See documentation/session establishment.md
@@ -29,67 +216,147 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // 8. << Dl Rrc Message Transfer + Rrc Reconfiguration + Nas PDU Session Establishment Accept
     // 9. >> Ul Rrc Message Transfer + Rrc Reconfiguration Complete
     // 8.    Pdu Session Resource Setup Response >>
-
     pub async fn pdu_session_resource_setup(
         &self,
         r: PduSessionResourceSetupRequest,
     ) -> PduSessionResourceSetupResponse {
         debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-        let (successful, unsuccessful) = match self.pdu_session_resource_setup_inner(&r).await {
-            Ok(x) => x,
-            Err(e) => {
-                debug!(self.logger, "Failed resource setup - {}", e);
-                (
-                    Vec::new(),
-                    r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
-                )
+        // The first stage is to carry out E1 bearer context setup.  This produces an E1AP PduSessionResourceSetupItem
+        // for each successful result.  Start by assuming failure to look up the UE.
+        let num_sessions = r.pdu_session_resource_setup_list_su_req.0.len();
+        let mut session_results: Vec<Result<PduSessionResourceSetupItem, ngap::Cause>> = vec![
+                Err(ngap::Cause::RadioNetwork(
+                    ngap::CauseRadioNetwork::UnknownLocalUeNgapId
+                ));
+                num_sessions
+            ];
+
+        'setup_stages: {
+            debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
+            let mut ue = match self.retrieve(&r.ran_ue_ngap_id.0).await {
+                Ok(ue) => ue,
+                Err(_) => break 'setup_stages,
+            };
+
+            // Build E1 PduSessionResourceToSetupItems.
+            let mut items = vec![];
+            for (idx, x) in r
+                .pdu_session_resource_setup_list_su_req
+                .0
+                .iter()
+                .enumerate()
+            {
+                match self.build_e1_setup_item(&ue, x) {
+                    Ok(item) => {
+                        items.push(item);
+                    }
+                    Err(e) => {
+                        debug!(self.logger, "Failed to build session setup item {:?}", e);
+                    }
+                };
             }
-        };
 
-        // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
+            if items.len() == 0 {
+                break 'setup_stages;
+            }
 
-        let pdu_session_resource_setup_list_su_res = if successful.is_empty() {
-            None
-        } else {
-            Some(PduSessionResourceSetupListSuRes(
-                successful
-                    .into_iter()
-                    .map(|x| PduSessionResourceSetupItemSuRes {
-                        pdu_session_id: x.pdu_session_id,
-                        pdu_session_resource_setup_response_transfer: x
-                            .pdu_session_resource_setup_request_transfer
-                            .clone(),
-                    })
-                    .collect(),
-            ))
-        };
-
-        let pdu_session_resource_failed_to_setup_list_su_res = if unsuccessful.is_empty() {
-            None
-        } else {
-            Some(PduSessionResourceFailedToSetupListSuRes(
-                unsuccessful
-                    .into_iter()
-                    .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                        pdu_session_id: x.pdu_session_id,
-                        pdu_session_resource_setup_unsuccessful_transfer: x
-                            .pdu_session_resource_setup_request_transfer
-                            .clone(),
-                    })
-                    .collect(),
-            ))
-        };
+            // Send BearerContextSetup to CU-UP.
+            let bearer_context_setup = self.build_bearer_context_setup(&ue, items);
+            debug!(self.logger, "<< BearerContextSetupRequest");
+            let response = match self
+                .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, self.logger)
+                .await
+            {
+                Ok(r) => r,
+                Err(e) => {
+                    debug!(self.logger, "Failed bearer context setup {:?}", e);
+                    break 'setup_stages;
+                }
+            };
+            debug!(self.logger, ">> BearerContextSetupResponse");
+        }
 
         debug!(self.logger, "PduSessionResourceSetupResponse >> ");
-        PduSessionResourceSetupResponse {
-            amf_ue_ngap_id: r.amf_ue_ngap_id,
-            ran_ue_ngap_id: r.ran_ue_ngap_id,
-            pdu_session_resource_setup_list_su_res,
-            pdu_session_resource_failed_to_setup_list_su_res,
-            criticality_diagnostics: None,
-        }
+        todo!()
+        // PduSessionResourceSetupResponse {
+        //     amf_ue_ngap_id: r.amf_ue_ngap_id,
+        //     ran_ue_ngap_id: r.ran_ue_ngap_id,
+        //     pdu_session_resource_setup_list_su_res,
+        //     pdu_session_resource_failed_to_setup_list_su_res,
+        //     criticality_diagnostics: None,
+        // }
     }
+
+    pub async fn pdu_session_resource_setup_stages<'b>(
+        &self,
+        r: &'b PduSessionResourceSetupRequest,
+        successful: &mut Vec<Result<PduSessionResourceSetupItem, ngap::Cause>>,
+    ) -> Result<()> {
+        // Retrieve UE context by ran_ue_ngap_id.
+        Ok(())
+    }
+
+    // pub async fn pdu_session_resource_setup(
+    //     &self,
+    //     r: PduSessionResourceSetupRequest,
+    // ) -> PduSessionResourceSetupResponse {
+    //     debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
+
+    //     let (successful, unsuccessful) = match self.pdu_session_resource_setup_inner(&r).await {
+    //         Ok(x) => x,
+    //         Err(e) => {
+    //             debug!(self.logger, "Failed resource setup - {}", e);
+    //             (
+    //                 Vec::new(),
+    //                 r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
+    //             )
+    //         }
+    //     };
+
+    //     // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
+
+    //     let pdu_session_resource_setup_list_su_res = if successful.is_empty() {
+    //         None
+    //     } else {
+    //         Some(PduSessionResourceSetupListSuRes(
+    //             successful
+    //                 .into_iter()
+    //                 .map(|x| PduSessionResourceSetupItemSuRes {
+    //                     pdu_session_id: x.pdu_session_id,
+    //                     pdu_session_resource_setup_response_transfer: x
+    //                         .pdu_session_resource_setup_request_transfer
+    //                         .clone(),
+    //                 })
+    //                 .collect(),
+    //         ))
+    //     };
+
+    //     let pdu_session_resource_failed_to_setup_list_su_res = if unsuccessful.is_empty() {
+    //         None
+    //     } else {
+    //         Some(PduSessionResourceFailedToSetupListSuRes(
+    //             unsuccessful
+    //                 .into_iter()
+    //                 .map(|x| PduSessionResourceFailedToSetupItemSuRes {
+    //                     pdu_session_id: x.pdu_session_id,
+    //                     pdu_session_resource_setup_unsuccessful_transfer: x
+    //                         .pdu_session_resource_setup_request_transfer
+    //                         .clone(),
+    //                 })
+    //                 .collect(),
+    //         ))
+    //     };
+
+    //     debug!(self.logger, "PduSessionResourceSetupResponse >> ");
+    //     PduSessionResourceSetupResponse {
+    //         amf_ue_ngap_id: r.amf_ue_ngap_id,
+    //         ran_ue_ngap_id: r.ran_ue_ngap_id,
+    //         pdu_session_resource_setup_list_su_res,
+    //         pdu_session_resource_failed_to_setup_list_su_res,
+    //         criticality_diagnostics: None,
+    //     }
+    // }
 
     pub async fn pdu_session_resource_setup_inner<'b>(
         &self,
@@ -106,10 +373,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let mut unsuccessful = vec![];
         let mut successful = vec![];
 
-        // Build PduSessionResourceToSetupItems.
+        // Build E1 PduSessionResourceToSetupItems.
         let mut items = vec![];
         for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
-            match self.build_setup_item(&ue, x) {
+            match self.build_e1_setup_item(&ue, x) {
                 Ok(item) => {
                     items.push(item);
                     successful.push(x);
@@ -202,7 +469,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok((successful, unsuccessful))
     }
 
-    pub fn build_setup_item(
+    pub fn build_e1_setup_item(
         &self,
         _ue: &UeState,
         r: &PduSessionResourceSetupItemSuReq,

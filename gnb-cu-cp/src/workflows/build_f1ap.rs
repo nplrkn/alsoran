@@ -11,7 +11,7 @@ use rrc::{
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
 
-fn build_drb_to_be_setup_item(
+pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,
     snssai: Snssai,
     gtp_tunnel: GtpTunnel,
@@ -104,7 +104,12 @@ pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> Result<UeContextSetupRequest> {
-    build_ue_context_setup_request(gnb_cu_cp, ue, rrc_container)
+    build_ue_context_setup_request(
+        gnb_cu_cp,
+        ue,
+        Some(default_drb_to_be_setup_list()?),
+        rrc_container,
+    )
 }
 
 pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
@@ -113,18 +118,15 @@ pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> Result<UeContextSetupRequest> {
-    build_ue_context_setup_request(gnb_cu_cp, ue, rrc_container)
+    build_ue_context_setup_request(
+        gnb_cu_cp,
+        ue,
+        Some(default_drb_to_be_setup_list()?),
+        rrc_container,
+    )
 }
 
-fn build_ue_context_setup_request<G: GnbCuCp>(
-    _gnb_cu_cp: &G,
-    ue: &UeState,
-    rrc_container: Option<f1ap::RrcContainer>,
-) -> Result<UeContextSetupRequest> {
-    // TODO: derive and use frunk for the common ngap / f1ap structures seen here?
-
-    // Build a Ue Context Setup Request similar to the one sent by the O-RAN-SC O-DU's CU Stub to the ODU.
-    // This has one SRB and two DRBs.
+fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
     let first_gtp_tunnel = GtpTunnel {
         transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
         gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
@@ -146,6 +148,22 @@ fn build_ue_context_setup_request<G: GnbCuCp>(
     };
     let second_drb_to_setup_item =
         build_drb_to_be_setup_item(DrbId(2), second_slice, second_gtp_tunnel)?;
+    Ok(DrbsToBeSetupList(vec![
+        first_drb_to_setup_item,
+        second_drb_to_setup_item,
+    ]))
+}
+
+pub fn build_ue_context_setup_request<G: GnbCuCp>(
+    _gnb_cu_cp: &G,
+    ue: &UeState,
+    drbs_to_be_setup_list: Option<DrbsToBeSetupList>,
+    rrc_container: Option<f1ap::RrcContainer>,
+) -> Result<UeContextSetupRequest> {
+    // TODO: derive and use frunk for the common ngap / f1ap structures seen here?
+
+    // Build a Ue Context Setup Request similar to the one sent by the O-RAN-SC O-DU's CU Stub to the ODU.
+    // This has one SRB and two DRBs.
 
     let rrc_ue_capability_rat_container_list =
         rrc::UeCapabilityRatContainerList(vec![UeCapabilityRatContainer {
@@ -266,10 +284,7 @@ fn build_ue_context_setup_request<G: GnbCuCp>(
             duplication_indication: None,
             additional_duplication_indication: None,
         }])),
-        drbs_to_be_setup_list: Some(DrbsToBeSetupList(vec![
-            first_drb_to_setup_item,
-            second_drb_to_setup_item,
-        ])),
+        drbs_to_be_setup_list,
         inactivity_monitoring_request: None,
         rat_frequency_priority_information: None,
         rrc_container,
