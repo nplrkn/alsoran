@@ -97,9 +97,11 @@ impl SctpAssociation {
         sock_opt::enable_sctp_heartbeat(fd, 1000).unwrap_or_else(|e| {
             warn!(logger, "Carrying on without heartbeat - {}", e);
         });
-        sock_opt::enable_sock_opt(fd, SCTP_NODELAY as _).unwrap_or_else(|e| {
-            warn!(logger, "Carrying on without NODELAY - {}", e);
-        });
+        // It's not clear if this socket option definitely achieves anything - RFC6458 is
+        // very vague.
+        // sock_opt::enable_sock_opt(fd, SCTP_NODELAY as _).unwrap_or_else(|e| {
+        //     warn!(logger, "Carrying on without NODELAY - {}", e);
+        // });
         sock_opt::enable_sock_opt(fd, SCTP_RECVRCVINFO as _)?;
         Ok(())
     }
@@ -137,7 +139,7 @@ impl SctpAssociation {
             cmsg_len: mem::size_of::<Sndinfo>(),
             cmsg_level: IPPROTO_SCTP,
             cmsg_type: sctp_cmsg_type_SCTP_SNDINFO as _,
-            snd_sid: 1,
+            snd_sid: 0,
             snd_flags: 0,
             snd_ppid: self.ppid.to_be(),
             snd_context: 0,
