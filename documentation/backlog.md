@@ -52,7 +52,6 @@
 ## ASN.1 GENERATOR
 - Bugs that show up in Wireshark capture of session establishment test (PrintableString issue is a wireshark bug??).
 - Cope with extension marker being set
-- Frunk transmogrify - awkward because of vecs, enums and bitstrings - or equivalent
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Implement Rrc setuprelease
 - Move to latest asn1-codecs crate version
@@ -78,6 +77,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Common XXAP structures in Asn.1 generator (e.g. Snssai, GtpTunnel) to allow easy transfer between NGAP, F1AP, E1AP
 - Use proper 32 bit bitstrings for TransportAddress in E1AP messages (avoids Wireshark decode issue) 
 - Support for BearerContextModificationRequest in CU-UP
 - Pass CellGroupConfig from DU to UE in Rrc Reconfiguration Request

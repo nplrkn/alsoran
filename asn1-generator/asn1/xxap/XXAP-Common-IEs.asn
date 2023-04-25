@@ -1,0 +1,26 @@
+-- Handwritten file that contains common structures from NGAP, E1AP and F1AP
+Criticality ::= ENUMERATED { reject, ignore, notify }
+
+TransportLayerAddress ::= BIT STRING (SIZE (1..160, ...))
+GTP-TEID ::= OCTET STRING (SIZE (4))
+GTPTunnel ::= SEQUENCE {
+	transportLayerAddress		TransportLayerAddress,
+	gTP-TEID					GTP-TEID,
+	iE-Extensions		ProtocolExtensionContainer { {GTPTunnel-ExtIEs } } OPTIONAL,
+	...
+}
+
+GTPTunnel-ExtIEs NGAP-PROTOCOL-EXTENSION ::= {
+	...
+}
+
+-- This one is named S-NSSAI in NGAP
+SNSSAI ::= SEQUENCE {
+	sST			OCTET STRING (SIZE (1)),
+	sD			OCTET STRING (SIZE (3)) 	OPTIONAL	,
+	iE-Extensions				ProtocolExtensionContainer { { SNSSAI-ExtIEs } }	OPTIONAL
+}
+
+SNSSAI-ExtIEs	F1AP-PROTOCOL-EXTENSION ::= {
+	...
+}

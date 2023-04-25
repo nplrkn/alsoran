@@ -1073,8 +1073,8 @@ def decode_ies_string(fields_from):
         }}"""
 
 
-def generate(tree, constants=dict(), verbose=False):
-    tree = transform(tree, constants)
+def generate(tree, constants=dict(), verbose=False, strip_xxap=False):
+    tree = transform(tree, constants, strip_xxap)
     if verbose:
         print(tree.pretty())
     visited = RustInterpreter()
@@ -1088,17 +1088,17 @@ def generate_from_file(input_file, constants=dict(), verbose=False):
     tree = parse_file(input_file)
     if verbose:
         print(tree.pretty())
-    return generate(tree, constants, print)
+    return generate(tree, constants, print, False)
 
 
 class TestGenerator(unittest.TestCase):
     maxDiff = None
 
-    def should_generate(self, input, expected, constants=dict()):
+    def should_generate(self, input, expected, constants=dict(), strip_xxap=False):
         output = ""
         tree = parse_string(input)
         try:
-            output = generate(tree, constants, True)
+            output = generate(tree, constants, True, strip_xxap)
             print(output)
             self.assertEqual(output, expected)
         finally:
@@ -3020,6 +3020,75 @@ impl PerCodec for QosInformation {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("QosInformation"); e})
     }
 }""", constants={"id-DRB-Information": 164, "id-Another-One": 156})
+
+    def test_common_xxap_struct(self):
+        self.should_generate("""\
+UPTransportLayerInformation ::= CHOICE {
+	gTPTunnel				GTPTunnel,
+	choice-Extensions		ProtocolIE-SingleContainer { {UPTransportLayerInformation-ExtIEs } }
+}
+
+UPTransportLayerInformation-ExtIEs NGAP-PROTOCOL-IES ::= {
+	...
+}
+
+GTPTunnel ::= SEQUENCE {
+	transportLayerAddress		TransportLayerAddress,
+	gTP-TEID					GTP-TEID,
+	iE-Extensions		ProtocolExtensionContainer { {GTPTunnel-ExtIEs } } OPTIONAL,
+	...
+}
+
+GTPTunnel-ExtIEs NGAP-PROTOCOL-EXTENSION ::= {
+	...
+}""", """\
+
+// UpTransportLayerInformation
+# [derive(Clone, Debug)]
+pub enum UpTransportLayerInformation {
+    GtpTunnel(GtpTunnel),
+}
+
+impl UpTransportLayerInformation {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::GtpTunnel(GtpTunnel::decode(data)?)),
+            1 => { 
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
+                let result = match id {
+                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                };
+                data.decode_align()?;
+                result
+            },
+            _ => Err(PerCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        match self {
+            Self::GtpTunnel(x) => {
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl PerCodec for UpTransportLayerInformation {
+    type Allocator = Allocator;
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        UpTransportLayerInformation::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UpTransportLayerInformation"); e})
+    }
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UpTransportLayerInformation"); e})
+    }
+}""", constants=dict(), strip_xxap=True)
 
 
 if __name__ == '__main__':

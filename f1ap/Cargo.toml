@@ -11,6 +11,7 @@ async-trait = "0.1.68"
 anyhow = "1.0.52"
 slog = "2.7.0"
 asn1-per = { path = "../asn1-per"}
+xxap = { path = "../xxap"}
 num_enum = "0.5.11"
 net = { path = "../net" }
 hex = "0.4.3"

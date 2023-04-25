@@ -8,5 +8,6 @@ mod top_pdu;
 pub use top_pdu::*;
 mod f1ap_cu;
 pub use f1ap_cu::*;
+pub use xxap::*;
 #[cfg(test)]
 mod test;
