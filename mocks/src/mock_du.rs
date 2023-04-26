@@ -9,6 +9,7 @@ use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
+use xxap::*;
 
 const F1AP_SCTP_PPID: u32 = 62;
 const F1AP_BIND_PORT: u16 = 38472;
@@ -189,7 +190,7 @@ impl MockDu {
                     selected_plmn_identity: 1,
                     registered_amf: None,
                     guami_type: None,
-                    s_nssai_list: None,
+                    snssai_list: None,
                     dedicated_nas_message: DedicatedNasMessage(nas_message),
                     ng_5g_s_tmsi_value: None,
                     late_non_critical_extension: None,

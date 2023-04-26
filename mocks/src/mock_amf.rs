@@ -7,6 +7,7 @@ use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
+use xxap::*;
 
 impl Pdu for NgapPdu {}
 
@@ -89,7 +90,7 @@ impl MockAmf {
                 plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
                     plmn_identity: self.plmn_identity(),
                     slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        s_nssai: self.snssai(),
+                        snssai: self.snssai(),
                     }]),
                     npn_support: None,
                     extended_slice_support_list: None,
@@ -146,9 +147,9 @@ impl MockAmf {
         PlmnIdentity(vec![2, 3, 2])
     }
 
-    fn snssai(&self) -> SNssai {
-        SNssai {
-            sst: Sst(vec![0x01]),
+    fn snssai(&self) -> Snssai {
+        Snssai {
+            sst: vec![0x01],
             sd: None,
         }
     }
@@ -196,7 +197,7 @@ impl MockAmf {
                 guami: self.guami(),
                 pdu_session_resource_setup_list_cxt_req: None,
                 allowed_nssai: AllowedNssai(vec![AllowedNssaiItem {
-                    s_nssai: self.snssai(),
+                    snssai: self.snssai(),
                 }]),
                 ue_security_capabilities: UeSecurityCapabilities {
                     nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![u8,Msb0;0;16]),
@@ -385,7 +386,7 @@ impl MockAmf {
                     PduSessionResourceSetupItemSuReq {
                         pdu_session_id: PduSessionId(1),
                         pdu_session_nas_pdu: None,
-                        s_nssai: self.snssai(),
+                        snssai: self.snssai(),
                         pdu_session_resource_setup_request_transfer,
                     },
                 ]),

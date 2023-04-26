@@ -10,6 +10,7 @@ use rrc::{
     FreqBandIndicatorNr, ModulationOrder, PdcpParameters, PhyParameters, RfParameters,
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
+use xxap::*;
 
 pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,
@@ -160,11 +161,8 @@ pub fn build_ue_context_setup_request<G: GnbCuCp>(
     drbs_to_be_setup_list: Option<DrbsToBeSetupList>,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> Result<UeContextSetupRequest> {
-    // TODO: derive and use frunk for the common ngap / f1ap structures seen here?
-
     // Build a Ue Context Setup Request similar to the one sent by the O-RAN-SC O-DU's CU Stub to the ODU.
     // This has one SRB and two DRBs.
-
     let rrc_ue_capability_rat_container_list =
         rrc::UeCapabilityRatContainerList(vec![UeCapabilityRatContainer {
             rat_type: rrc::RatType::Nr,

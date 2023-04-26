@@ -298,13 +298,13 @@ impl PerCodec for AllowedNssai {
 // AllowedNssaiItem
 #[derive(Clone, Debug)]
 pub struct AllowedNssaiItem {
-    pub s_nssai: SNssai,
+    pub snssai: Snssai,
 }
 
 impl AllowedNssaiItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let s_nssai = SNssai::decode(data)?;
+        let snssai = Snssai::decode(data)?;
 
         // Process the extension container
 
@@ -319,14 +319,14 @@ impl AllowedNssaiItem {
                 }
             }
         }
-        Ok(Self { s_nssai })
+        Ok(Self { snssai })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.s_nssai.encode(data)?;
+        self.snssai.encode(data)?;
 
         Ok(())
     }
@@ -22140,7 +22140,7 @@ pub struct PduSessionResourceModifyItemModReq {
     pub pdu_session_id: PduSessionId,
     pub nas_pdu: Option<NasPdu>,
     pub pdu_session_resource_modify_request_transfer: Vec<u8>,
-    pub s_nssai: Option<SNssai>,
+    pub snssai: Option<Snssai>,
 }
 
 impl PduSessionResourceModifyItemModReq {
@@ -22156,7 +22156,7 @@ impl PduSessionResourceModifyItemModReq {
             decode::decode_octetstring(data, None, None, false)?;
 
         // Process the extension container
-        let mut s_nssai: Option<SNssai> = None;
+        let mut snssai: Option<Snssai> = None;
 
         if optionals[1] {
             let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
@@ -22165,7 +22165,7 @@ impl PduSessionResourceModifyItemModReq {
                 let _criticality = Criticality::decode(data)?;
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    148 => s_nssai = Some(SNssai::decode(data)?),
+                    148 => snssai = Some(Snssai::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
@@ -22174,7 +22174,7 @@ impl PduSessionResourceModifyItemModReq {
             pdu_session_id,
             nas_pdu,
             pdu_session_resource_modify_request_transfer,
-            s_nssai,
+            snssai,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -23536,7 +23536,7 @@ impl PerCodec for PduSessionResourceSetupListCxtReq {
 pub struct PduSessionResourceSetupItemCxtReq {
     pub pdu_session_id: PduSessionId,
     pub nas_pdu: Option<NasPdu>,
-    pub s_nssai: SNssai,
+    pub snssai: Snssai,
     pub pdu_session_resource_setup_request_transfer: Vec<u8>,
 }
 
@@ -23549,7 +23549,7 @@ impl PduSessionResourceSetupItemCxtReq {
         } else {
             None
         };
-        let s_nssai = SNssai::decode(data)?;
+        let snssai = Snssai::decode(data)?;
         let pdu_session_resource_setup_request_transfer =
             decode::decode_octetstring(data, None, None, false)?;
 
@@ -23569,7 +23569,7 @@ impl PduSessionResourceSetupItemCxtReq {
         Ok(Self {
             pdu_session_id,
             nas_pdu,
-            s_nssai,
+            snssai,
             pdu_session_resource_setup_request_transfer,
         })
     }
@@ -23583,7 +23583,7 @@ impl PduSessionResourceSetupItemCxtReq {
         if let Some(x) = &self.nas_pdu {
             x.encode(data)?;
         }
-        self.s_nssai.encode(data)?;
+        self.snssai.encode(data)?;
         encode::encode_octetstring(
             data,
             None,
@@ -23760,7 +23760,7 @@ impl PerCodec for PduSessionResourceSetupListHoReq {
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupItemHoReq {
     pub pdu_session_id: PduSessionId,
-    pub s_nssai: SNssai,
+    pub snssai: Snssai,
     pub handover_request_transfer: Vec<u8>,
 }
 
@@ -23768,7 +23768,7 @@ impl PduSessionResourceSetupItemHoReq {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let pdu_session_id = PduSessionId::decode(data)?;
-        let s_nssai = SNssai::decode(data)?;
+        let snssai = Snssai::decode(data)?;
         let handover_request_transfer = decode::decode_octetstring(data, None, None, false)?;
 
         // Process the extension container
@@ -23786,7 +23786,7 @@ impl PduSessionResourceSetupItemHoReq {
         }
         Ok(Self {
             pdu_session_id,
-            s_nssai,
+            snssai,
             handover_request_transfer,
         })
     }
@@ -23796,7 +23796,7 @@ impl PduSessionResourceSetupItemHoReq {
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
-        self.s_nssai.encode(data)?;
+        self.snssai.encode(data)?;
         encode::encode_octetstring(
             data,
             None,
@@ -23869,7 +23869,7 @@ impl PerCodec for PduSessionResourceSetupListSuReq {
 pub struct PduSessionResourceSetupItemSuReq {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_nas_pdu: Option<NasPdu>,
-    pub s_nssai: SNssai,
+    pub snssai: Snssai,
     pub pdu_session_resource_setup_request_transfer: Vec<u8>,
 }
 
@@ -23882,7 +23882,7 @@ impl PduSessionResourceSetupItemSuReq {
         } else {
             None
         };
-        let s_nssai = SNssai::decode(data)?;
+        let snssai = Snssai::decode(data)?;
         let pdu_session_resource_setup_request_transfer =
             decode::decode_octetstring(data, None, None, false)?;
 
@@ -23902,7 +23902,7 @@ impl PduSessionResourceSetupItemSuReq {
         Ok(Self {
             pdu_session_id,
             pdu_session_nas_pdu,
-            s_nssai,
+            snssai,
             pdu_session_resource_setup_request_transfer,
         })
     }
@@ -23916,7 +23916,7 @@ impl PduSessionResourceSetupItemSuReq {
         if let Some(x) = &self.pdu_session_nas_pdu {
             x.encode(data)?;
         }
-        self.s_nssai.encode(data)?;
+        self.snssai.encode(data)?;
         encode::encode_octetstring(
             data,
             None,
@@ -30124,13 +30124,13 @@ impl PerCodec for SliceOverloadList {
 // SliceOverloadItem
 #[derive(Clone, Debug)]
 pub struct SliceOverloadItem {
-    pub s_nssai: SNssai,
+    pub snssai: Snssai,
 }
 
 impl SliceOverloadItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let s_nssai = SNssai::decode(data)?;
+        let snssai = Snssai::decode(data)?;
 
         // Process the extension container
 
@@ -30145,14 +30145,14 @@ impl SliceOverloadItem {
                 }
             }
         }
-        Ok(Self { s_nssai })
+        Ok(Self { snssai })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.s_nssai.encode(data)?;
+        self.snssai.encode(data)?;
 
         Ok(())
     }
@@ -30215,13 +30215,13 @@ impl PerCodec for SliceSupportList {
 // SliceSupportItem
 #[derive(Clone, Debug)]
 pub struct SliceSupportItem {
-    pub s_nssai: SNssai,
+    pub snssai: Snssai,
 }
 
 impl SliceSupportItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let s_nssai = SNssai::decode(data)?;
+        let snssai = Snssai::decode(data)?;
 
         // Process the extension container
 
@@ -30236,14 +30236,14 @@ impl SliceSupportItem {
                 }
             }
         }
-        Ok(Self { s_nssai })
+        Ok(Self { snssai })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.s_nssai.encode(data)?;
+        self.snssai.encode(data)?;
 
         Ok(())
     }
@@ -30312,68 +30312,6 @@ impl PerCodec for SnpnMobilityInformation {
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SnpnMobilityInformation");
-            e
-        })
-    }
-}
-// SNssai
-#[derive(Clone, Debug)]
-pub struct SNssai {
-    pub sst: Sst,
-    pub sd: Option<Sd>,
-}
-
-impl SNssai {
-    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 2)?;
-        let sst = Sst::decode(data)?;
-        let sd = if optionals[0] {
-            Some(Sd::decode(data)?)
-        } else {
-            None
-        };
-
-        // Process the extension container
-
-        if optionals[1] {
-            let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_ies {
-                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
-                let _criticality = Criticality::decode(data)?;
-                let ie_length = decode::decode_length_determinent(data, None, None, false)?;
-                match id {
-                    _ => data.advance_maybe_err(ie_length, false)?,
-                }
-            }
-        }
-        Ok(Self { sst, sd })
-    }
-    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut optionals = BitString::new();
-        optionals.push(self.sd.is_some());
-        optionals.push(false);
-
-        encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.sst.encode(data)?;
-        if let Some(x) = &self.sd {
-            x.encode(data)?;
-        }
-
-        Ok(())
-    }
-}
-
-impl PerCodec for SNssai {
-    type Allocator = Allocator;
-    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SNssai::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SNssai");
-            e
-        })
-    }
-    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SNssai");
             e
         })
     }

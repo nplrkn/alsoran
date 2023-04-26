@@ -4,6 +4,7 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{bail, Result};
 use bitvec::prelude::*;
 use e1ap::*;
+use xxap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
 

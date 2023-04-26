@@ -82,7 +82,7 @@ def generate_rrc():
     constants = get_constants(parse_tree)
 
     generate_file(protocol, "rrc.rs", "All", USE_ASN1_UPER +
-                  USE_RRC_SETUP_RELEASE, constants, parse_tree)
+                  USE_RRC_SETUP_RELEASE, constants, False, parse_tree)
 
 
 generate_xxap_common()

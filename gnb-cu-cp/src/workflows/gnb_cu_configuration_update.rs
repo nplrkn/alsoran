@@ -6,8 +6,8 @@ use anyhow::Result;
 use f1ap::{
     CpTransportLayerAddress, GnbCuConfigurationUpdate, GnbCuConfigurationUpdateProcedure,
     GnbCuTnlAssociationToAddItem, GnbCuTnlAssociationToAddList, TnlAssociationUsage, TransactionId,
-    TransportLayerAddress,
 };
+use xxap::TransportLayerAddress;
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
     pub async fn gnb_cu_configuration_update(&self, f1ap_endpoint_ip_addr: &String) -> Result<()> {

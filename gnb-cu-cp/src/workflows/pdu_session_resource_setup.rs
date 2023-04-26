@@ -2,9 +2,9 @@
 
 use super::{GnbCuCp, Workflow};
 use crate::datastore::UeState;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use e1ap::*;
-use f1ap::{DrbsToBeSetupList, UeContextSetupProcedure};
+use f1ap::{DrbsToBeSetupList, UeContextSetupProcedure, UeContextSetupResponse};
 use net::SerDes;
 use ngap::{
     PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
@@ -14,6 +14,7 @@ use ngap::{
     PduSessionResourceSetupResponseTransfer,
 };
 use slog::{debug, warn};
+use xxap::*;
 
 // We start with a list of session to set up.
 // At each stage we might bail out with a cause affecting all sessions.
@@ -150,47 +151,81 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         sessions: Vec<SessionResult<Stage2>>,
     ) -> Vec<SessionResult<Stage3>> {
         let mut items = vec![];
-        for session in &mut sessions {
+        for session in sessions {
             match session {
                 SessionResult {
                     pdu_session_id,
-                    result: Ok(x),
+                    result:
+                        Ok(Stage2 {
+                            stage1:
+                                Stage1 {
+                                    ngap_request: PduSessionResourceSetupItemSuReq { snssai, .. },
+                                },
+                            e1_setup_response:
+                                PduSessionResourceSetupItem {
+                                    ng_dl_up_tnl_information:
+                                        UpTnlInformation::GtpTunnel(gtp_tunnel),
+                                    ..
+                                },
+                        }),
                 } => {
                     // Pass the transport address of the CU-UP to the DU.
-                    // TODO: make these common structures
-                    let gtp_tunnel = f1ap::GtpTunnel {
-                        transport_layer_address: f1ap::TransportLayerAddress(
-                            net::ip_bits_from_string("192.168.130.82")?,
-                        ),
-                        gtp_teid: f1ap::GtpTeid(vec![0, 0, 0, 1]),
-                    };
-                    let drb_setup_item = super::build_f1ap::build_drb_to_be_setup_item(
+                    match super::build_f1ap::build_drb_to_be_setup_item(
                         f1ap::DrbId(pdu_session_id),
-                        f1ap::Snssai(x.stage1.ngap_request.s_nssai.0),
+                        snssai,
                         gtp_tunnel,
-                    );
-                    items.push(drb_setup_item);
+                    ) {
+                        Ok(drb_setup_item) => items.push(drb_setup_item),
+                        Err(e) => warn!(self.logger, "Failed to build Drb item - {:?}", e),
+                    }
                 }
-                Err(_) => {
-                    session.result = Err(ngap::Cause::Protocol(
-                        ngap::CauseProtocol::AbstractSyntaxErrorFalselyConstructedMessage,
-                    ));
+                _ => {
+                    warn!(
+                        self.logger,
+                        "Problem processing session setup result from CU-UP"
+                    );
+
+                    // We don't ask the DU to set up a DRB in this case.  We do not currently have a way of
+                    // storing and returning a specific error cause at this point.
                 }
             }
         }
 
         // Send UeContextSetupRequest to DU.
-        let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
-            self.gnb_cu_cp,
-            &ue,
-            Some(DrbsToBeSetupList(items)),
-            None,
-        )?;
-        self.log_message("<< UeContextSetupRequest");
-        let ue_context_setup_response = self
-            .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
-            .await?;
-        self.log_message(">> UeContextSetupResponse");
+        let ue_context_setup_response = if !items.is_empty() {
+            match super::build_f1ap::build_ue_context_setup_request(
+                self.gnb_cu_cp,
+                &ue,
+                Some(DrbsToBeSetupList(items)),
+                None,
+            ) {
+                Err(e) => Err(anyhow!("UeContextSetupRequest build failed - {:?}", e)),
+                Ok(ue_context_setup_request) => {
+                    self.log_message("<< UeContextSetupRequest");
+                    self.f1ap_request::<UeContextSetupProcedure>(
+                        ue_context_setup_request,
+                        self.logger,
+                    )
+                    .await
+                    .map_err(|e| anyhow!("UeContextSetupRequest request failed - {:?}", e))
+                }
+            }
+        } else {
+            Err(anyhow!("No remaining DRBs to be set up"))
+        };
+
+        match ue_context_setup_response {
+            Ok(UeContextSetupResponse { .. }) => {
+                self.log_message(">> UeContextSetupResponse");
+
+                todo!()
+            }
+            Err(e) => {
+                // Replace
+                todo!()
+            }
+        }
+
         todo!()
     }
 
@@ -480,10 +515,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok(PduSessionResourceToSetupItem {
             pdu_session_id: PduSessionId(r.pdu_session_id.0),
             pdu_session_type: PduSessionType::Ipv4,
-            snssai: Snssai {
-                sst: r.s_nssai.sst.0.clone(),
-                sd: r.s_nssai.sd.clone().map(|x| x.0),
-            },
+            snssai: r.snssai,
             security_indication: SecurityIndication {
                 integrity_protection_indication: IntegrityProtectionIndication::Preferred,
                 confidentiality_protection_indication:
@@ -492,7 +524,6 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             },
             pdu_session_resource_dl_ambr: None,
             // TODO: get transport information from the request
-            // TODO: Frunk transmogrify would be ideal
             ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
                 transport_layer_address: TransportLayerAddress(net::ip_bits_from_string(
                     "192.168.110.82",
