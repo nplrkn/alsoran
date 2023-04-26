@@ -489,7 +489,15 @@ class TypeTransformer(Transformer):
         return self.ie(tree)
 
 
-def transform(mut_tree, constants):
+def strip_xxap_common(tree):
+    new_tree = Tree(tree.data, [])
+    for definition in tree.children:
+        if definition.children[0] not in ["GtpTunnel", "GtpTeid", "TransportLayerAddress", "Snssai"]:
+            new_tree.children.append(definition)
+    return new_tree
+
+
+def transform(mut_tree, constants, strip_xxap):
     try:
         print("---- Deduplicate enum variants ----")
         mut_tree = EnumDeDuplicator().transform(mut_tree)
@@ -505,27 +513,34 @@ def transform(mut_tree, constants):
         mut_tree = IeContainerMerger(tnf.ie_dict).transform(mut_tree)
 
         print("---- Transforming ----")
-        return TypeTransformer(constants, tnf.name_dict, tnf.convert).transform(mut_tree)
+        mut_tree = TypeTransformer(
+            constants, tnf.name_dict, tnf.convert).transform(mut_tree)
+
+        if strip_xxap:
+            print("---- Remove XXAP common elements ----")
+            mut_tree = strip_xxap_common(mut_tree)
+
+        return mut_tree
 
     except Exception as e:
         print(mut_tree.pretty())
         raise e
 
 
-def transform_from_file(input_file):
+def transform_from_file(input_file, strip_xxap):
     tree = parse_file(input_file)
-    return transform(tree, dict())
+    return transform(tree, dict(), strip_xxap)
 
 
 class TestTransformer(unittest.TestCase):
     maxDiff = None
 
-    def should_generate(self, input, expected, constants=dict()):
+    def should_generate(self, input, expected, constants=dict(), strip_xxap=False):
         output = ""
         tree = parse_string(input)
         # print(tree.pretty())
         try:
-            output = transform(tree, constants).pretty()
+            output = transform(tree, constants, strip_xxap).pretty()
             # print(output)
             self.assertEqual(output, expected)
         finally:

@@ -10,6 +10,7 @@ members = [
     "ngap",
     "f1ap",
     "e1ap",
+    "xxap",
     "rrc",
     "pdcp",
     "gnb-cu-cp",

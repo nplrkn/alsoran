@@ -16,6 +16,7 @@ anyhow = "1.0.52"
 common = { path = "../common" }
 e1ap = {path = "../e1ap" }
 f1ap = {path = "../f1ap" }
+xxap = {path = "../xxap" }
 ngap = {path = "../ngap" }
 rrc = {path = "../rrc" }
 pdcp = {path = "../pdcp" }
