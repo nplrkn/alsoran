@@ -515,7 +515,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok(PduSessionResourceToSetupItem {
             pdu_session_id: PduSessionId(r.pdu_session_id.0),
             pdu_session_type: PduSessionType::Ipv4,
-            snssai: r.snssai,
+            snssai: r.snssai.clone(),
             security_indication: SecurityIndication {
                 integrity_protection_indication: IntegrityProtectionIndication::Preferred,
                 confidentiality_protection_indication:
