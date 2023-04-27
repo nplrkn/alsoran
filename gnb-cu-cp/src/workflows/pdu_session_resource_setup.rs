@@ -24,10 +24,6 @@ use xxap::*;
 
 // So
 
-struct SessionResult<S> {
-    pdu_session_id: u8,
-    result: Result<S, ngap::Cause>,
-}
 struct Stage1 {
     ngap_request: ngap::PduSessionResourceSetupItemSuReq,
 }
@@ -41,35 +37,31 @@ struct Stage3 {
 }
 struct Stage4 {
     stage3: Stage3,
-    e1_modify_response: e1ap::PduSessionResourceModifiedList,
+    e1_modify_response: e1ap::PduSessionResourceModifiedItem,
 }
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
-    pub async fn pdu_session_resource_setup_stage_1(
+    async fn pdu_session_resource_setup_stage_1(
         &self,
         ue: &mut UeState,
-        mut sessions: Vec<SessionResult<Stage1>>,
-    ) -> Vec<SessionResult<Stage2>> {
+        mut sessions: Vec<Stage1>,
+    ) -> Vec<Stage2> {
         // TODO: convert each of these to subfunctions?
 
         // Build E1 PduSessionResourceToSetupItems.
         let mut items = vec![];
-        for session in &mut sessions {
-            match session
-                .result
-                .as_ref()
-                .map(|s| self.build_e1_setup_item(&ue, &s.ngap_request))
-            {
-                Ok(Ok(item)) => items.push(item),
+        for session in &sessions {
+            match self.build_e1_setup_item(&ue, &session.ngap_request) {
+                Ok(item) => items.push(item),
                 // Case where E1 setup item failed
-                Ok(Err(_)) => {
-                    session.result = Err(ngap::Cause::Protocol(
-                        ngap::CauseProtocol::AbstractSyntaxErrorFalselyConstructedMessage,
-                    ))
+                Err(e) => {
+                    warn!(self.logger, "Build E1 setup item failed {:?}", e);
                 }
-                // Case where the session had already failed
-                Err(e) => (),
             }
+        }
+
+        if items.is_empty() {
+            return vec![];
         }
 
         // Send BearerContextSetup to CU-UP.
@@ -100,141 +92,241 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                     self.logger,
                     "BearerContextSetupRequest without NGRAN resource setup items: {:?}", m
                 );
-                vec![]
+                return vec![];
             }
             Err(e) => {
                 debug!(self.logger, "Failed bearer context setup {:?}", e);
-                vec![]
+                return vec![];
             }
         };
         debug!(self.logger, ">> BearerContextSetupResponse");
 
         // Rebuild the session results vec, adding in the new info from the UP.
-        let mut new_sessions: Vec<SessionResult<Stage2>> = vec![];
+        let mut new_sessions: Vec<Stage2> = vec![];
         for session in sessions.drain(..) {
-            let pdu_session_id = session.pdu_session_id;
+            let pdu_session_id = session.ngap_request.pdu_session_id.0;
             let index = resource_setup_items
                 .iter()
                 .position(|item| item.pdu_session_id.0 == pdu_session_id);
 
-            let result = match (session.result, index) {
+            match index {
                 // Success case
-                (Ok(stage1), Some(index)) => Ok(Stage2 {
-                    stage1,
+                Some(index) => new_sessions.push(Stage2 {
+                    stage1: session,
                     e1_setup_response: resource_setup_items.swap_remove(index),
                 }),
-                // Case where the session had already failed even before we talked to the CU-UP
-                (Err(cause), _) => Err(cause),
                 // Case where the CU-UP failed (or didn't return) this session.
-                (Ok(_), None) => {
+                None => {
                     warn!(
                         self.logger,
                         "Session {} failed bearer context setup", pdu_session_id
                     );
-                    Err(ngap::Cause::RadioNetwork(
-                        ngap::CauseRadioNetwork::Unspecified,
-                    ))
                 }
             };
-            new_sessions.push(SessionResult {
-                pdu_session_id,
-                result,
-            });
         }
 
         new_sessions
     }
 
-    pub async fn pdu_session_resource_setup_stage_2(
+    async fn pdu_session_resource_setup_stage_2(
         &self,
         ue: &UeState,
-        sessions: Vec<SessionResult<Stage2>>,
-    ) -> Vec<SessionResult<Stage3>> {
+        mut sessions: Vec<Stage2>,
+    ) -> Vec<Stage3> {
         let mut items = vec![];
-        for session in sessions {
-            match session {
-                SessionResult {
-                    pdu_session_id,
-                    result:
-                        Ok(Stage2 {
-                            stage1:
-                                Stage1 {
-                                    ngap_request: PduSessionResourceSetupItemSuReq { snssai, .. },
-                                },
-                            e1_setup_response:
-                                PduSessionResourceSetupItem {
-                                    ng_dl_up_tnl_information:
-                                        UpTnlInformation::GtpTunnel(gtp_tunnel),
-                                    ..
-                                },
-                        }),
-                } => {
-                    // Pass the transport address of the CU-UP to the DU.
-                    match super::build_f1ap::build_drb_to_be_setup_item(
-                        f1ap::DrbId(pdu_session_id),
-                        snssai,
-                        gtp_tunnel,
-                    ) {
-                        Ok(drb_setup_item) => items.push(drb_setup_item),
-                        Err(e) => warn!(self.logger, "Failed to build Drb item - {:?}", e),
-                    }
-                }
-                _ => {
-                    warn!(
-                        self.logger,
-                        "Problem processing session setup result from CU-UP"
-                    );
+        for session in &sessions {
+            let Stage2 {
+                stage1:
+                    Stage1 {
+                        ngap_request:
+                            PduSessionResourceSetupItemSuReq {
+                                pdu_session_id,
+                                snssai,
+                                ..
+                            },
+                    },
+                e1_setup_response:
+                    PduSessionResourceSetupItem {
+                        ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
+                        ..
+                    },
+            } = session;
+            let pdu_session_id = pdu_session_id.0;
 
-                    // We don't ask the DU to set up a DRB in this case.  We do not currently have a way of
-                    // storing and returning a specific error cause at this point.
-                }
+            // Pass the transport address of the CU-UP to the DU.
+            match super::build_f1ap::build_drb_to_be_setup_item(
+                f1ap::DrbId(pdu_session_id),
+                snssai.clone(),
+                gtp_tunnel.clone(),
+            ) {
+                Ok(drb_setup_item) => items.push(drb_setup_item),
+                Err(e) => warn!(self.logger, "Failed to build Drb item - {:?}", e),
             }
+        }
+
+        if items.is_empty() {
+            //TODO warn
+            return vec![];
         }
 
         // Send UeContextSetupRequest to DU.
-        let ue_context_setup_response = if !items.is_empty() {
-            match super::build_f1ap::build_ue_context_setup_request(
-                self.gnb_cu_cp,
-                &ue,
-                Some(DrbsToBeSetupList(items)),
-                None,
-            ) {
-                Err(e) => Err(anyhow!("UeContextSetupRequest build failed - {:?}", e)),
-                Ok(ue_context_setup_request) => {
-                    self.log_message("<< UeContextSetupRequest");
-                    self.f1ap_request::<UeContextSetupProcedure>(
-                        ue_context_setup_request,
-                        self.logger,
-                    )
+        let ue_context_setup_response = match super::build_f1ap::build_ue_context_setup_request(
+            self.gnb_cu_cp,
+            &ue,
+            Some(DrbsToBeSetupList(items)),
+            None,
+        ) {
+            Err(e) => Err(anyhow!("UeContextSetupRequest build failed - {:?}", e)),
+            Ok(ue_context_setup_request) => {
+                self.log_message("<< UeContextSetupRequest");
+                self.f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
                     .await
                     .map_err(|e| anyhow!("UeContextSetupRequest request failed - {:?}", e))
-                }
             }
-        } else {
-            Err(anyhow!("No remaining DRBs to be set up"))
         };
 
-        match ue_context_setup_response {
-            Ok(UeContextSetupResponse { .. }) => {
-                self.log_message(">> UeContextSetupResponse");
+        // TODO - can this be made generic with previous function
 
-                todo!()
-            }
+        // Extract the session items from the response.
+        let mut drbs_setup_list = match ue_context_setup_response {
             Err(e) => {
-                // Replace
-                todo!()
+                warn!(self.logger, "UeContextSetupRequest failed - {:?}", e);
+                return vec![];
             }
+            Ok(UeContextSetupResponse {
+                drbs_setup_list: Some(x),
+                ..
+            }) => {
+                self.log_message(">> UeContextSetupResponse");
+                x.0
+            }
+            Ok(m) => {
+                warn!(
+                    self.logger,
+                    "UeContextSetupResponse without DRB setup list: {:?}", m
+                );
+                return vec![];
+            }
+        };
+
+        // Rebuild the session results vec, adding in the new info from the UP.
+        let mut new_sessions: Vec<Stage3> = vec![];
+        for session in sessions.drain(..) {
+            let pdu_session_id = session.stage1.ngap_request.pdu_session_id.0;
+            let index = drbs_setup_list
+                .iter()
+                .position(|item| item.drb_id.0 == pdu_session_id);
+
+            match index {
+                // Success case
+                Some(index) => new_sessions.push(Stage3 {
+                    stage2: session,
+                    f1_setup_response: drbs_setup_list.swap_remove(index),
+                }),
+                // Case where the CU-UP failed (or didn't return) this session.
+                None => {
+                    warn!(
+                        self.logger,
+                        "Session {} failed bearer context setup", pdu_session_id
+                    );
+                }
+            };
         }
 
-        todo!()
+        new_sessions
     }
 
     pub async fn pdu_session_resource_setup_stage_3(
         &self,
         ue: &UeState,
-        sessions: Vec<Result<Stage3, ngap::Cause>>,
-    ) -> Vec<Result<Stage4, ngap::Cause>> {
-        todo!()
+        mut sessions: Vec<Stage3>,
+    ) -> Vec<Stage4> {
+        // TODO: convert each of these to subfunctions?
+
+        // Build E1 PduSessionResourceToSetupItems.
+        let mut items = vec![];
+        for session in &sessions {
+            match self.build_e1_modify_item(&ue) {
+                Ok(item) => items.push(item),
+                // Case where E1 setup item failed
+                Err(e) => {
+                    warn!(self.logger, "Build E1 setup item failed {:?}", e);
+                }
+            }
+        }
+
+        if items.is_empty() {
+            return vec![];
+        }
+
+        let Some(gnb_cu_up_ue_e1ap_id) = ue.gnb_cu_up_ue_e1ap_id else {
+            return vec![]
+        };
+
+        // Send BearerContextModify to CU-UP.
+        let bearer_context_modification =
+            self.build_bearer_context_modification(&ue, gnb_cu_up_ue_e1ap_id, items);
+        debug!(self.logger, "<< BearerContextSetupRequest");
+        let mut resource_modify_items = match self
+            .e1ap_request::<BearerContextModificationProcedure>(
+                bearer_context_modification,
+                self.logger,
+            )
+            .await
+        {
+            Ok(BearerContextModificationResponse {
+                gnb_cu_up_ue_e1ap_id,
+                system_bearer_context_modification_response:
+                    Some(SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(
+                        NgRanBearerContextModificationResponse {
+                            pdu_session_resource_modified_list:
+                                Some(PduSessionResourceModifiedList(x)),
+                            ..
+                        },
+                    )),
+                ..
+            }) => {
+                x
+            }
+            Ok(m) => {
+                warn!(
+                    self.logger,
+                    "BearerContextModificationResponse without resource modify items: {:?}", m
+                );
+                return vec![];
+            }
+            Err(e) => {
+                debug!(self.logger, "Failed bearer context modify {:?}", e);
+                return vec![];
+            }
+        };
+        debug!(self.logger, ">> BearerContextSetupResponse");
+
+        // Rebuild the session results vec, adding in the new info from the UP.
+        let mut new_sessions: Vec<Stage4> = vec![];
+        for session in sessions.drain(..) {
+            let pdu_session_id = session.stage2.stage1.ngap_request.pdu_session_id.0;
+            let index = resource_modify_items
+                .iter()
+                .position(|item| item.pdu_session_id.0 == pdu_session_id);
+
+            match index {
+                // Success case
+                Some(index) => new_sessions.push(Stage4 {
+                    stage3: session,
+                    e1_modify_response: resource_modify_items.swap_remove(index),
+                }),
+                // Case where the CU-UP failed (or didn't return) this session.
+                None => {
+                    warn!(
+                        self.logger,
+                        "Session {} failed bearer context setup", pdu_session_id
+                    );
+                }
+            };
+        }
+
+        new_sessions
     }
 
     // Pdu session resource setup procedure.
@@ -452,11 +544,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         self.log_message(">> UeContextSetupResponse");
 
         // Send BearerContextModification to CU-UP.
-        let bearer_context_modification = self.build_bearer_context_modification(
-            &ue,
-            gnb_cu_up_ue_e1ap_id,
-            &ue_context_setup_response,
-        );
+        let bearer_context_modification =
+            self.build_bearer_context_modification(&ue, gnb_cu_up_ue_e1ap_id, vec![]);
         self.log_message("<< BearerContextModificationRequest");
         let _response = self
             .e1ap_request::<BearerContextModificationProcedure>(
@@ -504,6 +593,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok((successful, unsuccessful))
     }
 
+    // TODO: move to build_e1ap
     pub fn build_e1_setup_item(
         &self,
         _ue: &UeState,
@@ -663,7 +753,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         &self,
         ue: &UeState,
         gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId,
-        _ue_context_setup_response: &f1ap::UeContextSetupResponse,
+        items: Vec<PduSessionResourceToModifyItem>,
     ) -> BearerContextModificationRequest {
         // TODO incomplete - for example need to supply a system_bearer_context_modification_request
         // with DrbToModifyListNgRan containing the UpTransportLayerInformation received in the
@@ -679,10 +769,24 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             new_ul_tnl_information_required: None,
             ue_inactivity_timer: None,
             data_discard_required: None,
-            system_bearer_context_modification_request: None,
+            system_bearer_context_modification_request: Some(
+                SystemBearerContextModificationRequest::NgRanBearerContextModificationRequest(
+                    NgRanBearerContextModificationRequest {
+                        pdu_session_resource_to_setup_mod_list: None,
+                        pdu_session_resource_to_modify_list: Some(PduSessionResourceToModifyList(
+                            items,
+                        )),
+                        pdu_session_resource_to_remove_list: None,
+                    },
+                ),
+            ),
             ran_ue_id: None,
             gnb_du_id: None,
             activity_notification_level: None,
         }
+    }
+
+    pub fn build_e1_modify_item(&self, _ue: &UeState) -> Result<PduSessionResourceToModifyItem> {
+        todo!()
     }
 }
