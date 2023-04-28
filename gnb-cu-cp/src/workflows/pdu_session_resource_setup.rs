@@ -2,7 +2,7 @@
 
 use super::{GnbCuCp, Workflow};
 use crate::datastore::UeState;
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use e1ap::*;
 use f1ap::{DrbsToBeSetupList, UeContextSetupProcedure, UeContextSetupResponse};
 use net::SerDes;
@@ -132,7 +132,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         &self,
         ue: &UeState,
         mut sessions: Vec<Stage2>,
-    ) -> Vec<Stage3> {
+    ) -> Result<Vec<Stage3>> {
         let mut items = vec![];
         for session in &sessions {
             let Stage2 {
@@ -164,48 +164,36 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             }
         }
 
-        if items.is_empty() {
-            //TODO warn
-            return vec![];
-        }
-
-        // Send UeContextSetupRequest to DU.
-        let ue_context_setup_response = match super::build_f1ap::build_ue_context_setup_request(
+        ensure!(!items.is_empty(), "No Drb items built successfully");
+        let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
             self.gnb_cu_cp,
             &ue,
             Some(DrbsToBeSetupList(items)),
             None,
-        ) {
-            Err(e) => Err(anyhow!("UeContextSetupRequest build failed - {:?}", e)),
-            Ok(ue_context_setup_request) => {
-                self.log_message("<< UeContextSetupRequest");
-                self.f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
-                    .await
-                    .map_err(|e| anyhow!("UeContextSetupRequest request failed - {:?}", e))
-            }
-        };
+        )?;
+
+        // Send UeContextSetupRequest to DU.
+        self.log_message("<< UeContextSetupRequest");
+        let ue_context_setup_response = self
+            .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
+            .await?;
+        self.log_message(">> UeContextSetupResponse");
+
+        // TS38.473, 8.3.1.2: "If the CellGroupConfig IE is included in the DU to CU RRC Information IE contained in the UE CONTEXT SETUP RESPONSE message,
+        // the gNB-CU shall perform RRC Reconfiguration or RRC connection resume as described in TS 38.331 [8]. The CellGroupConfig IE shall
+        // transparently be signaled to the UE as specified in TS 38.331 [8]."
+        let cell_group_config = ue_context_setup_response
+            .du_to_cu_rrc_information
+            .cell_group_config
+            .0;
 
         // TODO - can this be made generic with previous function
 
         // Extract the session items from the response.
-        let mut drbs_setup_list = match ue_context_setup_response {
-            Err(e) => {
-                warn!(self.logger, "UeContextSetupRequest failed - {:?}", e);
-                return vec![];
-            }
-            Ok(UeContextSetupResponse {
-                drbs_setup_list: Some(x),
-                ..
-            }) => {
-                self.log_message(">> UeContextSetupResponse");
-                x.0
-            }
-            Ok(m) => {
-                warn!(
-                    self.logger,
-                    "UeContextSetupResponse without DRB setup list: {:?}", m
-                );
-                return vec![];
+        let mut drbs_setup_list = match ue_context_setup_response.drbs_setup_list {
+            Some(x) => x.0,
+            _ => {
+                bail!("UeContextSetupResponse without DRB setup list");
             }
         };
 
@@ -236,7 +224,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         new_sessions
     }
 
-    pub async fn pdu_session_resource_setup_stage_3(
+    async fn pdu_session_resource_setup_stage_3(
         &self,
         ue: &UeState,
         mut sessions: Vec<Stage3>,
@@ -275,7 +263,6 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .await
         {
             Ok(BearerContextModificationResponse {
-                gnb_cu_up_ue_e1ap_id,
                 system_bearer_context_modification_response:
                     Some(SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(
                         NgRanBearerContextModificationResponse {
@@ -329,6 +316,73 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         new_sessions
     }
 
+    async fn pdu_session_resource_setup_stage_4(
+        &self,
+        ue: &UeState,
+        mut sessions: Vec<Stage4>,
+        cell_group_config: f1ap::CellGroupConfig,
+    ) -> Result<Vec<Stage4>> {
+        // Collect the Nas messages from the successful setups.
+        // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
+        // so that it doesn't have to clone.
+        let nas_messages: Vec<Vec<u8>> = sessions
+            .iter()
+            .filter_map(|x| {
+                x.stage3
+                    .stage2
+                    .stage1
+                    .ngap_request
+                    .pdu_session_nas_pdu
+                    .as_ref()
+                    .map(|x| x.0.clone())
+            })
+            .collect();
+
+        // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
+        let rrc_transaction = self.new_rrc_transaction(&ue).await;
+        let nas_messages = if nas_messages.is_empty() {
+            None
+        } else {
+            Some(nas_messages)
+        };
+        let rrc_container =
+            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config.0)?;
+        self.log_message("<< RrcReconfiguration");
+        self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
+            .await;
+        let _rrc_reconfiguration_complete: rrc::UlDcchMessage = rrc_transaction.recv().await?;
+        self.log_message(">> RrcReconfigurationComplete");
+
+        Ok(sessions)
+    }
+
+    async fn pdu_session_resource_setup_stage_5(
+        &self,
+        ue: &UeState,
+        mut sessions: Vec<Stage4>,
+    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
+        let mut new_sessions = vec![];
+        for session in sessions.drain(..) {
+            let new_session = PduSessionResourceSetupItemSuRes {
+                pdu_session_id: session.stage3.stage2.stage1.ngap_request.pdu_session_id,
+                pdu_session_resource_setup_response_transfer:
+                    PduSessionResourceSetupResponseTransfer {
+                        dl_qos_flow_per_tnl_information: todo!(),
+                        additional_dl_qos_flow_per_tnl_information: None,
+                        security_result: None,
+                        qos_flow_failed_to_setup_list: None,
+                        redundant_dl_qos_flow_per_tnl_information: None,
+                        additional_redundant_dl_qos_flow_per_tnl_information: None,
+                        used_rsn_information: None,
+                        global_ran_node_id: None,
+                    }
+                    .into_bytes()?,
+            };
+            new_sessions.push(new_session)
+        }
+        Ok(new_sessions)
+    }
+
     // Pdu session resource setup procedure.
     //
     // See documentation/session establishment.md
@@ -349,248 +403,101 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> PduSessionResourceSetupResponse {
         debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-        // The first stage is to carry out E1 bearer context setup.  This produces an E1AP PduSessionResourceSetupItem
-        // for each successful result.  Start by assuming failure to look up the UE.
-        let num_sessions = r.pdu_session_resource_setup_list_su_req.0.len();
-        let mut session_results: Vec<Result<PduSessionResourceSetupItem, ngap::Cause>> = vec![
-                Err(ngap::Cause::RadioNetwork(
-                    ngap::CauseRadioNetwork::UnknownLocalUeNgapId
-                ));
-                num_sessions
-            ];
+        // Save off the sessions IDs in case of error.  In theory we ought to be able to
+        // accumulate different errors to different sessions over the course of the following
+        // processing but the code is not currently sophisticated enough to do that.  Instead
+        // it just tracks the successful ones.
+        let session_ids: Vec<u8> = r
+            .pdu_session_resource_setup_list_su_req
+            .0
+            .iter()
+            .map(|item| item.pdu_session_id.0)
+            .collect();
 
-        'setup_stages: {
-            debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
-            let mut ue = match self.retrieve(&r.ran_ue_ngap_id.0).await {
-                Ok(ue) => ue,
-                Err(_) => break 'setup_stages,
-            };
+        // Go through all the stages of session resource setup.  If all goes well, the
+        // successfully set up sessions will pop out the other side.
+        let sessions = self
+            .pdu_session_resource_setup_stages(r)
+            .await
+            .unwrap_or(vec![]);
 
-            // Build E1 PduSessionResourceToSetupItems.
-            let mut items = vec![];
-            for (idx, x) in r
-                .pdu_session_resource_setup_list_su_req
-                .0
-                .iter()
-                .enumerate()
-            {
-                match self.build_e1_setup_item(&ue, x) {
-                    Ok(item) => {
-                        items.push(item);
-                    }
-                    Err(e) => {
-                        debug!(self.logger, "Failed to build session setup item {:?}", e);
-                    }
-                };
-            }
+        let failed_session_ids = session_ids
+            .iter()
+            .filter(|x| sessions.iter().any(|item| item.pdu_session_id.0 == **x));
 
-            if items.len() == 0 {
-                break 'setup_stages;
-            }
+        let pdu_session_resource_setup_list_su_res = if sessions.is_empty() {
+            None
+        } else {
+            Some(PduSessionResourceSetupListSuRes(sessions))
+        };
 
-            // Send BearerContextSetup to CU-UP.
-            let bearer_context_setup = self.build_bearer_context_setup(&ue, items);
-            debug!(self.logger, "<< BearerContextSetupRequest");
-            let response = match self
-                .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, self.logger)
-                .await
-            {
-                Ok(r) => r,
-                Err(e) => {
-                    debug!(self.logger, "Failed bearer context setup {:?}", e);
-                    break 'setup_stages;
-                }
-            };
-            debug!(self.logger, ">> BearerContextSetupResponse");
-        }
+        let pdu_session_resource_failed_to_setup_list_su_res = if failed_session_ids.is_empty() {
+            None
+        } else {
+            Some(PduSessionResourceFailedToSetupListSuRes(
+                failed_session_ids
+                    .map(|x| PduSessionResourceFailedToSetupItemSuRes {
+                        pdu_session_id: ngap::PduSessionId(x),
+                        pdu_session_resource_setup_unsuccessful_transfer: vec![],
+                    })
+                    .collect(),
+            ))
+        };
 
         debug!(self.logger, "PduSessionResourceSetupResponse >> ");
-        todo!()
-        // PduSessionResourceSetupResponse {
-        //     amf_ue_ngap_id: r.amf_ue_ngap_id,
-        //     ran_ue_ngap_id: r.ran_ue_ngap_id,
-        //     pdu_session_resource_setup_list_su_res,
-        //     pdu_session_resource_failed_to_setup_list_su_res,
-        //     criticality_diagnostics: None,
-        // }
+        PduSessionResourceSetupResponse {
+            amf_ue_ngap_id: r.amf_ue_ngap_id,
+            ran_ue_ngap_id: r.ran_ue_ngap_id,
+            pdu_session_resource_setup_list_su_res,
+            pdu_session_resource_failed_to_setup_list_su_res,
+            criticality_diagnostics: None,
+        }
     }
 
-    pub async fn pdu_session_resource_setup_stages<'b>(
+    pub async fn pdu_session_resource_setup_stages(
         &self,
-        r: &'b PduSessionResourceSetupRequest,
-        successful: &mut Vec<Result<PduSessionResourceSetupItem, ngap::Cause>>,
-    ) -> Result<()> {
-        // Retrieve UE context by ran_ue_ngap_id.
-        Ok(())
-    }
-
-    // pub async fn pdu_session_resource_setup(
-    //     &self,
-    //     r: PduSessionResourceSetupRequest,
-    // ) -> PduSessionResourceSetupResponse {
-    //     debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
-
-    //     let (successful, unsuccessful) = match self.pdu_session_resource_setup_inner(&r).await {
-    //         Ok(x) => x,
-    //         Err(e) => {
-    //             debug!(self.logger, "Failed resource setup - {}", e);
-    //             (
-    //                 Vec::new(),
-    //                 r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
-    //             )
-    //         }
-    //     };
-
-    //     // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
-
-    //     let pdu_session_resource_setup_list_su_res = if successful.is_empty() {
-    //         None
-    //     } else {
-    //         Some(PduSessionResourceSetupListSuRes(
-    //             successful
-    //                 .into_iter()
-    //                 .map(|x| PduSessionResourceSetupItemSuRes {
-    //                     pdu_session_id: x.pdu_session_id,
-    //                     pdu_session_resource_setup_response_transfer: x
-    //                         .pdu_session_resource_setup_request_transfer
-    //                         .clone(),
-    //                 })
-    //                 .collect(),
-    //         ))
-    //     };
-
-    //     let pdu_session_resource_failed_to_setup_list_su_res = if unsuccessful.is_empty() {
-    //         None
-    //     } else {
-    //         Some(PduSessionResourceFailedToSetupListSuRes(
-    //             unsuccessful
-    //                 .into_iter()
-    //                 .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-    //                     pdu_session_id: x.pdu_session_id,
-    //                     pdu_session_resource_setup_unsuccessful_transfer: x
-    //                         .pdu_session_resource_setup_request_transfer
-    //                         .clone(),
-    //                 })
-    //                 .collect(),
-    //         ))
-    //     };
-
-    //     debug!(self.logger, "PduSessionResourceSetupResponse >> ");
-    //     PduSessionResourceSetupResponse {
-    //         amf_ue_ngap_id: r.amf_ue_ngap_id,
-    //         ran_ue_ngap_id: r.ran_ue_ngap_id,
-    //         pdu_session_resource_setup_list_su_res,
-    //         pdu_session_resource_failed_to_setup_list_su_res,
-    //         criticality_diagnostics: None,
-    //     }
-    // }
-
-    pub async fn pdu_session_resource_setup_inner<'b>(
-        &self,
-        r: &'b PduSessionResourceSetupRequest,
-    ) -> Result<(
-        Vec<&'b PduSessionResourceSetupItemSuReq>,
-        Vec<&'b PduSessionResourceSetupItemSuReq>,
-    )> {
-        // Retrieve UE context by ran_ue_ngap_id.
+        r: PduSessionResourceSetupRequest,
+    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
         let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
 
-        // Keep track of which sessions we managed to set up, via references into the original message.
-        let mut unsuccessful = vec![];
-        let mut successful = vec![];
-
-        // Build E1 PduSessionResourceToSetupItems.
-        let mut items = vec![];
-        for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
-            match self.build_e1_setup_item(&ue, x) {
-                Ok(item) => {
-                    items.push(item);
-                    successful.push(x);
-                }
-                Err(e) => {
-                    debug!(self.logger, "Failed to build session setup item {:?}", e);
-                    unsuccessful.push(x);
-                }
-            };
-        }
-
-        // TODO - the following functions hardcode a lot of things they shouldn't and will need work to signal session setup correctly.
-
-        // Send BearerContextSetup to CU-UP.
-        let bearer_context_setup = self.build_bearer_context_setup(&ue, items);
-        debug!(self.logger, "<< BearerContextSetupRequest");
-        let response = self
-            .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, self.logger)
-            .await?;
-        debug!(self.logger, ">> BearerContextSetupResponse");
-
-        // Store CU-UP's UE ID.
-        let gnb_cu_up_ue_e1ap_id = response.gnb_cu_up_ue_e1ap_id;
-        ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
-
-        // Send UeContextSetupRequest to DU.
-        let ue_context_setup_request =
-            super::build_f1ap::build_ue_context_setup_request_from_pdu_session_setup(
-                self.gnb_cu_cp,
-                r,
-                &ue,
-                None,
-            )?;
-        self.log_message("<< UeContextSetupRequest");
-        let ue_context_setup_response = self
-            .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
-            .await?;
-        self.log_message(">> UeContextSetupResponse");
-
-        // Send BearerContextModification to CU-UP.
-        let bearer_context_modification =
-            self.build_bearer_context_modification(&ue, gnb_cu_up_ue_e1ap_id, vec![]);
-        self.log_message("<< BearerContextModificationRequest");
-        let _response = self
-            .e1ap_request::<BearerContextModificationProcedure>(
-                bearer_context_modification,
-                self.logger,
-            )
-            .await?;
-        self.log_message(">> BearerContextModificationResponse");
-
-        // Collect the Nas messages from the successful setups.
-        // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
-        // so that it doesn't have to clone.
-        let nas_messages: Vec<Vec<u8>> = successful
-            .iter()
-            .filter_map(|x| x.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
+        let sessions = r
+            .pdu_session_resource_setup_list_su_req
+            .0
+            .drain(..)
+            .map(|item| Stage1 { ngap_request: item })
             .collect();
 
-        // TS38.473, 8.3.1.2: "If the CellGroupConfig IE is included in the DU to CU RRC Information IE contained in the UE CONTEXT SETUP RESPONSE message,
-        // the gNB-CU shall perform RRC Reconfiguration or RRC connection resume as described in TS 38.331 [8]. The CellGroupConfig IE shall
-        // transparently be signaled to the UE as specified in TS 38.331 [8]."
-        let cell_group_config = ue_context_setup_response
-            .du_to_cu_rrc_information
-            .cell_group_config
-            .0;
-
-        // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
-        let rrc_transaction = self.new_rrc_transaction(&ue).await;
-        let nas_messages = if nas_messages.is_empty() {
-            None
-        } else {
-            Some(nas_messages)
-        };
-        let rrc_container =
-            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config)?;
-        self.log_message("<< RrcReconfiguration");
-        self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
+        // E1 BearerContextSetupRequest.
+        let sessions = self
+            .pdu_session_resource_setup_stage_1(&mut ue, sessions)
             .await;
-        let _rrc_reconfiguration_complete: rrc::UlDcchMessage = rrc_transaction.recv().await?;
-        self.log_message(">> RrcReconfigurationComplete");
+
+        // F1 UeContextSetupRequest
+        let (sessions, cell_group_config) = self
+            .pdu_session_resource_setup_stage_2(&mut ue, sessions)
+            .await;
+
+        // E1 BearerContextModifyRequest.
+        let sessions = self
+            .pdu_session_resource_setup_stage_3(&mut ue, sessions)
+            .await;
+
+        // RRC Reconfiguration.
+        let sessions = self
+            .pdu_session_resource_setup_stage_4(&mut ue, sessions, cell_group_config)
+            .await?;
+
+        // Production of NGAP setup responses.
+        let sessions = self
+            .pdu_session_resource_setup_stage_5(&mut ue, sessions)
+            .await?;
 
         // Write back UE.
         debug!(self.logger, "Store UE {:#010x}", ue.key);
         self.store(ue.key, ue, self.config().ue_ttl_secs).await?;
 
-        Ok((successful, unsuccessful))
+        Ok(sessions)
     }
 
     // TODO: move to build_e1ap
