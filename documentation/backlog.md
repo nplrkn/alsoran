@@ -1,6 +1,7 @@
 
 ## O-RAN O-DU interop
 - Form PDUSessionResourceSetupResponse correctly
+- Add PduSessionId to xxap common
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
   match a transaction.
 - Move Serdes to common

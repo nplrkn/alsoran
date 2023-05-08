@@ -113,19 +113,19 @@ pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
     )
 }
 
-pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
-    gnb_cu_cp: &G,
-    _r: &ngap::PduSessionResourceSetupRequest,
-    ue: &UeState,
-    rrc_container: Option<f1ap::RrcContainer>,
-) -> Result<UeContextSetupRequest> {
-    build_ue_context_setup_request(
-        gnb_cu_cp,
-        ue,
-        Some(default_drb_to_be_setup_list()?),
-        rrc_container,
-    )
-}
+// pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
+//     gnb_cu_cp: &G,
+//     _r: &ngap::PduSessionResourceSetupRequest,
+//     ue: &UeState,
+//     rrc_container: Option<f1ap::RrcContainer>,
+// ) -> Result<UeContextSetupRequest> {
+//     build_ue_context_setup_request(
+//         gnb_cu_cp,
+//         ue,
+//         Some(default_drb_to_be_setup_list()?),
+//         rrc_container,
+//     )
+// }
 
 fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
     let first_gtp_tunnel = GtpTunnel {

@@ -4,25 +4,18 @@ use super::{GnbCuCp, Workflow};
 use crate::datastore::UeState;
 use anyhow::{anyhow, bail, ensure, Result};
 use e1ap::*;
-use f1ap::{DrbsToBeSetupList, UeContextSetupProcedure, UeContextSetupResponse};
+use f1ap::{CellGroupConfig, DrbsToBeSetupList, UeContextSetupProcedure};
 use net::SerDes;
 use ngap::{
-    PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
-    PduSessionResourceSetupItemSuReq, PduSessionResourceSetupItemSuRes,
-    PduSessionResourceSetupListSuRes, PduSessionResourceSetupRequest,
-    PduSessionResourceSetupRequestTransfer, PduSessionResourceSetupResponse,
-    PduSessionResourceSetupResponseTransfer,
+    AssociatedQosFlowList, PduSessionResourceFailedToSetupItemSuRes,
+    PduSessionResourceFailedToSetupListSuRes, PduSessionResourceSetupItemSuReq,
+    PduSessionResourceSetupItemSuRes, PduSessionResourceSetupListSuRes,
+    PduSessionResourceSetupRequest, PduSessionResourceSetupRequestTransfer,
+    PduSessionResourceSetupResponse, PduSessionResourceSetupResponseTransfer,
+    QosFlowPerTnlInformation, UpTransportLayerInformation,
 };
 use slog::{debug, warn};
 use xxap::*;
-
-// We start with a list of session to set up.
-// At each stage we might bail out with a cause affecting all sessions.
-// Or we might knock out 1 session only.
-// Each stage has a new kind of result.
-// We always need to refer back to the original ask.
-
-// So
 
 struct Stage1 {
     ngap_request: ngap::PduSessionResourceSetupItemSuReq,
@@ -37,7 +30,7 @@ struct Stage3 {
 }
 struct Stage4 {
     stage3: Stage3,
-    e1_modify_response: e1ap::PduSessionResourceModifiedItem,
+    _e1_modify_response: e1ap::PduSessionResourceModifiedItem,
 }
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
@@ -132,7 +125,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         &self,
         ue: &UeState,
         mut sessions: Vec<Stage2>,
-    ) -> Result<Vec<Stage3>> {
+    ) -> Result<(Vec<Stage3>, CellGroupConfig)> {
         let mut items = vec![];
         for session in &sessions {
             let Stage2 {
@@ -186,6 +179,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .du_to_cu_rrc_information
             .cell_group_config
             .0;
+        let cell_group_config = CellGroupConfig(cell_group_config);
 
         // TODO - can this be made generic with previous function
 
@@ -221,7 +215,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             };
         }
 
-        new_sessions
+        Ok((new_sessions, cell_group_config))
     }
 
     async fn pdu_session_resource_setup_stage_3(
@@ -234,7 +228,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // Build E1 PduSessionResourceToSetupItems.
         let mut items = vec![];
         for session in &sessions {
-            match self.build_e1_modify_item(&ue) {
+            match self.build_e1_modify_item(&ue, session) {
                 Ok(item) => items.push(item),
                 // Case where E1 setup item failed
                 Err(e) => {
@@ -301,7 +295,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 // Success case
                 Some(index) => new_sessions.push(Stage4 {
                     stage3: session,
-                    e1_modify_response: resource_modify_items.swap_remove(index),
+                    _e1_modify_response: resource_modify_items.swap_remove(index),
                 }),
                 // Case where the CU-UP failed (or didn't return) this session.
                 None => {
@@ -319,7 +313,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn pdu_session_resource_setup_stage_4(
         &self,
         ue: &UeState,
-        mut sessions: Vec<Stage4>,
+        sessions: Vec<Stage4>,
         cell_group_config: f1ap::CellGroupConfig,
     ) -> Result<Vec<Stage4>> {
         // Collect the Nas messages from the successful setups.
@@ -358,16 +352,26 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
     async fn pdu_session_resource_setup_stage_5(
         &self,
-        ue: &UeState,
+        _ue: &UeState,
         mut sessions: Vec<Stage4>,
     ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
         let mut new_sessions = vec![];
         for session in sessions.drain(..) {
+            let UpTnlInformation::GtpTunnel(gtp_tunnel) = session
+                .stage3
+                .stage2
+                .e1_setup_response
+                .ng_dl_up_tnl_information;
             let new_session = PduSessionResourceSetupItemSuRes {
                 pdu_session_id: session.stage3.stage2.stage1.ngap_request.pdu_session_id,
                 pdu_session_resource_setup_response_transfer:
                     PduSessionResourceSetupResponseTransfer {
-                        dl_qos_flow_per_tnl_information: todo!(),
+                        dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation {
+                            up_transport_layer_information: UpTransportLayerInformation::GtpTunnel(
+                                gtp_tunnel,
+                            ),
+                            associated_qos_flow_list: AssociatedQosFlowList(vec![]),
+                        },
                         additional_dl_qos_flow_per_tnl_information: None,
                         security_result: None,
                         qos_flow_failed_to_setup_list: None,
@@ -403,6 +407,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> PduSessionResourceSetupResponse {
         debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
 
+        let amf_ue_ngap_id = r.amf_ue_ngap_id;
+        let ran_ue_ngap_id = r.ran_ue_ngap_id;
+
         // Save off the sessions IDs in case of error.  In theory we ought to be able to
         // accumulate different errors to different sessions over the course of the following
         // processing but the code is not currently sophisticated enough to do that.  Instead
@@ -421,9 +428,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .await
             .unwrap_or(vec![]);
 
-        let failed_session_ids = session_ids
-            .iter()
-            .filter(|x| sessions.iter().any(|item| item.pdu_session_id.0 == **x));
+        let failed_session_ids: Vec<u8> = session_ids
+            .into_iter()
+            .filter(|x| sessions.iter().any(|item| item.pdu_session_id.0 == *x))
+            .collect();
 
         let pdu_session_resource_setup_list_su_res = if sessions.is_empty() {
             None
@@ -436,8 +444,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         } else {
             Some(PduSessionResourceFailedToSetupListSuRes(
                 failed_session_ids
+                    .iter()
                     .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                        pdu_session_id: ngap::PduSessionId(x),
+                        pdu_session_id: ngap::PduSessionId(*x),
                         pdu_session_resource_setup_unsuccessful_transfer: vec![],
                     })
                     .collect(),
@@ -446,8 +455,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         debug!(self.logger, "PduSessionResourceSetupResponse >> ");
         PduSessionResourceSetupResponse {
-            amf_ue_ngap_id: r.amf_ue_ngap_id,
-            ran_ue_ngap_id: r.ran_ue_ngap_id,
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
             pdu_session_resource_setup_list_su_res,
             pdu_session_resource_failed_to_setup_list_su_res,
             criticality_diagnostics: None,
@@ -456,7 +465,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
     pub async fn pdu_session_resource_setup_stages(
         &self,
-        r: PduSessionResourceSetupRequest,
+        mut r: PduSessionResourceSetupRequest,
     ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
         let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
@@ -476,7 +485,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // F1 UeContextSetupRequest
         let (sessions, cell_group_config) = self
             .pdu_session_resource_setup_stage_2(&mut ue, sessions)
-            .await;
+            .await?;
 
         // E1 BearerContextModifyRequest.
         let sessions = self
@@ -693,7 +702,42 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         }
     }
 
-    pub fn build_e1_modify_item(&self, _ue: &UeState) -> Result<PduSessionResourceToModifyItem> {
-        todo!()
+    fn build_e1_modify_item(
+        &self,
+        _ue: &UeState,
+        session: &Stage3,
+    ) -> Result<PduSessionResourceToModifyItem> {
+        let pdu_session_id =
+            e1ap::PduSessionId(session.stage2.stage1.ngap_request.pdu_session_id.0);
+        let tnl_setup_list = &session
+            .f1_setup_response
+            .dluptnl_information_to_be_setup_list
+            .0;
+
+        ensure!(!tnl_setup_list.is_empty());
+
+        let f1ap::UpTransportLayerInformation::GtpTunnel(gtp_tunnel) = &tnl_setup_list
+            .first()
+            .ok_or_else(|| anyhow!("No GTP tunnel information from DU"))?
+            .dluptnl_information;
+
+        Ok(PduSessionResourceToModifyItem {
+            pdu_session_id,
+            security_indication: None,
+            pdu_session_resource_dl_ambr: None,
+            ng_ul_up_tnl_information: Some(UpTnlInformation::GtpTunnel(gtp_tunnel.clone())),
+            pdu_session_data_forwarding_information_request: None,
+            pdu_session_data_forwarding_information: None,
+            pdu_session_inactivity_timer: None,
+            network_instance: None,
+            drb_to_setup_list_ng_ran: None,
+            drb_to_modify_list_ng_ran: None,
+            drb_to_remove_list_ng_ran: None,
+            snssai: None,
+            common_network_instance: None,
+            redundant_n_g_ul_up_tnl_information: None,
+            redundant_common_network_instance: None,
+            data_forwardingto_eutran_information_list: None,
+        })
     }
 }
