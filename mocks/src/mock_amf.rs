@@ -150,7 +150,7 @@ impl MockAmf {
     fn snssai(&self) -> Snssai {
         Snssai {
             sst: vec![0x01],
-            sd: None,
+            sd: Some(vec![0x02, 0x03, 0x04]), // (Necessary for ODU interop when using AMF-SIM)
         }
     }
 

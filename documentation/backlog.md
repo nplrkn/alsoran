@@ -20,6 +20,7 @@
 - provide TransportAddress constructor from string (and use common struct for all XXAP libraries)
 - don't set up SRB + 2 DBRs if all we need is one session = one DRB
 - ASN.1 E1 and NGAP PduSessionIds should be directly comparable?  by being the same type?  instead of item.pdu_session_id.0 == stage1.ngap_request.pdu_session_id.0
+- FV regression test to reduce dependency on running with live ODU 
 
 # NEXT UP
 - Dataplane with O-RAN SC ODU

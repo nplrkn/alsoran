@@ -268,16 +268,14 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                         },
                     )),
                 ..
-            }) => {
-                x
-            }
+            }) => x,
             Ok(m) => {
                 warn!(
                     self.logger,
                     "BearerContextModificationResponse without resource modify items: {:?}", m
                 );
                 return vec![];
-            }
+            },
             Err(e) => {
                 debug!(self.logger, "Failed bearer context modify {:?}", e);
                 return vec![];
