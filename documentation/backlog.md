@@ -1,6 +1,7 @@
 
 ## O-RAN O-DU interop
-- Form PDUSessionResourceSetupResponse correctly
+- DLUPTNLInformation-ToBeSetup-List is wrongly rendered as DluptnlInformationToBeSetupList
+- TransportLayerAddress should have TryFrom<String>
 - Add PduSessionId to xxap common
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
   match a transaction.
@@ -86,6 +87,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Form PDUSessionResourceSetupResponse correctly
 - Avoid missing NAS message Wireshark error on RrcReconfiguration
 - Find a way to get O-DU PHY stub to send ReconfigurationComplete in the right order (recompile with `ratio = 20`)
 - Common XXAP structures in Asn.1 generator (e.g. Snssai, GtpTunnel) to allow easy transfer between NGAP, F1AP, E1AP

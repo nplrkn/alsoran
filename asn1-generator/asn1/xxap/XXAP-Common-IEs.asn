@@ -14,11 +14,19 @@ GTPTunnel-ExtIEs NGAP-PROTOCOL-EXTENSION ::= {
 	...
 }
 
--- This one is named S-NSSAI in NGAP
 SNSSAI ::= SEQUENCE {
 	sST			OCTET STRING (SIZE (1)),
 	sD			OCTET STRING (SIZE (3)) 	OPTIONAL	,
 	iE-Extensions				ProtocolExtensionContainer { { SNSSAI-ExtIEs } }	OPTIONAL
+}
+
+-- The NGAP version is almost the same but is extensible.  The following hack enables them to 
+-- use the same Rust struct while preserving the correct APER coding.
+S-NSSAI ::= SEQUENCE {
+	sST			OCTET STRING (SIZE (1)),
+	sD			OCTET STRING (SIZE (3)) 	OPTIONAL	,
+	iE-Extensions				ProtocolExtensionContainer { { SNSSAI-ExtIEs } }	OPTIONAL
+	...
 }
 
 SNSSAI-ExtIEs	F1AP-PROTOCOL-EXTENSION ::= {

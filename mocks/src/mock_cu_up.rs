@@ -287,7 +287,15 @@ impl MockCuUp {
                             // TODO - supply these to make a proper reply to the request
                             pdu_session_resource_setup_mod_list: None,
                             pdu_session_resource_failed_mod_list: None,
-                            pdu_session_resource_modified_list: None,
+                            pdu_session_resource_modified_list: Some(PduSessionResourceModifiedList(vec![
+                                PduSessionResourceModifiedItem{ 
+                                    pdu_session_id: PduSessionId(1), 
+                                    ng_dl_up_tnl_information: None, 
+                                    security_result: None, 
+                                    pdu_session_data_forwarding_information_response: None, 
+                                    drb_setup_list_ng_ran: None, drb_failed_list_ng_ran: None, 
+                                    drb_modified_list_ng_ran: None, drb_failed_to_modify_list_ng_ran: None, 
+                                    redundant_n_g_dl_up_tnl_information: None }])),
                             pdu_session_resource_failed_to_modify_list: None,
                             retainability_measurements_info: None,
                         },

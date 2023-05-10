@@ -7,7 +7,7 @@ use e1ap::*;
 use f1ap::{CellGroupConfig, DrbsToBeSetupList, UeContextSetupProcedure};
 use net::SerDes;
 use ngap::{
-    AssociatedQosFlowList, PduSessionResourceFailedToSetupItemSuRes,
+    AssociatedQosFlowItem, AssociatedQosFlowList, PduSessionResourceFailedToSetupItemSuRes,
     PduSessionResourceFailedToSetupListSuRes, PduSessionResourceSetupItemSuReq,
     PduSessionResourceSetupItemSuRes, PduSessionResourceSetupListSuRes,
     PduSessionResourceSetupRequest, PduSessionResourceSetupRequestTransfer,
@@ -134,7 +134,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                         ngap_request:
                             PduSessionResourceSetupItemSuReq {
                                 pdu_session_id,
-                                snssai,
+                                s_nssai,
                                 ..
                             },
                     },
@@ -149,7 +149,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             // Pass the transport address of the CU-UP to the DU.
             match super::build_f1ap::build_drb_to_be_setup_item(
                 f1ap::DrbId(pdu_session_id),
-                snssai.clone(),
+                s_nssai.clone().into(),
                 gtp_tunnel.clone(),
             ) {
                 Ok(drb_setup_item) => items.push(drb_setup_item),
@@ -238,10 +238,12 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         }
 
         if items.is_empty() {
+            warn!(self.logger, "No sessions left");
             return vec![];
         }
 
         let Some(gnb_cu_up_ue_e1ap_id) = ue.gnb_cu_up_ue_e1ap_id else {
+            warn!(self.logger, "No E1AP ID on UE");
             return vec![]
         };
 
@@ -332,6 +334,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             })
             .collect();
 
+        debug!(self.logger, "Nas messages is {:?}", nas_messages);
+
         // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
         let nas_messages = if nas_messages.is_empty() {
@@ -370,7 +374,13 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                             up_transport_layer_information: UpTransportLayerInformation::GtpTunnel(
                                 gtp_tunnel,
                             ),
-                            associated_qos_flow_list: AssociatedQosFlowList(vec![]),
+                            associated_qos_flow_list: AssociatedQosFlowList(vec![
+                                AssociatedQosFlowItem {
+                                    qos_flow_identifier: ngap::QosFlowIdentifier(1),
+                                    qos_flow_mapping_indication: None,
+                                    current_qos_para_set_index: None,
+                                },
+                            ]),
                         },
                         additional_dl_qos_flow_per_tnl_information: None,
                         security_result: None,
@@ -423,10 +433,13 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Go through all the stages of session resource setup.  If all goes well, the
         // successfully set up sessions will pop out the other side.
-        let sessions = self
-            .pdu_session_resource_setup_stages(r)
-            .await
-            .unwrap_or(vec![]);
+        let sessions = match self.pdu_session_resource_setup_stages(r).await {
+            Ok(sessions) => sessions,
+            Err(e) => {
+                warn!(self.logger, "Error processing session setup - {}", e);
+                vec![]
+            }
+        };
 
         let failed_session_ids: Vec<u8> = session_ids
             .into_iter()
@@ -521,7 +534,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok(PduSessionResourceToSetupItem {
             pdu_session_id: PduSessionId(r.pdu_session_id.0),
             pdu_session_type: PduSessionType::Ipv4,
-            snssai: r.snssai.clone(),
+            snssai: r.s_nssai.clone().into(),
             security_indication: SecurityIndication {
                 integrity_protection_indication: IntegrityProtectionIndication::Preferred,
                 confidentiality_protection_indication:

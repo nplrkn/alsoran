@@ -190,7 +190,7 @@ impl MockDu {
                     selected_plmn_identity: 1,
                     registered_amf: None,
                     guami_type: None,
-                    snssai_list: None,
+                    s_nssai_list: None,
                     dedicated_nas_message: DedicatedNasMessage(nas_message),
                     ng_5g_s_tmsi_value: None,
                     late_non_critical_extension: None,
@@ -369,7 +369,24 @@ impl MockDu {
                 c_rnti: None,
                 resource_coordination_transfer_container: None,
                 full_configuration: None,
-                drbs_setup_list: None,
+                drbs_setup_list: Some(DrbsSetupList(vec![DrbsSetupItem {
+                    drb_id: DrbId(1),
+                    lcid: None,
+                    dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList(vec![
+                        DluptnlInformationToBeSetupItem {
+                            dluptnl_information: UpTransportLayerInformation::GtpTunnel(
+                                GtpTunnel {
+                                    transport_layer_address: TransportLayerAddress(
+                                        net::ip_bits_from_string("1.2.3.4").unwrap(),
+                                    ),
+                                    gtp_teid: GtpTeid(vec![5, 6, 1, 2]),
+                                },
+                            ),
+                        },
+                    ]),
+                    additional_pdcp_duplication_tnl_list: None,
+                    current_qos_para_set_index: None,
+                }])),
                 srbs_failed_to_be_setup_list: None,
                 drbs_failed_to_be_setup_list: None,
                 s_cell_failedto_setup_list: None,

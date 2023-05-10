@@ -90,7 +90,7 @@ impl MockAmf {
                 plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
                     plmn_identity: self.plmn_identity(),
                     slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        snssai: self.snssai(),
+                        s_nssai: self.snssai().into(),
                     }]),
                     npn_support: None,
                     extended_slice_support_list: None,
@@ -197,7 +197,7 @@ impl MockAmf {
                 guami: self.guami(),
                 pdu_session_resource_setup_list_cxt_req: None,
                 allowed_nssai: AllowedNssai(vec![AllowedNssaiItem {
-                    snssai: self.snssai(),
+                    s_nssai: self.snssai().into(),
                 }]),
                 ue_security_capabilities: UeSecurityCapabilities {
                     nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![u8,Msb0;0;16]),
@@ -326,7 +326,7 @@ impl MockAmf {
     pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
 
-        let transport_layer_address = TransportLayerAddress(bitvec![u8, Msb0;0,1,0,1,0,1]);
+        let transport_layer_address = TransportLayerAddress(net::ip_bits_from_string("1.2.1.2")?);
 
         let pdu_session_resource_setup_request_transfer = PduSessionResourceSetupRequestTransfer {
             pdu_session_aggregate_maximum_bit_rate: None,
@@ -376,6 +376,8 @@ impl MockAmf {
         }
         .into_bytes()?;
 
+        let dummy_nas_session_establishment_accept = NasPdu(vec![1]);
+
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceSetupRequest(
             PduSessionResourceSetupRequest {
                 amf_ue_ngap_id: AmfUeNgapId(ue_context.ue_id.into()),
@@ -385,8 +387,8 @@ impl MockAmf {
                 pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(vec![
                     PduSessionResourceSetupItemSuReq {
                         pdu_session_id: PduSessionId(1),
-                        pdu_session_nas_pdu: None,
-                        snssai: self.snssai(),
+                        pdu_session_nas_pdu: Some(dummy_nas_session_establishment_accept),
+                        s_nssai: self.snssai().into(),
                         pdu_session_resource_setup_request_transfer,
                     },
                 ]),

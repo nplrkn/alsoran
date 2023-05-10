@@ -4,7 +4,7 @@ use super::{GnbCuCp, Workflow};
 use anyhow::Result;
 use ngap::*;
 use slog::info;
-use xxap::Snssai;
+use xxap::SNssai;
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // Ng Setup Procedure
@@ -24,7 +24,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                     plmn_identity: PlmnIdentity(self.config().plmn.clone()),
                     tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        snssai: Snssai {
+                        s_nssai: SNssai {
                             sst: vec![0x01],
                             sd: Some(vec![0x1, 0x2, 0x3]),
                         },
