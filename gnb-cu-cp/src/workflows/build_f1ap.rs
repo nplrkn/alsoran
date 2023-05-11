@@ -10,7 +10,7 @@ use rrc::{
     FreqBandIndicatorNr, ModulationOrder, PdcpParameters, PhyParameters, RfParameters,
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
-use xxap::{Snssai, GtpTeid, TransportLayerAddress, GtpTunnel};
+use xxap::{Snssai, GtpTeid, GtpTunnel};
 
 pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,
@@ -129,7 +129,7 @@ pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
 
 fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
     let first_gtp_tunnel = GtpTunnel {
-        transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
+        transport_layer_address: "192.168.130.82".try_into()?,
         gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
     };
     let first_slice = Snssai(1, Some([2, 3, 4]));
@@ -138,7 +138,7 @@ fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
         build_drb_to_be_setup_item(DrbId(1), first_slice.into(), first_gtp_tunnel)?;
 
     let second_gtp_tunnel = GtpTunnel {
-        transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
+        transport_layer_address: "192.168.130.82".try_into()?,
         gtp_teid: GtpTeid(vec![0, 0, 0, 2]),
     };
     let second_slice = Snssai(5, Some([6, 7, 8]));

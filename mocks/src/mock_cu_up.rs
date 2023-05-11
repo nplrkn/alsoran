@@ -95,10 +95,9 @@ impl MockCuUp {
 
     pub async fn handle_cu_cp_configuration_update(
         &mut self,
-        expected_addr_string: &String,
+        expected_addr_string: &str,
     ) -> Result<()> {
-        let expected_address =
-            TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
+        let expected_address = expected_addr_string.try_into()?;
         let (transaction_id, assoc_id) = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;

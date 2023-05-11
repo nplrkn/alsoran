@@ -7,7 +7,7 @@ use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
-use xxap::{GtpTeid, GtpTunnel, TransportLayerAddress};
+use xxap::{GtpTeid, GtpTunnel};
 
 impl Pdu for NgapPdu {}
 
@@ -323,7 +323,7 @@ impl MockAmf {
     pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
 
-        let transport_layer_address = TransportLayerAddress(net::ip_bits_from_string("1.2.1.2")?);
+        let transport_layer_address = "1.2.1.2".try_into()?;
 
         let pdu_session_resource_setup_request_transfer = PduSessionResourceSetupRequestTransfer {
             pdu_session_aggregate_maximum_bit_rate: None,

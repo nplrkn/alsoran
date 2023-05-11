@@ -2,7 +2,6 @@
 ## O-RAN O-DU interop
 - Rerun O-DU test
 - DLUPTNLInformation-ToBeSetup-List is wrongly rendered as DluptnlInformationToBeSetupList
-- TransportLayerAddress should have TryFrom<String>
 - Add PduSessionId to xxap common
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
   match a transaction.
@@ -90,6 +89,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- TransportLayerAddress has TryFrom<&str>
 - Form PDUSessionResourceSetupResponse correctly
 - Avoid missing NAS message Wireshark error on RrcReconfiguration
 - Find a way to get O-DU PHY stub to send ReconfigurationComplete in the right order (recompile with `ratio = 20`)

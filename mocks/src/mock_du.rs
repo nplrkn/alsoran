@@ -376,9 +376,7 @@ impl MockDu {
                         DluptnlInformationToBeSetupItem {
                             dluptnl_information: UpTransportLayerInformation::GtpTunnel(
                                 GtpTunnel {
-                                    transport_layer_address: TransportLayerAddress(
-                                        net::ip_bits_from_string("1.2.3.4").unwrap(),
-                                    ),
+                                    transport_layer_address: "1.2.3.4".try_into().unwrap(),
                                     gtp_teid: GtpTeid(vec![5, 6, 1, 2]),
                                 },
                             ),
@@ -482,10 +480,9 @@ impl MockDu {
 
     pub async fn handle_cu_configuration_update(
         &mut self,
-        expected_addr_string: &String,
+        expected_addr_string: &str,
     ) -> Result<()> {
-        let expected_address =
-            TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
+        let expected_address = expected_addr_string.try_into()?;
         let (transaction_id, assoc_id) = self
             .receive_gnb_cu_configuration_update(&expected_address)
             .await?;

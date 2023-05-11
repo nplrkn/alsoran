@@ -544,9 +544,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             pdu_session_resource_dl_ambr: None,
             // TODO: get transport information from the request
             ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
-                transport_layer_address: TransportLayerAddress(net::ip_bits_from_string(
-                    "192.168.110.82",
-                )?),
+                transport_layer_address: "192.168.110.82".try_into()?,
                 gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
             }),
             pdu_session_data_forwarding_information_request: None,
