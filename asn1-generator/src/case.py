@@ -17,6 +17,7 @@ SPECIALS = [(re.compile("^DU"), "DU-"),
             (re.compile(r"SRB(s?)"), r"-srb\1-"),
             (re.compile(r"DRB(s?)"), r"-drb\1-"),
             (re.compile(r"E-UTRAN"), r"EUTRAN"),
+            (re.compile(r"S-NSSAI"), r"SNSSAI"),
             ]
 
 
@@ -79,6 +80,10 @@ class TestCase(unittest.TestCase):
     def test_pmlns(self):
         self.assertEqual(pascal_case(
             "SupportedPLMNs-List"), "SupportedPlmnsList")
+
+    def test_snssai(self):
+        self.assertEqual(pascal_case(
+            "S-NSSAI"), "Snssai")
 
 
 if __name__ == '__main__':
