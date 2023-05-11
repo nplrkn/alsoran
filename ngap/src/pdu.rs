@@ -2,7 +2,8 @@
 use super::common::*;
 use super::ies::*;
 use asn1_per::{aper::*, *};
-use xxap::TransportLayerAddress;
+#[allow(unused_imports)]
+use xxap::{GtpTunnel, TransportLayerAddress};
 
 // PduSessionResourceSetupRequest
 #[derive(Clone, Debug)]

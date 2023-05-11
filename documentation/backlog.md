@@ -1,6 +1,6 @@
 
 ## O-RAN O-DU interop
-- Bearer context setup malformed in Wireshark - argh the E1AP and the NGAP SNSSAI are the same!!
+- Rerun O-DU test
 - DLUPTNLInformation-ToBeSetup-List is wrongly rendered as DluptnlInformationToBeSetupList
 - TransportLayerAddress should have TryFrom<String>
 - Add PduSessionId to xxap common

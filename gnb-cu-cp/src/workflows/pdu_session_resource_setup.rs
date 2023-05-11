@@ -147,9 +147,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             let pdu_session_id = pdu_session_id.0;
 
             // Pass the transport address of the CU-UP to the DU.
+            let snssai: xxap::Snssai = snssai.clone().into();
             match super::build_f1ap::build_drb_to_be_setup_item(
                 f1ap::DrbId(pdu_session_id),
-                snssai.clone().into(),
+                snssai.into(),
                 gtp_tunnel.clone(),
             ) {
                 Ok(drb_setup_item) => items.push(drb_setup_item),
@@ -526,7 +527,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         _ue: &UeState,
         r: &PduSessionResourceSetupItemSuReq,
     ) -> Result<PduSessionResourceToSetupItem> {
-        let snssai: Snssai = r.snssai.clone().into();
+        let snssai: xxap::Snssai = r.snssai.clone().into();
         let _session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
             &r.pdu_session_resource_setup_request_transfer,
         )?;

@@ -10,7 +10,7 @@ use rrc::{
     FreqBandIndicatorNr, ModulationOrder, PdcpParameters, PhyParameters, RfParameters,
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
-use xxap::*;
+use xxap::{Snssai, GtpTeid, TransportLayerAddress, GtpTunnel};
 
 pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,
@@ -135,7 +135,7 @@ fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
     let first_slice = Snssai(1, Some([2, 3, 4]));
 
     let first_drb_to_setup_item =
-        build_drb_to_be_setup_item(DrbId(1), first_slice, first_gtp_tunnel)?;
+        build_drb_to_be_setup_item(DrbId(1), first_slice.into(), first_gtp_tunnel)?;
 
     let second_gtp_tunnel = GtpTunnel {
         transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
@@ -143,7 +143,7 @@ fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
     };
     let second_slice = Snssai(5, Some([6, 7, 8]));
     let second_drb_to_setup_item =
-        build_drb_to_be_setup_item(DrbId(2), second_slice, second_gtp_tunnel)?;
+        build_drb_to_be_setup_item(DrbId(2), second_slice.into(), second_gtp_tunnel)?;
     Ok(DrbsToBeSetupList(vec![
         first_drb_to_setup_item,
         second_drb_to_setup_item,
