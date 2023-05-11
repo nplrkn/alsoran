@@ -15919,6 +15919,68 @@ impl PerCodec for SliceSupportItem {
         })
     }
 }
+// Snssai
+#[derive(Clone, Debug)]
+pub struct Snssai {
+    pub sst: Vec<u8>,
+    pub sd: Option<Vec<u8>>,
+}
+
+impl Snssai {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 2)?;
+        let sst = decode::decode_octetstring(data, Some(1), Some(1), false)?;
+        let sd = if optionals[0] {
+            Some(decode::decode_octetstring(data, Some(3), Some(3), false)?)
+        } else {
+            None
+        };
+
+        // Process the extension container
+
+        if optionals[1] {
+            let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let ie_length = decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => data.advance_maybe_err(ie_length, false)?,
+                }
+            }
+        }
+        Ok(Self { sst, sd })
+    }
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut optionals = BitString::new();
+        optionals.push(self.sd.is_some());
+        optionals.push(false);
+
+        encode::encode_sequence_header(data, true, &optionals, false)?;
+        encode::encode_octetstring(data, Some(1), Some(1), false, &self.sst, false)?;
+        if let Some(x) = &self.sd {
+            encode::encode_octetstring(data, Some(3), Some(3), false, &x, false)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl PerCodec for Snssai {
+    type Allocator = Allocator;
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        Snssai::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("Snssai");
+            e
+        })
+    }
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("Snssai");
+            e
+        })
+    }
+}
 // SdapConfiguration
 #[derive(Clone, Debug)]
 pub struct SdapConfiguration {

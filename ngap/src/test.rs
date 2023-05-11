@@ -2,7 +2,7 @@ use super::ies::*;
 use super::pdu::*;
 use super::top_pdu::*;
 use asn1_per::*;
-use xxap::SNssai;
+use xxap::Snssai;
 
 fn make_ng_setup() -> NgSetupRequest {
     let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);
@@ -17,10 +17,7 @@ fn make_ng_setup() -> NgSetupRequest {
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                 plmn_identity: plmn_identity,
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                    s_nssai: SNssai {
-                        sst: vec![0x01],
-                        sd: Some(vec![1, 2, 3]),
-                    },
+                    snssai: Snssai(1, Some([1, 2, 3])).into(),
                 }]),
                 npn_support: None,
                 extended_tai_slice_support_list: None,
@@ -64,10 +61,7 @@ fn test_ng_setup() -> Result<(), PerCodecError> {
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                 plmn_identity: PlmnIdentity(vec![2, 3, 2]),
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                    s_nssai: SNssai {
-                        sst: vec![0x01],
-                        sd: None,
-                    },
+                    snssai: Snssai(1, None).into(),
                 }]),
                 npn_support: None,
                 extended_tai_slice_support_list: None,

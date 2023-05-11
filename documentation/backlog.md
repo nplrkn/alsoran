@@ -1,5 +1,6 @@
 
 ## O-RAN O-DU interop
+- Bearer context setup malformed in Wireshark - argh the E1AP and the NGAP SNSSAI are the same!!
 - DLUPTNLInformation-ToBeSetup-List is wrongly rendered as DluptnlInformationToBeSetupList
 - TransportLayerAddress should have TryFrom<String>
 - Add PduSessionId to xxap common
@@ -21,6 +22,7 @@
 - don't set up SRB + 2 DBRs if all we need is one session = one DRB
 - ASN.1 E1 and NGAP PduSessionIds should be directly comparable?  by being the same type?  instead of item.pdu_session_id.0 == stage1.ngap_request.pdu_session_id.0
 - FV regression test to reduce dependency on running with live ODU 
+- fixed size octet string should be [] not Vec?
 
 # NEXT UP
 - Dataplane with O-RAN SC ODU

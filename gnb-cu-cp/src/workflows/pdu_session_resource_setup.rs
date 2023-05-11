@@ -134,7 +134,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                         ngap_request:
                             PduSessionResourceSetupItemSuReq {
                                 pdu_session_id,
-                                s_nssai,
+                                snssai,
                                 ..
                             },
                     },
@@ -149,7 +149,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             // Pass the transport address of the CU-UP to the DU.
             match super::build_f1ap::build_drb_to_be_setup_item(
                 f1ap::DrbId(pdu_session_id),
-                s_nssai.clone().into(),
+                snssai.clone().into(),
                 gtp_tunnel.clone(),
             ) {
                 Ok(drb_setup_item) => items.push(drb_setup_item),
@@ -526,13 +526,14 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         _ue: &UeState,
         r: &PduSessionResourceSetupItemSuReq,
     ) -> Result<PduSessionResourceToSetupItem> {
+        let snssai: Snssai = r.snssai.clone().into();
         let _session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
             &r.pdu_session_resource_setup_request_transfer,
         )?;
         Ok(PduSessionResourceToSetupItem {
             pdu_session_id: PduSessionId(r.pdu_session_id.0),
             pdu_session_type: PduSessionType::Ipv4,
-            snssai: r.s_nssai.clone().into(),
+            snssai: snssai.into(),
             security_indication: SecurityIndication {
                 integrity_protection_indication: IntegrityProtectionIndication::Preferred,
                 confidentiality_protection_indication:

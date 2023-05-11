@@ -1,5 +1,6 @@
-mod conversion;
+mod common;
 mod ies;
 
 // Export everything except Criticality
-pub use ies::{GtpTeid, GtpTunnel, SNssai, Snssai, TransportLayerAddress};
+pub use common::*;
+pub use ies::{GtpTeid, GtpTunnel, TransportLayerAddress};

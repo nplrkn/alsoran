@@ -7,7 +7,7 @@ use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
-use xxap::*;
+use xxap::{GtpTeid, GtpTunnel, TransportLayerAddress};
 
 impl Pdu for NgapPdu {}
 
@@ -90,7 +90,7 @@ impl MockAmf {
                 plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
                     plmn_identity: self.plmn_identity(),
                     slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        s_nssai: self.snssai().into(),
+                        snssai: self.snssai().into(),
                     }]),
                     npn_support: None,
                     extended_slice_support_list: None,
@@ -147,11 +147,8 @@ impl MockAmf {
         PlmnIdentity(vec![2, 3, 2])
     }
 
-    fn snssai(&self) -> Snssai {
-        Snssai {
-            sst: vec![0x01],
-            sd: Some(vec![0x02, 0x03, 0x04]), // (Necessary for ODU interop when using AMF-SIM)
-        }
+    fn snssai(&self) -> xxap::Snssai {
+        xxap::Snssai(1, Some([0x02, 0x03, 0x04])) // (Necessary for ODU interop when using AMF-SIM)
     }
 
     pub async fn receive_initial_ue_message(&self, ue_id: u32) -> Result<UeContext> {
@@ -197,7 +194,7 @@ impl MockAmf {
                 guami: self.guami(),
                 pdu_session_resource_setup_list_cxt_req: None,
                 allowed_nssai: AllowedNssai(vec![AllowedNssaiItem {
-                    s_nssai: self.snssai().into(),
+                    snssai: self.snssai().into(),
                 }]),
                 ue_security_capabilities: UeSecurityCapabilities {
                     nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![u8,Msb0;0;16]),
@@ -388,7 +385,7 @@ impl MockAmf {
                     PduSessionResourceSetupItemSuReq {
                         pdu_session_id: PduSessionId(1),
                         pdu_session_nas_pdu: Some(dummy_nas_session_establishment_accept),
-                        s_nssai: self.snssai().into(),
+                        snssai: self.snssai().into(),
                         pdu_session_resource_setup_request_transfer,
                     },
                 ]),

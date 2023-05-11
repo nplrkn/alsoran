@@ -190,7 +190,7 @@ impl MockDu {
                     selected_plmn_identity: 1,
                     registered_amf: None,
                     guami_type: None,
-                    s_nssai_list: None,
+                    snssai_list: None,
                     dedicated_nas_message: DedicatedNasMessage(nas_message),
                     ng_5g_s_tmsi_value: None,
                     late_non_critical_extension: None,

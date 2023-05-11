@@ -42,7 +42,7 @@ pub fn build_drb_to_be_setup_item(
                 ulpdu_session_aggregate_maximum_bit_rate: None,
                 qos_monitoring_request: None,
             },
-            snssai,
+            snssai: snssai.into(),
             notification_control: None,
             flows_mapped_to_drb_list: FlowsMappedToDrbList(vec![FlowsMappedToDrbItem {
                 qos_flow_identifier: QosFlowIdentifier(0),
@@ -132,10 +132,8 @@ fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
         transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
         gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
     };
-    let first_slice = Snssai {
-        sst: vec![1],
-        sd: Some(vec![2, 3, 4]),
-    };
+    let first_slice = Snssai(1, Some([2, 3, 4]));
+
     let first_drb_to_setup_item =
         build_drb_to_be_setup_item(DrbId(1), first_slice, first_gtp_tunnel)?;
 
@@ -143,10 +141,7 @@ fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
         transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
         gtp_teid: GtpTeid(vec![0, 0, 0, 2]),
     };
-    let second_slice = Snssai {
-        sst: vec![5],
-        sd: Some(vec![6, 7, 8]),
-    };
+    let second_slice = Snssai(5, Some([6, 7, 8]));
     let second_drb_to_setup_item =
         build_drb_to_be_setup_item(DrbId(2), second_slice, second_gtp_tunnel)?;
     Ok(DrbsToBeSetupList(vec![
