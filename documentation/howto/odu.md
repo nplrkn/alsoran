@@ -70,7 +70,7 @@ RUST_LOG=debug cargo run
 sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412 or port 38462
 ```
 
-# in terminal 5, in o-du-l2 directory
+# in terminal 5, in projects/o-du-l2
 (This needs the rebuilt ODU which listens on 127.0.0.2 and connects to 127.0.0.1.)
 ```
 sudo bin/odu/odu

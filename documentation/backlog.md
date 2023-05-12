@@ -1,6 +1,5 @@
 
 ## O-RAN O-DU interop
-- Rerun O-DU test
 - DLUPTNLInformation-ToBeSetup-List is wrongly rendered as DluptnlInformationToBeSetupList
 - Add PduSessionId to xxap common
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
