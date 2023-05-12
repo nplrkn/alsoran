@@ -372,9 +372,9 @@ impl MockDu {
                 drbs_setup_list: Some(DrbsSetupList(vec![DrbsSetupItem {
                     drb_id: DrbId(1),
                     lcid: None,
-                    dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList(vec![
-                        DluptnlInformationToBeSetupItem {
-                            dluptnl_information: UpTransportLayerInformation::GtpTunnel(
+                    dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList(vec![
+                        DlUpTnlInformationToBeSetupItem {
+                            dl_up_tnl_information: UpTransportLayerInformation::GtpTunnel(
                                 GtpTunnel {
                                     transport_layer_address: "1.2.3.4".try_into().unwrap(),
                                     gtp_teid: GtpTeid(vec![5, 6, 1, 2]),

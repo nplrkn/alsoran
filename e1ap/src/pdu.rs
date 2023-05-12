@@ -6099,20 +6099,20 @@ impl PerCodec for ResourceStatusUpdate {
         })
     }
 }
-// IabUptnlAddressUpdate
+// IabUpTnlAddressUpdate
 #[derive(Clone, Debug)]
-pub struct IabUptnlAddressUpdate {
+pub struct IabUpTnlAddressUpdate {
     pub transaction_id: TransactionId,
-    pub dluptnl_address_to_update_list: Option<DluptnlAddressToUpdateList>,
+    pub dl_up_tnl_address_to_update_list: Option<DlUpTnlAddressToUpdateList>,
 }
 
-impl IabUptnlAddressUpdate {
+impl IabUpTnlAddressUpdate {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
         let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut dluptnl_address_to_update_list: Option<DluptnlAddressToUpdateList> = None;
+        let mut dl_up_tnl_address_to_update_list: Option<DlUpTnlAddressToUpdateList> = None;
 
         for _ in 0..len {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -6121,7 +6121,8 @@ impl IabUptnlAddressUpdate {
             match id {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
                 108 => {
-                    dluptnl_address_to_update_list = Some(DluptnlAddressToUpdateList::decode(data)?)
+                    dl_up_tnl_address_to_update_list =
+                        Some(DlUpTnlAddressToUpdateList::decode(data)?)
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
@@ -6131,7 +6132,7 @@ impl IabUptnlAddressUpdate {
         )))?;
         Ok(Self {
             transaction_id,
-            dluptnl_address_to_update_list,
+            dl_up_tnl_address_to_update_list,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -6146,7 +6147,7 @@ impl IabUptnlAddressUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.dluptnl_address_to_update_list {
+        if let Some(x) = &self.dl_up_tnl_address_to_update_list {
             let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
@@ -6163,32 +6164,32 @@ impl IabUptnlAddressUpdate {
     }
 }
 
-impl PerCodec for IabUptnlAddressUpdate {
+impl PerCodec for IabUpTnlAddressUpdate {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        IabUptnlAddressUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabUptnlAddressUpdate");
+        IabUpTnlAddressUpdate::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("IabUpTnlAddressUpdate");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabUptnlAddressUpdate");
+            e.push_context("IabUpTnlAddressUpdate");
             e
         })
     }
 }
-// DluptnlAddressToUpdateList
+// DlUpTnlAddressToUpdateList
 #[derive(Clone, Debug)]
-pub struct DluptnlAddressToUpdateList(pub Vec<DluptnlAddressToUpdateItem>);
+pub struct DlUpTnlAddressToUpdateList(pub Vec<DlUpTnlAddressToUpdateItem>);
 
-impl DluptnlAddressToUpdateList {
+impl DlUpTnlAddressToUpdateList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DluptnlAddressToUpdateItem::decode(data)?);
+                items.push(DlUpTnlAddressToUpdateItem::decode(data)?);
             }
             items
         }))
@@ -6202,37 +6203,37 @@ impl DluptnlAddressToUpdateList {
     }
 }
 
-impl PerCodec for DluptnlAddressToUpdateList {
+impl PerCodec for DlUpTnlAddressToUpdateList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        DluptnlAddressToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlAddressToUpdateList");
+        DlUpTnlAddressToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("DlUpTnlAddressToUpdateList");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlAddressToUpdateList");
+            e.push_context("DlUpTnlAddressToUpdateList");
             e
         })
     }
 }
-// IabUptnlAddressUpdateAcknowledge
+// IabUpTnlAddressUpdateAcknowledge
 #[derive(Clone, Debug)]
-pub struct IabUptnlAddressUpdateAcknowledge {
+pub struct IabUpTnlAddressUpdateAcknowledge {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
-    pub uluptnl_address_to_update_list: Option<UluptnlAddressToUpdateList>,
+    pub ul_up_tnl_address_to_update_list: Option<UlUpTnlAddressToUpdateList>,
 }
 
-impl IabUptnlAddressUpdateAcknowledge {
+impl IabUpTnlAddressUpdateAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
         let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
-        let mut uluptnl_address_to_update_list: Option<UluptnlAddressToUpdateList> = None;
+        let mut ul_up_tnl_address_to_update_list: Option<UlUpTnlAddressToUpdateList> = None;
 
         for _ in 0..len {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -6242,7 +6243,8 @@ impl IabUptnlAddressUpdateAcknowledge {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 109 => {
-                    uluptnl_address_to_update_list = Some(UluptnlAddressToUpdateList::decode(data)?)
+                    ul_up_tnl_address_to_update_list =
+                        Some(UlUpTnlAddressToUpdateList::decode(data)?)
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
@@ -6253,7 +6255,7 @@ impl IabUptnlAddressUpdateAcknowledge {
         Ok(Self {
             transaction_id,
             criticality_diagnostics,
-            uluptnl_address_to_update_list,
+            ul_up_tnl_address_to_update_list,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -6278,7 +6280,7 @@ impl IabUptnlAddressUpdateAcknowledge {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.uluptnl_address_to_update_list {
+        if let Some(x) = &self.ul_up_tnl_address_to_update_list {
             let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 109, false)?;
@@ -6295,32 +6297,32 @@ impl IabUptnlAddressUpdateAcknowledge {
     }
 }
 
-impl PerCodec for IabUptnlAddressUpdateAcknowledge {
+impl PerCodec for IabUpTnlAddressUpdateAcknowledge {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        IabUptnlAddressUpdateAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabUptnlAddressUpdateAcknowledge");
+        IabUpTnlAddressUpdateAcknowledge::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("IabUpTnlAddressUpdateAcknowledge");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabUptnlAddressUpdateAcknowledge");
+            e.push_context("IabUpTnlAddressUpdateAcknowledge");
             e
         })
     }
 }
-// UluptnlAddressToUpdateList
+// UlUpTnlAddressToUpdateList
 #[derive(Clone, Debug)]
-pub struct UluptnlAddressToUpdateList(pub Vec<UluptnlAddressToUpdateItem>);
+pub struct UlUpTnlAddressToUpdateList(pub Vec<UlUpTnlAddressToUpdateItem>);
 
-impl UluptnlAddressToUpdateList {
+impl UlUpTnlAddressToUpdateList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(UluptnlAddressToUpdateItem::decode(data)?);
+                items.push(UlUpTnlAddressToUpdateItem::decode(data)?);
             }
             items
         }))
@@ -6334,31 +6336,31 @@ impl UluptnlAddressToUpdateList {
     }
 }
 
-impl PerCodec for UluptnlAddressToUpdateList {
+impl PerCodec for UlUpTnlAddressToUpdateList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UluptnlAddressToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlAddressToUpdateList");
+        UlUpTnlAddressToUpdateList::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("UlUpTnlAddressToUpdateList");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlAddressToUpdateList");
+            e.push_context("UlUpTnlAddressToUpdateList");
             e
         })
     }
 }
-// IabUptnlAddressUpdateFailure
+// IabUpTnlAddressUpdateFailure
 #[derive(Clone, Debug)]
-pub struct IabUptnlAddressUpdateFailure {
+pub struct IabUpTnlAddressUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl IabUptnlAddressUpdateFailure {
+impl IabUpTnlAddressUpdateFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
         let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6438,17 +6440,17 @@ impl IabUptnlAddressUpdateFailure {
     }
 }
 
-impl PerCodec for IabUptnlAddressUpdateFailure {
+impl PerCodec for IabUpTnlAddressUpdateFailure {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        IabUptnlAddressUpdateFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabUptnlAddressUpdateFailure");
+        IabUpTnlAddressUpdateFailure::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("IabUpTnlAddressUpdateFailure");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabUptnlAddressUpdateFailure");
+            e.push_context("IabUpTnlAddressUpdateFailure");
             e
         })
     }

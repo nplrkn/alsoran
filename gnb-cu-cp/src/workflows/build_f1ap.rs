@@ -72,9 +72,9 @@ pub fn build_drb_to_be_setup_item(
                 tsc_traffic_characteristics: None,
             }]),
         }),
-        uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList(vec![
-            UluptnlInformationToBeSetupItem {
-                uluptnl_information: UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
+        ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList(vec![
+            UlUpTnlInformationToBeSetupItem {
+                ul_up_tnl_information: UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
                 bh_info: None,
             },
         ]),

@@ -4,17 +4,17 @@ use asn1_per::{aper::*, *};
 #[allow(unused_imports)]
 use xxap::{GtpTunnel, TransportLayerAddress};
 
-// AdditionalDluptnlInformationForHoList
+// AdditionalDlUpTnlInformationForHoList
 #[derive(Clone, Debug)]
-pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
+pub struct AdditionalDlUpTnlInformationForHoList(pub Vec<AdditionalDlUpTnlInformationForHoItem>);
 
-impl AdditionalDluptnlInformationForHoList {
+impl AdditionalDlUpTnlInformationForHoList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(3), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(AdditionalDluptnlInformationForHoItem::decode(data)?);
+                items.push(AdditionalDlUpTnlInformationForHoItem::decode(data)?);
             }
             items
         }))
@@ -28,36 +28,36 @@ impl AdditionalDluptnlInformationForHoList {
     }
 }
 
-impl PerCodec for AdditionalDluptnlInformationForHoList {
+impl PerCodec for AdditionalDlUpTnlInformationForHoList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("AdditionalDluptnlInformationForHoList");
+        AdditionalDlUpTnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("AdditionalDlUpTnlInformationForHoList");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("AdditionalDluptnlInformationForHoList");
+            e.push_context("AdditionalDlUpTnlInformationForHoList");
             e
         })
     }
 }
-// AdditionalDluptnlInformationForHoItem
+// AdditionalDlUpTnlInformationForHoItem
 #[derive(Clone, Debug)]
-pub struct AdditionalDluptnlInformationForHoItem {
+pub struct AdditionalDlUpTnlInformationForHoItem {
     pub additional_dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub additional_qos_flow_setup_response_list: QosFlowListWithDataForwarding,
-    pub additional_dl_forwarding_uptnl_information: Option<UpTransportLayerInformation>,
+    pub additional_dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
     pub additional_redundant_dl_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
 }
 
-impl AdditionalDluptnlInformationForHoItem {
+impl AdditionalDlUpTnlInformationForHoItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 2)?;
         let additional_dl_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
         let additional_qos_flow_setup_response_list = QosFlowListWithDataForwarding::decode(data)?;
-        let additional_dl_forwarding_uptnl_information = if optionals[0] {
+        let additional_dl_forwarding_up_tnl_information = if optionals[0] {
             Some(UpTransportLayerInformation::decode(data)?)
         } else {
             None
@@ -86,19 +86,19 @@ impl AdditionalDluptnlInformationForHoItem {
         Ok(Self {
             additional_dl_ngu_up_tnl_information,
             additional_qos_flow_setup_response_list,
-            additional_dl_forwarding_uptnl_information,
+            additional_dl_forwarding_up_tnl_information,
             additional_redundant_dl_ngu_up_tnl_information,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
-        optionals.push(self.additional_dl_forwarding_uptnl_information.is_some());
+        optionals.push(self.additional_dl_forwarding_up_tnl_information.is_some());
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.additional_dl_ngu_up_tnl_information.encode(data)?;
         self.additional_qos_flow_setup_response_list.encode(data)?;
-        if let Some(x) = &self.additional_dl_forwarding_uptnl_information {
+        if let Some(x) = &self.additional_dl_forwarding_up_tnl_information {
             x.encode(data)?;
         }
 
@@ -106,17 +106,17 @@ impl AdditionalDluptnlInformationForHoItem {
     }
 }
 
-impl PerCodec for AdditionalDluptnlInformationForHoItem {
+impl PerCodec for AdditionalDlUpTnlInformationForHoItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        AdditionalDluptnlInformationForHoItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("AdditionalDluptnlInformationForHoItem");
+        AdditionalDlUpTnlInformationForHoItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("AdditionalDlUpTnlInformationForHoItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("AdditionalDluptnlInformationForHoItem");
+            e.push_context("AdditionalDlUpTnlInformationForHoItem");
             e
         })
     }
@@ -7005,7 +7005,7 @@ pub struct DrbsSubjectToStatusTransferItem {
     pub drb_id: DrbId,
     pub drb_status_ul: DrbStatusUl,
     pub drb_status_dl: DrbStatusDl,
-    pub old_associated_qos_flow_list_u_lendmarkerexpected: Option<AssociatedQosFlowList>,
+    pub old_associated_qos_flow_list_ul_endmarkerexpected: Option<AssociatedQosFlowList>,
 }
 
 impl DrbsSubjectToStatusTransferItem {
@@ -7016,7 +7016,7 @@ impl DrbsSubjectToStatusTransferItem {
         let drb_status_dl = DrbStatusDl::decode(data)?;
 
         // Process the extension container
-        let mut old_associated_qos_flow_list_u_lendmarkerexpected: Option<AssociatedQosFlowList> =
+        let mut old_associated_qos_flow_list_ul_endmarkerexpected: Option<AssociatedQosFlowList> =
             None;
 
         if optionals[0] {
@@ -7027,7 +7027,7 @@ impl DrbsSubjectToStatusTransferItem {
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     159 => {
-                        old_associated_qos_flow_list_u_lendmarkerexpected =
+                        old_associated_qos_flow_list_ul_endmarkerexpected =
                             Some(AssociatedQosFlowList::decode(data)?)
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
@@ -7038,7 +7038,7 @@ impl DrbsSubjectToStatusTransferItem {
             drb_id,
             drb_status_ul,
             drb_status_dl,
-            old_associated_qos_flow_list_u_lendmarkerexpected,
+            old_associated_qos_flow_list_ul_endmarkerexpected,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -7854,14 +7854,14 @@ impl PerCodec for DrbsSubjectToEarlyStatusTransferList {
 #[derive(Clone, Debug)]
 pub struct DrbsSubjectToEarlyStatusTransferItem {
     pub drb_id: DrbId,
-    pub first_dlcount: DrbStatusDl,
+    pub first_dl_count: DrbStatusDl,
 }
 
 impl DrbsSubjectToEarlyStatusTransferItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let drb_id = DrbId::decode(data)?;
-        let first_dlcount = DrbStatusDl::decode(data)?;
+        let first_dl_count = DrbStatusDl::decode(data)?;
 
         // Process the extension container
 
@@ -7878,7 +7878,7 @@ impl DrbsSubjectToEarlyStatusTransferItem {
         }
         Ok(Self {
             drb_id,
-            first_dlcount,
+            first_dl_count,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -7887,7 +7887,7 @@ impl DrbsSubjectToEarlyStatusTransferItem {
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
-        self.first_dlcount.encode(data)?;
+        self.first_dl_count.encode(data)?;
 
         Ok(())
     }
@@ -11666,9 +11666,9 @@ pub struct HandoverCommandTransfer {
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
     pub qos_flow_to_be_forwarded_list: Option<QosFlowToBeForwardedList>,
     pub data_forwarding_response_drb_list: Option<DataForwardingResponseDrbList>,
-    pub additional_dl_forwarding_uptnl_information: Option<QosFlowPerTnlInformationList>,
+    pub additional_dl_forwarding_up_tnl_information: Option<QosFlowPerTnlInformationList>,
     pub ul_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
-    pub additional_ul_forwarding_uptnl_information: Option<UpTransportLayerInformationList>,
+    pub additional_ul_forwarding_up_tnl_information: Option<UpTransportLayerInformationList>,
     pub data_forwarding_response_erab_list: Option<DataForwardingResponseErabList>,
 }
 
@@ -11692,10 +11692,10 @@ impl HandoverCommandTransfer {
         };
 
         // Process the extension container
-        let mut additional_dl_forwarding_uptnl_information: Option<QosFlowPerTnlInformationList> =
+        let mut additional_dl_forwarding_up_tnl_information: Option<QosFlowPerTnlInformationList> =
             None;
         let mut ul_forwarding_up_tnl_information: Option<UpTransportLayerInformation> = None;
-        let mut additional_ul_forwarding_uptnl_information: Option<
+        let mut additional_ul_forwarding_up_tnl_information: Option<
             UpTransportLayerInformationList,
         > = None;
         let mut data_forwarding_response_erab_list: Option<DataForwardingResponseErabList> = None;
@@ -11708,7 +11708,7 @@ impl HandoverCommandTransfer {
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     152 => {
-                        additional_dl_forwarding_uptnl_information =
+                        additional_dl_forwarding_up_tnl_information =
                             Some(QosFlowPerTnlInformationList::decode(data)?)
                     }
                     164 => {
@@ -11716,7 +11716,7 @@ impl HandoverCommandTransfer {
                             Some(UpTransportLayerInformation::decode(data)?)
                     }
                     172 => {
-                        additional_ul_forwarding_uptnl_information =
+                        additional_ul_forwarding_up_tnl_information =
                             Some(UpTransportLayerInformationList::decode(data)?)
                     }
                     249 => {
@@ -11731,9 +11731,9 @@ impl HandoverCommandTransfer {
             dl_forwarding_up_tnl_information,
             qos_flow_to_be_forwarded_list,
             data_forwarding_response_drb_list,
-            additional_dl_forwarding_uptnl_information,
+            additional_dl_forwarding_up_tnl_information,
             ul_forwarding_up_tnl_information,
-            additional_ul_forwarding_uptnl_information,
+            additional_ul_forwarding_up_tnl_information,
             data_forwarding_response_erab_list,
         })
     }
@@ -11872,9 +11872,9 @@ pub struct HandoverRequestAcknowledgeTransfer {
     pub qos_flow_setup_response_list: QosFlowListWithDataForwarding,
     pub qos_flow_failed_to_setup_list: Option<QosFlowListWithCause>,
     pub data_forwarding_response_drb_list: Option<DataForwardingResponseDrbList>,
-    pub additional_dluptnl_information_for_ho_list: Option<AdditionalDluptnlInformationForHoList>,
+    pub additional_dl_up_tnl_information_for_ho_list: Option<AdditionalDlUpTnlInformationForHoList>,
     pub ul_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
-    pub additional_ul_forwarding_uptnl_information: Option<UpTransportLayerInformationList>,
+    pub additional_ul_forwarding_up_tnl_information: Option<UpTransportLayerInformationList>,
     pub data_forwarding_response_erab_list: Option<DataForwardingResponseErabList>,
     pub redundant_dl_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
     pub used_rsn_information: Option<RedundantPduSessionInformation>,
@@ -11908,11 +11908,11 @@ impl HandoverRequestAcknowledgeTransfer {
         };
 
         // Process the extension container
-        let mut additional_dluptnl_information_for_ho_list: Option<
-            AdditionalDluptnlInformationForHoList,
+        let mut additional_dl_up_tnl_information_for_ho_list: Option<
+            AdditionalDlUpTnlInformationForHoList,
         > = None;
         let mut ul_forwarding_up_tnl_information: Option<UpTransportLayerInformation> = None;
-        let mut additional_ul_forwarding_uptnl_information: Option<
+        let mut additional_ul_forwarding_up_tnl_information: Option<
             UpTransportLayerInformationList,
         > = None;
         let mut data_forwarding_response_erab_list: Option<DataForwardingResponseErabList> = None;
@@ -11928,15 +11928,15 @@ impl HandoverRequestAcknowledgeTransfer {
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     153 => {
-                        additional_dluptnl_information_for_ho_list =
-                            Some(AdditionalDluptnlInformationForHoList::decode(data)?)
+                        additional_dl_up_tnl_information_for_ho_list =
+                            Some(AdditionalDlUpTnlInformationForHoList::decode(data)?)
                     }
                     164 => {
                         ul_forwarding_up_tnl_information =
                             Some(UpTransportLayerInformation::decode(data)?)
                     }
                     172 => {
-                        additional_ul_forwarding_uptnl_information =
+                        additional_ul_forwarding_up_tnl_information =
                             Some(UpTransportLayerInformationList::decode(data)?)
                     }
                     249 => {
@@ -11962,9 +11962,9 @@ impl HandoverRequestAcknowledgeTransfer {
             qos_flow_setup_response_list,
             qos_flow_failed_to_setup_list,
             data_forwarding_response_drb_list,
-            additional_dluptnl_information_for_ho_list,
+            additional_dl_up_tnl_information_for_ho_list,
             ul_forwarding_up_tnl_information,
-            additional_ul_forwarding_uptnl_information,
+            additional_ul_forwarding_up_tnl_information,
             data_forwarding_response_erab_list,
             redundant_dl_ngu_up_tnl_information,
             used_rsn_information,
@@ -21269,7 +21269,7 @@ impl PerCodec for PduSessionResourceItemHoRqd {
 pub struct PduSessionResourceModifyConfirmTransfer {
     pub qos_flow_modify_confirm_list: QosFlowModifyConfirmList,
     pub ulngu_up_tnl_information: UpTransportLayerInformation,
-    pub additional_ng_uuptnl_information: Option<UpTransportLayerInformationPairList>,
+    pub additional_ng_u_up_tnl_information: Option<UpTransportLayerInformationPairList>,
     pub qos_flow_failed_to_modify_list: Option<QosFlowListWithCause>,
     pub redundant_ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
     pub additional_redundant_ngu_up_tnl_information: Option<UpTransportLayerInformationPairList>,
@@ -21280,7 +21280,7 @@ impl PduSessionResourceModifyConfirmTransfer {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 3)?;
         let qos_flow_modify_confirm_list = QosFlowModifyConfirmList::decode(data)?;
         let ulngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
-        let additional_ng_uuptnl_information = if optionals[0] {
+        let additional_ng_u_up_tnl_information = if optionals[0] {
             Some(UpTransportLayerInformationPairList::decode(data)?)
         } else {
             None
@@ -21319,7 +21319,7 @@ impl PduSessionResourceModifyConfirmTransfer {
         Ok(Self {
             qos_flow_modify_confirm_list,
             ulngu_up_tnl_information,
-            additional_ng_uuptnl_information,
+            additional_ng_u_up_tnl_information,
             qos_flow_failed_to_modify_list,
             redundant_ul_ngu_up_tnl_information,
             additional_redundant_ngu_up_tnl_information,
@@ -21327,14 +21327,14 @@ impl PduSessionResourceModifyConfirmTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
-        optionals.push(self.additional_ng_uuptnl_information.is_some());
+        optionals.push(self.additional_ng_u_up_tnl_information.is_some());
         optionals.push(self.qos_flow_failed_to_modify_list.is_some());
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_modify_confirm_list.encode(data)?;
         self.ulngu_up_tnl_information.encode(data)?;
-        if let Some(x) = &self.additional_ng_uuptnl_information {
+        if let Some(x) = &self.additional_ng_u_up_tnl_information {
             x.encode(data)?;
         }
         if let Some(x) = &self.qos_flow_failed_to_modify_list {

@@ -1,6 +1,5 @@
 
 ## O-RAN O-DU interop
-- DLUPTNLInformation-ToBeSetup-List is wrongly rendered as DluptnlInformationToBeSetupList
 - Add PduSessionId to xxap common
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
   match a transaction.
@@ -88,6 +87,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Improved case conversion of DLUPTNLInformation-ToBeSetup-List and similar
 - TransportLayerAddress has TryFrom<&str>
 - Form PDUSessionResourceSetupResponse correctly
 - Avoid missing NAS message Wireshark error on RrcReconfiguration

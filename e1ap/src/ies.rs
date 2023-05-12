@@ -2122,14 +2122,14 @@ impl PerCodec for DlDiscarding {
         })
     }
 }
-// DluptnlAddressToUpdateItem
+// DlUpTnlAddressToUpdateItem
 #[derive(Clone, Debug)]
-pub struct DluptnlAddressToUpdateItem {
+pub struct DlUpTnlAddressToUpdateItem {
     pub old_tnl_adress: TransportLayerAddress,
     pub new_tnl_adress: TransportLayerAddress,
 }
 
-impl DluptnlAddressToUpdateItem {
+impl DlUpTnlAddressToUpdateItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let old_tnl_adress = TransportLayerAddress::decode(data)?;
@@ -2165,17 +2165,17 @@ impl DluptnlAddressToUpdateItem {
     }
 }
 
-impl PerCodec for DluptnlAddressToUpdateItem {
+impl PerCodec for DlUpTnlAddressToUpdateItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        DluptnlAddressToUpdateItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlAddressToUpdateItem");
+        DlUpTnlAddressToUpdateItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("DlUpTnlAddressToUpdateItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlAddressToUpdateItem");
+            e.push_context("DlUpTnlAddressToUpdateItem");
             e
         })
     }
@@ -3429,7 +3429,7 @@ pub struct DrbModifiedItemNgRan {
     pub flow_setup_list: Option<QosFlowList>,
     pub flow_failed_list: Option<QosFlowFailedList>,
     pub early_forwarding_count_info: Option<EarlyForwardingCountInfo>,
-    pub old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList>,
+    pub old_qos_flow_map_ul_endmarkerexpected: Option<QosFlowList>,
 }
 
 impl DrbModifiedItemNgRan {
@@ -3459,7 +3459,7 @@ impl DrbModifiedItemNgRan {
 
         // Process the extension container
         let mut early_forwarding_count_info: Option<EarlyForwardingCountInfo> = None;
-        let mut old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList> = None;
+        let mut old_qos_flow_map_ul_endmarkerexpected: Option<QosFlowList> = None;
 
         if optionals[4] {
             let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
@@ -3471,7 +3471,7 @@ impl DrbModifiedItemNgRan {
                     123 => {
                         early_forwarding_count_info = Some(EarlyForwardingCountInfo::decode(data)?)
                     }
-                    71 => old_qos_flow_map_u_lendmarkerexpected = Some(QosFlowList::decode(data)?),
+                    71 => old_qos_flow_map_ul_endmarkerexpected = Some(QosFlowList::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
@@ -3483,7 +3483,7 @@ impl DrbModifiedItemNgRan {
             flow_setup_list,
             flow_failed_list,
             early_forwarding_count_info,
-            old_qos_flow_map_u_lendmarkerexpected,
+            old_qos_flow_map_ul_endmarkerexpected,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -5006,7 +5006,7 @@ pub struct DrbToModifyItemNgRan {
     pub cell_group_to_remove: Option<CellGroupInformation>,
     pub flow_mapping_information: Option<QosFlowQosParameterList>,
     pub drb_inactivity_timer: Option<InactivityTimer>,
-    pub old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList>,
+    pub old_qos_flow_map_ul_endmarkerexpected: Option<QosFlowList>,
     pub drb_qos: Option<QosFlowLevelQosParameters>,
     pub early_forwarding_count_req: Option<EarlyForwardingCountReq>,
     pub early_forwarding_count_info: Option<EarlyForwardingCountInfo>,
@@ -5073,7 +5073,7 @@ impl DrbToModifyItemNgRan {
         };
 
         // Process the extension container
-        let mut old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList> = None;
+        let mut old_qos_flow_map_ul_endmarkerexpected: Option<QosFlowList> = None;
         let mut drb_qos: Option<QosFlowLevelQosParameters> = None;
         let mut early_forwarding_count_req: Option<EarlyForwardingCountReq> = None;
         let mut early_forwarding_count_info: Option<EarlyForwardingCountInfo> = None;
@@ -5085,7 +5085,7 @@ impl DrbToModifyItemNgRan {
                 let _criticality = Criticality::decode(data)?;
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    71 => old_qos_flow_map_u_lendmarkerexpected = Some(QosFlowList::decode(data)?),
+                    71 => old_qos_flow_map_ul_endmarkerexpected = Some(QosFlowList::decode(data)?),
                     72 => drb_qos = Some(QosFlowLevelQosParameters::decode(data)?),
                     122 => {
                         early_forwarding_count_req = Some(EarlyForwardingCountReq::decode(data)?)
@@ -5110,7 +5110,7 @@ impl DrbToModifyItemNgRan {
             cell_group_to_remove,
             flow_mapping_information,
             drb_inactivity_timer,
-            old_qos_flow_map_u_lendmarkerexpected,
+            old_qos_flow_map_ul_endmarkerexpected,
             drb_qos,
             early_forwarding_count_req,
             early_forwarding_count_info,
@@ -6632,7 +6632,7 @@ impl PerCodec for EhcCommonParameters {
 #[derive(Clone, Debug)]
 pub struct EhcDownlinkParameters {
     pub drb_continue_ehc_dl: DrbContinueEhcDl,
-    pub max_cidehcdl: Option<MaxCidehcdl>,
+    pub max_cidehc_dl: Option<MaxCidehcDl>,
 }
 
 impl EhcDownlinkParameters {
@@ -6641,7 +6641,7 @@ impl EhcDownlinkParameters {
         let drb_continue_ehc_dl = DrbContinueEhcDl::decode(data)?;
 
         // Process the extension container
-        let mut max_cidehcdl: Option<MaxCidehcdl> = None;
+        let mut max_cidehc_dl: Option<MaxCidehcDl> = None;
 
         if optionals[0] {
             let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
@@ -6650,14 +6650,14 @@ impl EhcDownlinkParameters {
                 let _criticality = Criticality::decode(data)?;
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    137 => max_cidehcdl = Some(MaxCidehcdl::decode(data)?),
+                    137 => max_cidehc_dl = Some(MaxCidehcDl::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
         Ok(Self {
             drb_continue_ehc_dl,
-            max_cidehcdl,
+            max_cidehc_dl,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -9149,11 +9149,11 @@ impl PerCodec for MaxPacketLossRate {
         })
     }
 }
-// MaxCidehcdl
+// MaxCidehcDl
 #[derive(Clone, Copy, Debug)]
-pub struct MaxCidehcdl(pub u16);
+pub struct MaxCidehcDl(pub u16);
 
-impl MaxCidehcdl {
+impl MaxCidehcDl {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(
             decode::decode_integer(data, Some(1), Some(32767), true)?.0 as u16,
@@ -9164,17 +9164,17 @@ impl MaxCidehcdl {
     }
 }
 
-impl PerCodec for MaxCidehcdl {
+impl PerCodec for MaxCidehcDl {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        MaxCidehcdl::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("MaxCidehcdl");
+        MaxCidehcDl::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("MaxCidehcDl");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("MaxCidehcdl");
+            e.push_context("MaxCidehcDl");
             e
         })
     }
@@ -17291,14 +17291,14 @@ impl PerCodec for UlConfiguration {
         })
     }
 }
-// UluptnlAddressToUpdateItem
+// UlUpTnlAddressToUpdateItem
 #[derive(Clone, Debug)]
-pub struct UluptnlAddressToUpdateItem {
+pub struct UlUpTnlAddressToUpdateItem {
     pub old_tnl_adress: TransportLayerAddress,
     pub new_tnl_adress: TransportLayerAddress,
 }
 
-impl UluptnlAddressToUpdateItem {
+impl UlUpTnlAddressToUpdateItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let old_tnl_adress = TransportLayerAddress::decode(data)?;
@@ -17334,17 +17334,17 @@ impl UluptnlAddressToUpdateItem {
     }
 }
 
-impl PerCodec for UluptnlAddressToUpdateItem {
+impl PerCodec for UlUpTnlAddressToUpdateItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UluptnlAddressToUpdateItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlAddressToUpdateItem");
+        UlUpTnlAddressToUpdateItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("UlUpTnlAddressToUpdateItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlAddressToUpdateItem");
+            e.push_context("UlUpTnlAddressToUpdateItem");
             e
         })
     }

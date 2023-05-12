@@ -722,7 +722,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             e1ap::PduSessionId(session.stage2.stage1.ngap_request.pdu_session_id.0);
         let tnl_setup_list = &session
             .f1_setup_response
-            .dluptnl_information_to_be_setup_list
+            .dl_up_tnl_information_to_be_setup_list
             .0;
 
         ensure!(!tnl_setup_list.is_empty());
@@ -730,7 +730,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let f1ap::UpTransportLayerInformation::GtpTunnel(gtp_tunnel) = &tnl_setup_list
             .first()
             .ok_or_else(|| anyhow!("No GTP tunnel information from DU"))?
-            .dluptnl_information;
+            .dl_up_tnl_information;
 
         Ok(PduSessionResourceToModifyItem {
             pdu_session_id,

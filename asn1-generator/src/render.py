@@ -1945,17 +1945,17 @@ impl PerCodec for UriAddress {
         self.should_generate("""\
 AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalDLUPTNLInformationForHOItem
 """, """
-// AdditionalDluptnlInformationForHoList
+// AdditionalDlUpTnlInformationForHoList
 # [derive(Clone, Debug)]
-pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
+pub struct AdditionalDlUpTnlInformationForHoList(pub Vec<AdditionalDlUpTnlInformationForHoItem>);
 
-impl AdditionalDluptnlInformationForHoList {
+impl AdditionalDlUpTnlInformationForHoList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(50), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(AdditionalDluptnlInformationForHoItem::decode(data)?);
+                items.push(AdditionalDlUpTnlInformationForHoItem::decode(data)?);
             }
             items
         }))
@@ -1969,13 +1969,13 @@ impl AdditionalDluptnlInformationForHoList {
     }
 }
 
-impl PerCodec for AdditionalDluptnlInformationForHoList {
+impl PerCodec for AdditionalDlUpTnlInformationForHoList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AdditionalDluptnlInformationForHoList"); e})
+        AdditionalDlUpTnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AdditionalDlUpTnlInformationForHoList"); e})
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AdditionalDluptnlInformationForHoList"); e})
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AdditionalDlUpTnlInformationForHoList"); e})
     }
 }""")
 

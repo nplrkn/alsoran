@@ -311,9 +311,9 @@ impl PerCodec for ActivatedCellsToBeUpdatedListItem {
         })
     }
 }
-// ActiveUlbwp
+// ActiveUlBwp
 #[derive(Clone, Debug)]
-pub struct ActiveUlbwp {
+pub struct ActiveUlBwp {
     pub location_and_bandwidth: u16,
     pub subcarrier_spacing: SubcarrierSpacing1,
     pub cyclic_prefix: CyclicPrefix,
@@ -322,7 +322,7 @@ pub struct ActiveUlbwp {
     pub srs_config: SrsConfig,
 }
 
-impl ActiveUlbwp {
+impl ActiveUlBwp {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 2)?;
         let location_and_bandwidth =
@@ -393,17 +393,17 @@ impl ActiveUlbwp {
     }
 }
 
-impl PerCodec for ActiveUlbwp {
+impl PerCodec for ActiveUlBwp {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        ActiveUlbwp::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("ActiveUlbwp");
+        ActiveUlBwp::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("ActiveUlBwp");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("ActiveUlbwp");
+            e.push_context("ActiveUlBwp");
             e
         })
     }
@@ -590,14 +590,14 @@ impl PerCodec for AdditionalPdcpDuplicationTnlList {
 // AdditionalPdcpDuplicationTnlItem
 #[derive(Clone, Debug)]
 pub struct AdditionalPdcpDuplicationTnlItem {
-    pub additional_pdcp_duplication_uptnl_information: UpTransportLayerInformation,
+    pub additional_pdcp_duplication_up_tnl_information: UpTransportLayerInformation,
     pub bh_info: Option<BhInfo>,
 }
 
 impl AdditionalPdcpDuplicationTnlItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let additional_pdcp_duplication_uptnl_information =
+        let additional_pdcp_duplication_up_tnl_information =
             UpTransportLayerInformation::decode(data)?;
 
         // Process the extension container
@@ -616,7 +616,7 @@ impl AdditionalPdcpDuplicationTnlItem {
             }
         }
         Ok(Self {
-            additional_pdcp_duplication_uptnl_information,
+            additional_pdcp_duplication_up_tnl_information,
             bh_info,
         })
     }
@@ -625,7 +625,7 @@ impl AdditionalPdcpDuplicationTnlItem {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.additional_pdcp_duplication_uptnl_information
+        self.additional_pdcp_duplication_up_tnl_information
             .encode(data)?;
 
         Ok(())
@@ -7104,17 +7104,17 @@ impl PerCodec for DlUpTnlAddressToUpdateListItem {
         })
     }
 }
-// DluptnlInformationToBeSetupList
+// DlUpTnlInformationToBeSetupList
 #[derive(Clone, Debug)]
-pub struct DluptnlInformationToBeSetupList(pub Vec<DluptnlInformationToBeSetupItem>);
+pub struct DlUpTnlInformationToBeSetupList(pub Vec<DlUpTnlInformationToBeSetupItem>);
 
-impl DluptnlInformationToBeSetupList {
+impl DlUpTnlInformationToBeSetupList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DluptnlInformationToBeSetupItem::decode(data)?);
+                items.push(DlUpTnlInformationToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -7128,31 +7128,31 @@ impl DluptnlInformationToBeSetupList {
     }
 }
 
-impl PerCodec for DluptnlInformationToBeSetupList {
+impl PerCodec for DlUpTnlInformationToBeSetupList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        DluptnlInformationToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlInformationToBeSetupList");
+        DlUpTnlInformationToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("DlUpTnlInformationToBeSetupList");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlInformationToBeSetupList");
+            e.push_context("DlUpTnlInformationToBeSetupList");
             e
         })
     }
 }
-// DluptnlInformationToBeSetupItem
+// DlUpTnlInformationToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct DluptnlInformationToBeSetupItem {
-    pub dluptnl_information: UpTransportLayerInformation,
+pub struct DlUpTnlInformationToBeSetupItem {
+    pub dl_up_tnl_information: UpTransportLayerInformation,
 }
 
-impl DluptnlInformationToBeSetupItem {
+impl DlUpTnlInformationToBeSetupItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let dluptnl_information = UpTransportLayerInformation::decode(data)?;
+        let dl_up_tnl_information = UpTransportLayerInformation::decode(data)?;
 
         // Process the extension container
 
@@ -7168,7 +7168,7 @@ impl DluptnlInformationToBeSetupItem {
             }
         }
         Ok(Self {
-            dluptnl_information,
+            dl_up_tnl_information,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -7176,23 +7176,23 @@ impl DluptnlInformationToBeSetupItem {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.dluptnl_information.encode(data)?;
+        self.dl_up_tnl_information.encode(data)?;
 
         Ok(())
     }
 }
 
-impl PerCodec for DluptnlInformationToBeSetupItem {
+impl PerCodec for DlUpTnlInformationToBeSetupItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        DluptnlInformationToBeSetupItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlInformationToBeSetupItem");
+        DlUpTnlInformationToBeSetupItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("DlUpTnlInformationToBeSetupItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("DluptnlInformationToBeSetupItem");
+            e.push_context("DlUpTnlInformationToBeSetupItem");
             e
         })
     }
@@ -7592,7 +7592,7 @@ impl PerCodec for DrbInformation {
 pub struct DrbsModifiedItem {
     pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
-    pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
+    pub dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList,
     pub rlc_status: Option<RlcStatus>,
     pub additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList>,
     pub current_qos_para_set_index: Option<QosParaSetIndex>,
@@ -7607,7 +7607,7 @@ impl DrbsModifiedItem {
         } else {
             None
         };
-        let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
+        let dl_up_tnl_information_to_be_setup_list = DlUpTnlInformationToBeSetupList::decode(data)?;
 
         // Process the extension container
         let mut rlc_status: Option<RlcStatus> = None;
@@ -7635,7 +7635,7 @@ impl DrbsModifiedItem {
         Ok(Self {
             drb_id,
             lcid,
-            dluptnl_information_to_be_setup_list,
+            dl_up_tnl_information_to_be_setup_list,
             rlc_status,
             additional_pdcp_duplication_tnl_list,
             current_qos_para_set_index,
@@ -7651,7 +7651,7 @@ impl DrbsModifiedItem {
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
-        self.dluptnl_information_to_be_setup_list.encode(data)?;
+        self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
@@ -7676,7 +7676,7 @@ impl PerCodec for DrbsModifiedItem {
 #[derive(Clone, Debug)]
 pub struct DrbsModifiedConfItem {
     pub drb_id: DrbId,
-    pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
+    pub ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList,
     pub additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList>,
 }
 
@@ -7684,7 +7684,7 @@ impl DrbsModifiedConfItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let drb_id = DrbId::decode(data)?;
-        let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
+        let ul_up_tnl_information_to_be_setup_list = UlUpTnlInformationToBeSetupList::decode(data)?;
 
         // Process the extension container
         let mut additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList> =
@@ -7707,7 +7707,7 @@ impl DrbsModifiedConfItem {
         }
         Ok(Self {
             drb_id,
-            uluptnl_information_to_be_setup_list,
+            ul_up_tnl_information_to_be_setup_list,
             additional_pdcp_duplication_tnl_list,
         })
     }
@@ -7717,7 +7717,7 @@ impl DrbsModifiedConfItem {
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
-        self.uluptnl_information_to_be_setup_list.encode(data)?;
+        self.ul_up_tnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
@@ -7804,7 +7804,7 @@ impl PerCodec for DrbNotifyItem {
 #[derive(Clone, Debug)]
 pub struct DrbsRequiredToBeModifiedItem {
     pub drb_id: DrbId,
-    pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
+    pub dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList,
     pub rlc_status: Option<RlcStatus>,
     pub additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList>,
 }
@@ -7813,7 +7813,7 @@ impl DrbsRequiredToBeModifiedItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let drb_id = DrbId::decode(data)?;
-        let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
+        let dl_up_tnl_information_to_be_setup_list = DlUpTnlInformationToBeSetupList::decode(data)?;
 
         // Process the extension container
         let mut rlc_status: Option<RlcStatus> = None;
@@ -7838,7 +7838,7 @@ impl DrbsRequiredToBeModifiedItem {
         }
         Ok(Self {
             drb_id,
-            dluptnl_information_to_be_setup_list,
+            dl_up_tnl_information_to_be_setup_list,
             rlc_status,
             additional_pdcp_duplication_tnl_list,
         })
@@ -7849,7 +7849,7 @@ impl DrbsRequiredToBeModifiedItem {
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
-        self.dluptnl_information_to_be_setup_list.encode(data)?;
+        self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
@@ -7927,7 +7927,7 @@ impl PerCodec for DrbsRequiredToBeReleasedItem {
 pub struct DrbsSetupItem {
     pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
-    pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
+    pub dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList,
     pub additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList>,
     pub current_qos_para_set_index: Option<QosParaSetIndex>,
 }
@@ -7941,7 +7941,7 @@ impl DrbsSetupItem {
         } else {
             None
         };
-        let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
+        let dl_up_tnl_information_to_be_setup_list = DlUpTnlInformationToBeSetupList::decode(data)?;
 
         // Process the extension container
         let mut additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList> =
@@ -7967,7 +7967,7 @@ impl DrbsSetupItem {
         Ok(Self {
             drb_id,
             lcid,
-            dluptnl_information_to_be_setup_list,
+            dl_up_tnl_information_to_be_setup_list,
             additional_pdcp_duplication_tnl_list,
             current_qos_para_set_index,
         })
@@ -7982,7 +7982,7 @@ impl DrbsSetupItem {
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
-        self.dluptnl_information_to_be_setup_list.encode(data)?;
+        self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
@@ -8008,7 +8008,7 @@ impl PerCodec for DrbsSetupItem {
 pub struct DrbsSetupModItem {
     pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
-    pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
+    pub dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList,
     pub additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList>,
     pub current_qos_para_set_index: Option<QosParaSetIndex>,
 }
@@ -8022,7 +8022,7 @@ impl DrbsSetupModItem {
         } else {
             None
         };
-        let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
+        let dl_up_tnl_information_to_be_setup_list = DlUpTnlInformationToBeSetupList::decode(data)?;
 
         // Process the extension container
         let mut additional_pdcp_duplication_tnl_list: Option<AdditionalPdcpDuplicationTnlList> =
@@ -8048,7 +8048,7 @@ impl DrbsSetupModItem {
         Ok(Self {
             drb_id,
             lcid,
-            dluptnl_information_to_be_setup_list,
+            dl_up_tnl_information_to_be_setup_list,
             additional_pdcp_duplication_tnl_list,
             current_qos_para_set_index,
         })
@@ -8063,7 +8063,7 @@ impl DrbsSetupModItem {
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
-        self.dluptnl_information_to_be_setup_list.encode(data)?;
+        self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
@@ -8089,7 +8089,7 @@ impl PerCodec for DrbsSetupModItem {
 pub struct DrbsToBeModifiedItem {
     pub drb_id: DrbId,
     pub qos_information: Option<QosInformation>,
-    pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
+    pub ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList,
     pub ul_configuration: Option<UlConfiguration>,
     pub dlpdcpsn_length: Option<PdcpsnLength>,
     pub ulpdcpsn_length: Option<PdcpsnLength>,
@@ -8112,7 +8112,7 @@ impl DrbsToBeModifiedItem {
         } else {
             None
         };
-        let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
+        let ul_up_tnl_information_to_be_setup_list = UlUpTnlInformationToBeSetupList::decode(data)?;
         let ul_configuration = if optionals[1] {
             Some(UlConfiguration::decode(data)?)
         } else {
@@ -8168,7 +8168,7 @@ impl DrbsToBeModifiedItem {
         Ok(Self {
             drb_id,
             qos_information,
-            uluptnl_information_to_be_setup_list,
+            ul_up_tnl_information_to_be_setup_list,
             ul_configuration,
             dlpdcpsn_length,
             ulpdcpsn_length,
@@ -8193,7 +8193,7 @@ impl DrbsToBeModifiedItem {
         if let Some(x) = &self.qos_information {
             x.encode(data)?;
         }
-        self.uluptnl_information_to_be_setup_list.encode(data)?;
+        self.ul_up_tnl_information_to_be_setup_list.encode(data)?;
         if let Some(x) = &self.ul_configuration {
             x.encode(data)?;
         }
@@ -8274,7 +8274,7 @@ impl PerCodec for DrbsToBeReleasedItem {
 pub struct DrbsToBeSetupItem {
     pub drb_id: DrbId,
     pub qos_information: QosInformation,
-    pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
+    pub ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList,
     pub rlc_mode: RlcMode,
     pub ul_configuration: Option<UlConfiguration>,
     pub duplication_activation: Option<DuplicationActivation>,
@@ -8291,7 +8291,7 @@ impl DrbsToBeSetupItem {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 3)?;
         let drb_id = DrbId::decode(data)?;
         let qos_information = QosInformation::decode(data)?;
-        let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
+        let ul_up_tnl_information_to_be_setup_list = UlUpTnlInformationToBeSetupList::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
         let ul_configuration = if optionals[0] {
             Some(UlConfiguration::decode(data)?)
@@ -8343,7 +8343,7 @@ impl DrbsToBeSetupItem {
         Ok(Self {
             drb_id,
             qos_information,
-            uluptnl_information_to_be_setup_list,
+            ul_up_tnl_information_to_be_setup_list,
             rlc_mode,
             ul_configuration,
             duplication_activation,
@@ -8364,7 +8364,7 @@ impl DrbsToBeSetupItem {
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         self.qos_information.encode(data)?;
-        self.uluptnl_information_to_be_setup_list.encode(data)?;
+        self.ul_up_tnl_information_to_be_setup_list.encode(data)?;
         self.rlc_mode.encode(data)?;
         if let Some(x) = &self.ul_configuration {
             x.encode(data)?;
@@ -8397,7 +8397,7 @@ impl PerCodec for DrbsToBeSetupItem {
 pub struct DrbsToBeSetupModItem {
     pub drb_id: DrbId,
     pub qos_information: QosInformation,
-    pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
+    pub ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList,
     pub rlc_mode: RlcMode,
     pub ul_configuration: Option<UlConfiguration>,
     pub duplication_activation: Option<DuplicationActivation>,
@@ -8414,7 +8414,7 @@ impl DrbsToBeSetupModItem {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 3)?;
         let drb_id = DrbId::decode(data)?;
         let qos_information = QosInformation::decode(data)?;
-        let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
+        let ul_up_tnl_information_to_be_setup_list = UlUpTnlInformationToBeSetupList::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
         let ul_configuration = if optionals[0] {
             Some(UlConfiguration::decode(data)?)
@@ -8466,7 +8466,7 @@ impl DrbsToBeSetupModItem {
         Ok(Self {
             drb_id,
             qos_information,
-            uluptnl_information_to_be_setup_list,
+            ul_up_tnl_information_to_be_setup_list,
             rlc_mode,
             ul_configuration,
             duplication_activation,
@@ -8487,7 +8487,7 @@ impl DrbsToBeSetupModItem {
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         self.qos_information.encode(data)?;
-        self.uluptnl_information_to_be_setup_list.encode(data)?;
+        self.ul_up_tnl_information_to_be_setup_list.encode(data)?;
         self.rlc_mode.encode(data)?;
         if let Some(x) = &self.ul_configuration {
             x.encode(data)?;
@@ -15807,7 +15807,7 @@ impl PerCodec for InterfacesToTrace {
 pub struct IntendedTddDlUlConfig {
     pub nr_scs: NrScs1,
     pub nr_cp: NrCp,
-    pub nr_dlul_tx_periodicity: NrDlulTxPeriodicity,
+    pub nr_dl_ul_tx_periodicity: NrDlUlTxPeriodicity,
     pub slot_configuration_list: SlotConfigurationList,
 }
 
@@ -15816,7 +15816,7 @@ impl IntendedTddDlUlConfig {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 1)?;
         let nr_scs = NrScs1::decode(data)?;
         let nr_cp = NrCp::decode(data)?;
-        let nr_dlul_tx_periodicity = NrDlulTxPeriodicity::decode(data)?;
+        let nr_dl_ul_tx_periodicity = NrDlUlTxPeriodicity::decode(data)?;
         let slot_configuration_list = SlotConfigurationList::decode(data)?;
 
         // Process the extension container
@@ -15835,7 +15835,7 @@ impl IntendedTddDlUlConfig {
         Ok(Self {
             nr_scs,
             nr_cp,
-            nr_dlul_tx_periodicity,
+            nr_dl_ul_tx_periodicity,
             slot_configuration_list,
         })
     }
@@ -15846,7 +15846,7 @@ impl IntendedTddDlUlConfig {
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.nr_scs.encode(data)?;
         self.nr_cp.encode(data)?;
-        self.nr_dlul_tx_periodicity.encode(data)?;
+        self.nr_dl_ul_tx_periodicity.encode(data)?;
         self.slot_configuration_list.encode(data)?;
 
         Ok(())
@@ -20088,14 +20088,14 @@ impl PerCodec for NumberofBroadcastRequest {
         })
     }
 }
-// NumDlulSymbols
+// NumDlUlSymbols
 #[derive(Clone, Debug)]
-pub struct NumDlulSymbols {
+pub struct NumDlUlSymbols {
     pub num_dl_symbols: u8,
     pub num_ul_symbols: u8,
 }
 
-impl NumDlulSymbols {
+impl NumDlUlSymbols {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 1)?;
         let num_dl_symbols = decode::decode_integer(data, Some(0), Some(13), true)?.0 as u8;
@@ -20145,17 +20145,17 @@ impl NumDlulSymbols {
     }
 }
 
-impl PerCodec for NumDlulSymbols {
+impl PerCodec for NumDlUlSymbols {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        NumDlulSymbols::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("NumDlulSymbols");
+        NumDlUlSymbols::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("NumDlUlSymbols");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("NumDlulSymbols");
+            e.push_context("NumDlUlSymbols");
             e
         })
     }
@@ -31857,7 +31857,7 @@ impl PerCodec for SrsCarrierList {
 pub struct SrsCarrierListItem {
     pub point_a: u32,
     pub uplink_channel_bw_per_scs_list: UplinkChannelBwPerScsList,
-    pub active_ulbwp: ActiveUlbwp,
+    pub active_ul_bwp: ActiveUlBwp,
     pub pci: Option<NrPci>,
 }
 
@@ -31866,7 +31866,7 @@ impl SrsCarrierListItem {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 2)?;
         let point_a = decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32;
         let uplink_channel_bw_per_scs_list = UplinkChannelBwPerScsList::decode(data)?;
-        let active_ulbwp = ActiveUlbwp::decode(data)?;
+        let active_ul_bwp = ActiveUlBwp::decode(data)?;
         let pci = if optionals[0] {
             Some(NrPci::decode(data)?)
         } else {
@@ -31889,7 +31889,7 @@ impl SrsCarrierListItem {
         Ok(Self {
             point_a,
             uplink_channel_bw_per_scs_list,
-            active_ulbwp,
+            active_ul_bwp,
             pci,
         })
     }
@@ -31908,7 +31908,7 @@ impl SrsCarrierListItem {
             false,
         )?;
         self.uplink_channel_bw_per_scs_list.encode(data)?;
-        self.active_ulbwp.encode(data)?;
+        self.active_ul_bwp.encode(data)?;
         if let Some(x) = &self.pci {
             x.encode(data)?;
         }
@@ -33166,10 +33166,10 @@ impl PerCodec for SsbAreaRadioResourceStatusList {
 #[derive(Clone, Debug)]
 pub struct SsbAreaRadioResourceStatusItem {
     pub ssb_index: u8,
-    pub ssb_area_dlgbrpr_busage: u8,
-    pub ssb_area_ulgbrpr_busage: u8,
-    pub ssb_area_d_lnon_gbrpr_busage: u8,
-    pub ssb_area_u_lnon_gbrpr_busage: u8,
+    pub ssb_area_dl_gbrpr_busage: u8,
+    pub ssb_area_ul_gbrpr_busage: u8,
+    pub ssb_area_dl_non_gbrpr_busage: u8,
+    pub ssb_area_ul_non_gbrpr_busage: u8,
     pub ssb_area_dl_total_pr_busage: u8,
     pub ssb_area_ul_total_pr_busage: u8,
     pub d_lscheduling_pdcchcc_eusage: Option<u8>,
@@ -33180,13 +33180,13 @@ impl SsbAreaRadioResourceStatusItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 3)?;
         let ssb_index = decode::decode_integer(data, Some(0), Some(63), false)?.0 as u8;
-        let ssb_area_dlgbrpr_busage =
+        let ssb_area_dl_gbrpr_busage =
             decode::decode_integer(data, Some(0), Some(100), false)?.0 as u8;
-        let ssb_area_ulgbrpr_busage =
+        let ssb_area_ul_gbrpr_busage =
             decode::decode_integer(data, Some(0), Some(100), false)?.0 as u8;
-        let ssb_area_d_lnon_gbrpr_busage =
+        let ssb_area_dl_non_gbrpr_busage =
             decode::decode_integer(data, Some(0), Some(100), false)?.0 as u8;
-        let ssb_area_u_lnon_gbrpr_busage =
+        let ssb_area_ul_non_gbrpr_busage =
             decode::decode_integer(data, Some(0), Some(100), false)?.0 as u8;
         let ssb_area_dl_total_pr_busage =
             decode::decode_integer(data, Some(0), Some(100), false)?.0 as u8;
@@ -33218,10 +33218,10 @@ impl SsbAreaRadioResourceStatusItem {
         }
         Ok(Self {
             ssb_index,
-            ssb_area_dlgbrpr_busage,
-            ssb_area_ulgbrpr_busage,
-            ssb_area_d_lnon_gbrpr_busage,
-            ssb_area_u_lnon_gbrpr_busage,
+            ssb_area_dl_gbrpr_busage,
+            ssb_area_ul_gbrpr_busage,
+            ssb_area_dl_non_gbrpr_busage,
+            ssb_area_ul_non_gbrpr_busage,
             ssb_area_dl_total_pr_busage,
             ssb_area_ul_total_pr_busage,
             d_lscheduling_pdcchcc_eusage,
@@ -33248,7 +33248,7 @@ impl SsbAreaRadioResourceStatusItem {
             Some(0),
             Some(100),
             false,
-            self.ssb_area_dlgbrpr_busage as i128,
+            self.ssb_area_dl_gbrpr_busage as i128,
             false,
         )?;
         encode::encode_integer(
@@ -33256,7 +33256,7 @@ impl SsbAreaRadioResourceStatusItem {
             Some(0),
             Some(100),
             false,
-            self.ssb_area_ulgbrpr_busage as i128,
+            self.ssb_area_ul_gbrpr_busage as i128,
             false,
         )?;
         encode::encode_integer(
@@ -33264,7 +33264,7 @@ impl SsbAreaRadioResourceStatusItem {
             Some(0),
             Some(100),
             false,
-            self.ssb_area_d_lnon_gbrpr_busage as i128,
+            self.ssb_area_dl_non_gbrpr_busage as i128,
             false,
         )?;
         encode::encode_integer(
@@ -33272,7 +33272,7 @@ impl SsbAreaRadioResourceStatusItem {
             Some(0),
             Some(100),
             false,
-            self.ssb_area_u_lnon_gbrpr_busage as i128,
+            self.ssb_area_ul_non_gbrpr_busage as i128,
             false,
         )?;
         encode::encode_integer(
@@ -34016,7 +34016,7 @@ impl PerCodec for SupportedSulFreqBandItem {
 pub enum SymbolAllocInSlot {
     AllDl,
     AllUl,
-    BothDlAndUl(NumDlulSymbols),
+    BothDlAndUl(NumDlUlSymbols),
 }
 
 impl SymbolAllocInSlot {
@@ -34028,7 +34028,7 @@ impl SymbolAllocInSlot {
         match idx {
             0 => Ok(Self::AllDl),
             1 => Ok(Self::AllUl),
-            2 => Ok(Self::BothDlAndUl(NumDlulSymbols::decode(data)?)),
+            2 => Ok(Self::BothDlAndUl(NumDlUlSymbols::decode(data)?)),
             3 => {
                 let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
@@ -37962,16 +37962,16 @@ impl PerCodec for UlUeConfiguration {
 // UlUpTnlInformationToUpdateListItem
 #[derive(Clone, Debug)]
 pub struct UlUpTnlInformationToUpdateListItem {
-    pub uluptnl_information: UpTransportLayerInformation,
-    pub new_uluptnl_information: Option<UpTransportLayerInformation>,
+    pub ul_up_tnl_information: UpTransportLayerInformation,
+    pub new_ul_up_tnl_information: Option<UpTransportLayerInformation>,
     pub bh_info: BhInfo,
 }
 
 impl UlUpTnlInformationToUpdateListItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 2)?;
-        let uluptnl_information = UpTransportLayerInformation::decode(data)?;
-        let new_uluptnl_information = if optionals[0] {
+        let ul_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let new_ul_up_tnl_information = if optionals[0] {
             Some(UpTransportLayerInformation::decode(data)?)
         } else {
             None
@@ -37992,19 +37992,19 @@ impl UlUpTnlInformationToUpdateListItem {
             }
         }
         Ok(Self {
-            uluptnl_information,
-            new_uluptnl_information,
+            ul_up_tnl_information,
+            new_ul_up_tnl_information,
             bh_info,
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
-        optionals.push(self.new_uluptnl_information.is_some());
+        optionals.push(self.new_ul_up_tnl_information.is_some());
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.uluptnl_information.encode(data)?;
-        if let Some(x) = &self.new_uluptnl_information {
+        self.ul_up_tnl_information.encode(data)?;
+        if let Some(x) = &self.new_ul_up_tnl_information {
             x.encode(data)?;
         }
         self.bh_info.encode(data)?;
@@ -38086,17 +38086,17 @@ impl PerCodec for UlUpTnlAddressToUpdateListItem {
         })
     }
 }
-// UluptnlInformationToBeSetupList
+// UlUpTnlInformationToBeSetupList
 #[derive(Clone, Debug)]
-pub struct UluptnlInformationToBeSetupList(pub Vec<UluptnlInformationToBeSetupItem>);
+pub struct UlUpTnlInformationToBeSetupList(pub Vec<UlUpTnlInformationToBeSetupItem>);
 
-impl UluptnlInformationToBeSetupList {
+impl UlUpTnlInformationToBeSetupList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(UluptnlInformationToBeSetupItem::decode(data)?);
+                items.push(UlUpTnlInformationToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -38110,32 +38110,32 @@ impl UluptnlInformationToBeSetupList {
     }
 }
 
-impl PerCodec for UluptnlInformationToBeSetupList {
+impl PerCodec for UlUpTnlInformationToBeSetupList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UluptnlInformationToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlInformationToBeSetupList");
+        UlUpTnlInformationToBeSetupList::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("UlUpTnlInformationToBeSetupList");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlInformationToBeSetupList");
+            e.push_context("UlUpTnlInformationToBeSetupList");
             e
         })
     }
 }
-// UluptnlInformationToBeSetupItem
+// UlUpTnlInformationToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct UluptnlInformationToBeSetupItem {
-    pub uluptnl_information: UpTransportLayerInformation,
+pub struct UlUpTnlInformationToBeSetupItem {
+    pub ul_up_tnl_information: UpTransportLayerInformation,
     pub bh_info: Option<BhInfo>,
 }
 
-impl UluptnlInformationToBeSetupItem {
+impl UlUpTnlInformationToBeSetupItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let uluptnl_information = UpTransportLayerInformation::decode(data)?;
+        let ul_up_tnl_information = UpTransportLayerInformation::decode(data)?;
 
         // Process the extension container
         let mut bh_info: Option<BhInfo> = None;
@@ -38153,7 +38153,7 @@ impl UluptnlInformationToBeSetupItem {
             }
         }
         Ok(Self {
-            uluptnl_information,
+            ul_up_tnl_information,
             bh_info,
         })
     }
@@ -38162,23 +38162,23 @@ impl UluptnlInformationToBeSetupItem {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.uluptnl_information.encode(data)?;
+        self.ul_up_tnl_information.encode(data)?;
 
         Ok(())
     }
 }
 
-impl PerCodec for UluptnlInformationToBeSetupItem {
+impl PerCodec for UlUpTnlInformationToBeSetupItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UluptnlInformationToBeSetupItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlInformationToBeSetupItem");
+        UlUpTnlInformationToBeSetupItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("UlUpTnlInformationToBeSetupItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UluptnlInformationToBeSetupItem");
+            e.push_context("UlUpTnlInformationToBeSetupItem");
             e
         })
     }
@@ -38849,10 +38849,10 @@ impl PerCodec for NrCp {
         })
     }
 }
-// NrDlulTxPeriodicity
+// NrDlUlTxPeriodicity
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum NrDlulTxPeriodicity {
+pub enum NrDlUlTxPeriodicity {
     Ms0p5,
     Ms0p625,
     Ms1,
@@ -38873,7 +38873,7 @@ pub enum NrDlulTxPeriodicity {
     Ms160,
 }
 
-impl NrDlulTxPeriodicity {
+impl NrDlUlTxPeriodicity {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(17), true)?;
         if extended {
@@ -38886,17 +38886,17 @@ impl NrDlulTxPeriodicity {
     }
 }
 
-impl PerCodec for NrDlulTxPeriodicity {
+impl PerCodec for NrDlUlTxPeriodicity {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        NrDlulTxPeriodicity::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("NrDlulTxPeriodicity");
+        NrDlUlTxPeriodicity::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("NrDlUlTxPeriodicity");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("NrDlulTxPeriodicity");
+            e.push_context("NrDlUlTxPeriodicity");
             e
         })
     }

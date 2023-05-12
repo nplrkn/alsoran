@@ -703,7 +703,7 @@ SubcarrierSpacing ::= ENUMERATED { kHz15, kHz30, kHz60, kHz120, kHz240, spare3, 
 """, """\
 document
   sequence_def
-    ActiveUlbwp
+    ActiveUlBwp
     sequence
       field
         subcarrier_spacing
