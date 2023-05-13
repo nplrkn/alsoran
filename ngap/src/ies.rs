@@ -2,7 +2,7 @@
 use super::common::*;
 use asn1_per::{aper::*, *};
 #[allow(unused_imports)]
-use xxap::{GtpTunnel, TransportLayerAddress};
+use xxap::{GtpTunnel, PduSessionId, TransportLayerAddress};
 
 // AdditionalDlUpTnlInformationForHoList
 #[derive(Clone, Debug)]
@@ -19635,36 +19635,6 @@ impl PerCodec for PduSessionAggregateMaximumBitRate {
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("PduSessionAggregateMaximumBitRate");
-            e
-        })
-    }
-}
-// PduSessionId
-#[derive(Clone, Copy, Debug)]
-pub struct PduSessionId(pub u8);
-
-impl PduSessionId {
-    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(
-            decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8,
-        ))
-    }
-    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
-    }
-}
-
-impl PerCodec for PduSessionId {
-    type Allocator = Allocator;
-    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        PduSessionId::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("PduSessionId");
-            e
-        })
-    }
-    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("PduSessionId");
             e
         })
     }

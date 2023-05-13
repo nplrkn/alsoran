@@ -7,7 +7,7 @@ use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
-use xxap::{GtpTeid, GtpTunnel};
+use xxap::{GtpTeid, GtpTunnel, PduSessionId};
 
 impl Pdu for NgapPdu {}
 

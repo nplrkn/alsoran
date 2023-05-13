@@ -423,11 +423,11 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // accumulate different errors to different sessions over the course of the following
         // processing but the code is not currently sophisticated enough to do that.  Instead
         // it just tracks the successful ones.
-        let session_ids: Vec<u8> = r
+        let session_ids: Vec<PduSessionId> = r
             .pdu_session_resource_setup_list_su_req
             .0
             .iter()
-            .map(|item| item.pdu_session_id.0)
+            .map(|item| item.pdu_session_id)
             .collect();
 
         // Go through all the stages of session resource setup.  If all goes well, the
@@ -440,9 +440,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             }
         };
 
-        let failed_session_ids: Vec<u8> = session_ids
+        let failed_session_ids: Vec<PduSessionId> = session_ids
             .into_iter()
-            .filter(|x| sessions.iter().any(|item| item.pdu_session_id.0 == *x))
+            .filter(|x| sessions.iter().any(|item| item.pdu_session_id.0 == x.0))
             .collect();
 
         let pdu_session_resource_setup_list_su_res = if sessions.is_empty() {
@@ -458,7 +458,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 failed_session_ids
                     .iter()
                     .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                        pdu_session_id: ngap::PduSessionId(*x),
+                        pdu_session_id: *x,
                         pdu_session_resource_setup_unsuccessful_transfer: vec![],
                     })
                     .collect(),
@@ -718,8 +718,6 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         _ue: &UeState,
         session: &Stage3,
     ) -> Result<PduSessionResourceToModifyItem> {
-        let pdu_session_id =
-            e1ap::PduSessionId(session.stage2.stage1.ngap_request.pdu_session_id.0);
         let tnl_setup_list = &session
             .f1_setup_response
             .dl_up_tnl_information_to_be_setup_list
@@ -733,7 +731,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .dl_up_tnl_information;
 
         Ok(PduSessionResourceToModifyItem {
-            pdu_session_id,
+            pdu_session_id: session.stage2.stage1.ngap_request.pdu_session_id,
             security_indication: None,
             pdu_session_resource_dl_ambr: None,
             ng_ul_up_tnl_information: Some(UpTnlInformation::GtpTunnel(gtp_tunnel.clone())),

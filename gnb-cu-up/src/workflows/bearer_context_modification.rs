@@ -4,6 +4,7 @@ use super::{GnbCuUp, Workflow};
 use anyhow::Result;
 use e1ap::*;
 use net::{RequestError, ResponseAction};
+use xxap::PduSessionId;
 
 impl<'a, G: GnbCuUp> Workflow<'a, G> {
     pub async fn bearer_context_modification(

@@ -1,29 +1,21 @@
 
 ## O-RAN O-DU interop
-- Add PduSessionId to xxap common
-- Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not
-  match a transaction.
+- Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
 - Move Serdes to common
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
+- document a method that other people could use to test ODU
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
-- Remove reference to malformed packet errors from free5GC-testing.md
 - Fix hang on Ctrl-C when AMF connect doesn't complete
 - Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
-- use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
-- ENUMERATED{True} OPTIONAL (as seen in RRC) should appear in Rust as a bool
-- provide TransportAddress constructor from string (and use common struct for all XXAP libraries)
 - don't set up SRB + 2 DBRs if all we need is one session = one DRB
-- ASN.1 E1 and NGAP PduSessionIds should be directly comparable?  by being the same type?  instead of item.pdu_session_id.0 == stage1.ngap_request.pdu_session_id.0
 - FV regression test to reduce dependency on running with live ODU 
-- fixed size octet string should be [] not Vec?
 
 # NEXT UP
 - Dataplane with O-RAN SC ODU
-- Proper UE software to enable development of correct RRC messages
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -60,7 +52,9 @@
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 ## ASN.1 GENERATOR
-- Bugs that show up in Wireshark capture of session establishment test (PrintableString issue is a wireshark bug??).
+- fixed size octet string should be [] not Vec?
+- use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
+- ENUMERATED{True} OPTIONAL (as seen in RRC) should appear in Rust as a bool
 - Cope with extension marker being set
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Implement Rrc setuprelease
@@ -87,6 +81,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Add PduSessionId to xxap common
 - Improved case conversion of DLUPTNLInformation-ToBeSetup-List and similar
 - TransportLayerAddress has TryFrom<&str>
 - Form PDUSessionResourceSetupResponse correctly

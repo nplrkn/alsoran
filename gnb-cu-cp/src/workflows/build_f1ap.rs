@@ -10,7 +10,7 @@ use rrc::{
     FreqBandIndicatorNr, ModulationOrder, PdcpParameters, PhyParameters, RfParameters,
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
-use xxap::{Snssai, GtpTeid, GtpTunnel};
+use xxap::{GtpTeid, GtpTunnel, PduSessionId, Snssai};
 
 pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,

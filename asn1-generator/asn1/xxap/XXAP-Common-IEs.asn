@@ -13,3 +13,6 @@ GTPTunnel ::= SEQUENCE {
 GTPTunnel-ExtIEs NGAP-PROTOCOL-EXTENSION ::= {
 	...
 }
+
+-- E1 PDU-Session-ID / F1 PDUSessionID / NG PDUSessionID / RRC PDU-SessionID
+PDU-Session-ID ::= INTEGER (0..255)

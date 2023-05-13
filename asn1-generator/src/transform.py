@@ -492,7 +492,7 @@ class TypeTransformer(Transformer):
 def strip_xxap_common(tree):
     new_tree = Tree(tree.data, [])
     for definition in tree.children:
-        if definition.children[0] not in ["GtpTunnel", "GtpTeid", "TransportLayerAddress"]:
+        if definition.children[0] not in ["GtpTunnel", "GtpTeid", "TransportLayerAddress", "PduSessionId"]:
             new_tree.children.append(definition)
     return new_tree
 
