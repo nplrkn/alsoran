@@ -2,6 +2,7 @@ use super::GnbCuCp;
 use slog::{debug, warn, Logger};
 
 mod amf_status_indication;
+mod build_e1ap;
 mod build_f1ap;
 mod build_ngap;
 mod build_rrc;

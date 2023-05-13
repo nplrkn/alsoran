@@ -1,7 +1,6 @@
 
 ## O-RAN O-DU interop
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
-- Move Serdes to common
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
