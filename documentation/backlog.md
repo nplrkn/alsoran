@@ -1,5 +1,6 @@
 
 ## O-RAN O-DU interop
+- Refactoring of pdu_session_resource_setup
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
@@ -52,6 +53,7 @@
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 ## ASN.1 GENERATOR
 - fixed size octet string should be [] not Vec?
+- inlining of lists to avoid newtypes of vecs (e.g. PDU-Session-Resource-Activity-List)
 - use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
 - ENUMERATED{True} OPTIONAL (as seen in RRC) should appear in Rust as a bool
 - Cope with extension marker being set

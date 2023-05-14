@@ -18,21 +18,10 @@ use ngap::{
 use slog::{debug, warn, Logger};
 use xxap::*;
 
-struct Stage1 {
-    ngap_request: ngap::PduSessionResourceSetupItemSuReq,
-}
-struct Stage2 {
-    stage1: Stage1,
-    e1_setup_response: e1ap::PduSessionResourceSetupItem,
-}
-struct Stage3 {
-    stage2: Stage2,
-    f1_setup_response: f1ap::DrbsSetupItem,
-}
-struct Stage4 {
-    stage3: Stage3,
-    _e1_modify_response: e1ap::PduSessionResourceModifiedItem,
-}
+type Stage1 = ngap::PduSessionResourceSetupItemSuReq;
+type Stage2 = (Stage1, e1ap::PduSessionResourceSetupItem);
+type Stage3 = (Stage2, f1ap::DrbsSetupItem);
+type Stage4 = (Stage3, e1ap::PduSessionResourceModifiedItem);
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // Pdu session resource setup procedure.
@@ -62,7 +51,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // accumulate different errors to different sessions over the course of the following
         // processing but the code is not currently sophisticated enough to do that.  Instead
         // it just tracks the successful ones.
-        let session_ids: Vec<PduSessionId> = r
+        let requested_session_ids: Vec<PduSessionId> = r
             .pdu_session_resource_setup_list_su_req
             .0
             .iter()
@@ -71,37 +60,33 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Go through all the stages of session resource setup.  If all goes well, the
         // successfully set up sessions will pop out the other side.
-        let sessions = match self.pdu_session_resource_setup_stages(r).await {
-            Ok(sessions) => sessions,
-            Err(e) => {
+        let ok_sessions = self
+            .pdu_session_resource_setup_stages(r)
+            .await
+            .unwrap_or_else(|e| {
                 warn!(self.logger, "Error processing session setup - {}", e);
                 vec![]
-            }
-        };
+            });
 
-        let failed_session_ids: Vec<PduSessionId> = session_ids
+        let failed_sessions: Vec<PduSessionResourceFailedToSetupItemSuRes> = requested_session_ids
             .into_iter()
-            .filter(|x| sessions.iter().any(|item| item.pdu_session_id.0 == x.0))
+            .filter(|x| ok_sessions.iter().all(|item| item.pdu_session_id.0 != x.0))
+            .map(|x| PduSessionResourceFailedToSetupItemSuRes {
+                pdu_session_id: x,
+                pdu_session_resource_setup_unsuccessful_transfer: vec![],
+            })
             .collect();
 
-        let pdu_session_resource_setup_list_su_res = if sessions.is_empty() {
+        let pdu_session_resource_setup_list_su_res = if ok_sessions.is_empty() {
             None
         } else {
-            Some(PduSessionResourceSetupListSuRes(sessions))
+            Some(PduSessionResourceSetupListSuRes(ok_sessions))
         };
 
-        let pdu_session_resource_failed_to_setup_list_su_res = if failed_session_ids.is_empty() {
+        let pdu_session_resource_failed_to_setup_list_su_res = if failed_sessions.is_empty() {
             None
         } else {
-            Some(PduSessionResourceFailedToSetupListSuRes(
-                failed_session_ids
-                    .iter()
-                    .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                        pdu_session_id: *x,
-                        pdu_session_resource_setup_unsuccessful_transfer: vec![],
-                    })
-                    .collect(),
-            ))
+            Some(PduSessionResourceFailedToSetupListSuRes(failed_sessions))
         };
 
         debug!(self.logger, "PduSessionResourceSetupResponse >> ");
@@ -116,21 +101,14 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
     pub async fn pdu_session_resource_setup_stages(
         &self,
-        mut r: PduSessionResourceSetupRequest,
+        r: PduSessionResourceSetupRequest,
     ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
         let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
 
-        let sessions = r
-            .pdu_session_resource_setup_list_su_req
-            .0
-            .drain(..)
-            .map(|item| Stage1 { ngap_request: item })
-            .collect();
-
         // E1 BearerContextSetupRequest.
         let sessions = self
-            .pdu_session_resource_setup_stage_1(&mut ue, sessions)
+            .pdu_session_resource_setup_stage_1(&mut ue, r.pdu_session_resource_setup_list_su_req.0)
             .await;
 
         // F1 UeContextSetupRequest
@@ -163,14 +141,12 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn pdu_session_resource_setup_stage_1(
         &self,
         ue: &mut UeState,
-        mut sessions: Vec<Stage1>,
+        sessions: Vec<Stage1>,
     ) -> Vec<Stage2> {
-        // TODO: convert each of these to subfunctions?
-
         // Build E1 PduSessionResourceToSetupItems.
         let mut items = vec![];
         for session in &sessions {
-            match build_e1ap::build_e1_setup_item(&ue, &session.ngap_request) {
+            match build_e1ap::build_e1_setup_item(&ue, &session) {
                 Ok(item) => items.push(item),
                 // Case where E1 setup item failed
                 Err(e) => {
@@ -183,64 +159,34 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             return vec![];
         }
 
-        let mut items = self.perform_bearer_context_setup(ue, items).await;
+        let items = self.perform_bearer_context_setup(ue, items).await;
 
-        // Rebuild the session results vec, adding in the new info from the UP.
-        let mut new_sessions: Vec<Stage2> = vec![];
-        for session in sessions.drain(..) {
-            let pdu_session_id = session.ngap_request.pdu_session_id.0;
-            let index = items
-                .iter()
-                .position(|item| item.pdu_session_id.0 == pdu_session_id);
-
-            match index {
-                // Success case
-                Some(index) => new_sessions.push(Stage2 {
-                    stage1: session,
-                    e1_setup_response: items.swap_remove(index),
-                }),
-                // Case where the CU-UP failed (or didn't return) this session.
-                None => {
-                    warn!(
-                        self.logger,
-                        "Session {} failed bearer context setup", pdu_session_id
-                    );
-                }
-            };
-        }
-
-        new_sessions
+        keep_matching_items(sessions, items, self.logger)
     }
 
     async fn pdu_session_resource_setup_stage_2(
         &self,
         ue: &UeState,
-        mut sessions: Vec<Stage2>,
+        sessions: Vec<Stage2>,
     ) -> Result<(Vec<Stage3>, CellGroupConfig)> {
         let mut items = vec![];
         for session in &sessions {
-            let Stage2 {
-                stage1:
-                    Stage1 {
-                        ngap_request:
-                            PduSessionResourceSetupItemSuReq {
-                                pdu_session_id,
-                                snssai,
-                                ..
-                            },
-                    },
-                e1_setup_response:
-                    PduSessionResourceSetupItem {
-                        ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
-                        ..
-                    },
-            } = session;
-            let pdu_session_id = pdu_session_id.0;
+            let (
+                PduSessionResourceSetupItemSuReq {
+                    pdu_session_id,
+                    snssai,
+                    ..
+                },
+                PduSessionResourceSetupItem {
+                    ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
+                    ..
+                },
+            ) = session;
 
             // Pass the transport address of the CU-UP to the DU.
             let snssai: xxap::Snssai = snssai.clone().into();
             match super::build_f1ap::build_drb_to_be_setup_item(
-                f1ap::DrbId(pdu_session_id),
+                f1ap::DrbId(pdu_session_id.0),
                 snssai.into(),
                 gtp_tunnel.clone(),
             ) {
@@ -276,38 +222,16 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // TODO - can this be made generic with previous function
 
         // Extract the session items from the response.
-        let mut drbs_setup_list = match ue_context_setup_response.drbs_setup_list {
+        let drbs_setup_list = match ue_context_setup_response.drbs_setup_list {
             Some(x) => x.0,
             _ => {
                 bail!("UeContextSetupResponse without DRB setup list");
             }
         };
 
-        // Rebuild the session results vec, adding in the new info from the UP.
-        let mut new_sessions: Vec<Stage3> = vec![];
-        for session in sessions.drain(..) {
-            let pdu_session_id = session.stage1.ngap_request.pdu_session_id.0;
-            let index = drbs_setup_list
-                .iter()
-                .position(|item| item.drb_id.0 == pdu_session_id);
+        let successful_sessions = keep_matching_items(sessions, drbs_setup_list, self.logger);
 
-            match index {
-                // Success case
-                Some(index) => new_sessions.push(Stage3 {
-                    stage2: session,
-                    f1_setup_response: drbs_setup_list.swap_remove(index),
-                }),
-                // Case where the CU-UP failed (or didn't return) this session.
-                None => {
-                    warn!(
-                        self.logger,
-                        "Session {} failed bearer context setup", pdu_session_id
-                    );
-                }
-            };
-        }
-
-        Ok((new_sessions, cell_group_config))
+        Ok((successful_sessions, cell_group_config))
     }
 
     async fn perform_bearer_context_setup(
@@ -409,7 +333,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn pdu_session_resource_setup_stage_3(
         &self,
         ue: &UeState,
-        mut sessions: Vec<Stage3>,
+        sessions: Vec<Stage3>,
     ) -> Vec<Stage4> {
         let e1_items = build_e1_modify_items(&sessions, self.logger);
         if e1_items.is_empty() {
@@ -417,33 +341,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             return vec![];
         }
 
-        let mut f1_items = self.perform_bearer_context_modification(ue, e1_items).await;
+        let f1_items = self.perform_bearer_context_modification(ue, e1_items).await;
 
         // Rebuild the session results vec, adding in the new info from the UP.
-        let mut new_sessions: Vec<Stage4> = vec![];
-        for session in sessions.drain(..) {
-            let pdu_session_id = session.stage2.stage1.ngap_request.pdu_session_id.0;
-            let index = f1_items
-                .iter()
-                .position(|item| item.pdu_session_id.0 == pdu_session_id);
-
-            match index {
-                // Success case
-                Some(index) => new_sessions.push(Stage4 {
-                    stage3: session,
-                    _e1_modify_response: f1_items.swap_remove(index),
-                }),
-                // Case where the CU-UP failed (or didn't return) this session.
-                None => {
-                    warn!(
-                        self.logger,
-                        "Session {} failed bearer context setup", pdu_session_id
-                    );
-                }
-            };
-        }
-
-        new_sessions
+        keep_matching_items(sessions, f1_items, self.logger)
     }
 
     async fn pdu_session_resource_setup_stage_4(
@@ -457,15 +358,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         // so that it doesn't have to clone.
         let nas_messages: Vec<Vec<u8>> = sessions
             .iter()
-            .filter_map(|x| {
-                x.stage3
-                    .stage2
-                    .stage1
-                    .ngap_request
-                    .pdu_session_nas_pdu
-                    .as_ref()
-                    .map(|x| x.0.clone())
-            })
+            .filter_map(|x| x.0 .0 .0.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
             .collect();
 
         debug!(self.logger, "Nas messages is {:?}", nas_messages);
@@ -495,13 +388,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
         let mut new_sessions = vec![];
         for session in sessions.drain(..) {
-            let UpTnlInformation::GtpTunnel(gtp_tunnel) = session
-                .stage3
-                .stage2
-                .e1_setup_response
-                .ng_dl_up_tnl_information;
+            let pdu_session_id = PduSessionId(session.id());
+            let UpTnlInformation::GtpTunnel(gtp_tunnel) = session.0 .0 .1.ng_dl_up_tnl_information;
             let new_session = PduSessionResourceSetupItemSuRes {
-                pdu_session_id: session.stage3.stage2.stage1.ngap_request.pdu_session_id,
+                pdu_session_id,
                 pdu_session_resource_setup_response_transfer:
                     PduSessionResourceSetupResponseTransfer {
                         dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation {
@@ -532,6 +422,67 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     }
 }
 
+trait HasId {
+    fn id(&self) -> u8;
+}
+
+// Outputs a list of pairs of elements with matching ids from the two input lists.
+// (Not an efficient algorithm for long lists.)
+fn keep_matching_items<T1: HasId, T2: HasId>(
+    mut sessions: Vec<T1>,
+    mut items: Vec<T2>,
+    logger: &Logger,
+) -> Vec<(T1, T2)> {
+    let mut new_sessions: Vec<(T1, T2)> = vec![];
+    for session in sessions.drain(..) {
+        let pdu_session_id = session.id();
+        let index = items.iter().position(|item| item.id() == pdu_session_id);
+        match index {
+            Some(index) => new_sessions.push((session, items.swap_remove(index))),
+            None => {
+                warn!(logger, "Session {} not found", pdu_session_id);
+            }
+        };
+    }
+    new_sessions
+}
+
+impl HasId for Stage1 {
+    fn id(&self) -> u8 {
+        self.pdu_session_id.0
+    }
+}
+impl HasId for e1ap::PduSessionResourceSetupItem {
+    fn id(&self) -> u8 {
+        self.pdu_session_id.0
+    }
+}
+impl HasId for f1ap::DrbsSetupItem {
+    fn id(&self) -> u8 {
+        self.drb_id.0
+    }
+}
+impl HasId for e1ap::PduSessionResourceModifiedItem {
+    fn id(&self) -> u8 {
+        self.pdu_session_id.0
+    }
+}
+impl HasId for Stage2 {
+    fn id(&self) -> u8 {
+        self.0.id()
+    }
+}
+impl HasId for Stage3 {
+    fn id(&self) -> u8 {
+        self.0.id()
+    }
+}
+impl HasId for Stage4 {
+    fn id(&self) -> u8 {
+        self.0.id()
+    }
+}
+
 fn build_e1_modify_items(
     sessions: &Vec<Stage3>,
     logger: &Logger,
@@ -540,7 +491,7 @@ fn build_e1_modify_items(
     for session in sessions {
         match session
             // Get the tunnel information returned by the DU...
-            .f1_setup_response
+            .1
             .dl_up_tnl_information_to_be_setup_list
             .0
             .first()
@@ -552,7 +503,7 @@ fn build_e1_modify_items(
                          f1ap::UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
                  }| {
                     build_e1ap::build_e1_modify_item(
-                        session.stage2.stage1.ngap_request.pdu_session_id,
+                        PduSessionId(session.id()),
                         gtp_tunnel.clone(),
                     )
                 },
