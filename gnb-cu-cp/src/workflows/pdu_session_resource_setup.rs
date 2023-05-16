@@ -8,13 +8,11 @@ use f1ap::{
     CellGroupConfig, DlUpTnlInformationToBeSetupItem, DrbsSetupItem, DrbsToBeSetupItem,
     DrbsToBeSetupList, UeContextSetupProcedure,
 };
-use net::SerDes;
 use ngap::{
-    AssociatedQosFlowItem, AssociatedQosFlowList, PduSessionResourceFailedToSetupItemSuRes,
-    PduSessionResourceFailedToSetupListSuRes, PduSessionResourceSetupItemSuReq,
-    PduSessionResourceSetupItemSuRes, PduSessionResourceSetupListSuRes,
-    PduSessionResourceSetupRequest, PduSessionResourceSetupResponse,
-    PduSessionResourceSetupResponseTransfer, QosFlowPerTnlInformation, UpTransportLayerInformation,
+    PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
+    PduSessionResourceSetupItemSuReq, PduSessionResourceSetupItemSuRes,
+    PduSessionResourceSetupListSuRes, PduSessionResourceSetupRequest,
+    PduSessionResourceSetupResponse,
 };
 use slog::{debug, warn, Logger};
 use xxap::*;
@@ -173,46 +171,6 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok(sessions)
     }
 
-    async fn ngap_responses(
-        &self,
-        _ue: &UeState,
-        mut sessions: Vec<Stage5>,
-    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
-        let mut new_sessions = vec![];
-        for session in sessions.drain(..) {
-            let pdu_session_id = PduSessionId(session.id());
-            let UpTnlInformation::GtpTunnel(gtp_tunnel) = session.ng_dl_up_tnl_information;
-            let new_session = PduSessionResourceSetupItemSuRes {
-                pdu_session_id,
-                pdu_session_resource_setup_response_transfer:
-                    PduSessionResourceSetupResponseTransfer {
-                        dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation {
-                            up_transport_layer_information: UpTransportLayerInformation::GtpTunnel(
-                                gtp_tunnel,
-                            ),
-                            associated_qos_flow_list: AssociatedQosFlowList(vec![
-                                AssociatedQosFlowItem {
-                                    qos_flow_identifier: ngap::QosFlowIdentifier(1),
-                                    qos_flow_mapping_indication: None,
-                                    current_qos_para_set_index: None,
-                                },
-                            ]),
-                        },
-                        additional_dl_qos_flow_per_tnl_information: None,
-                        security_result: None,
-                        qos_flow_failed_to_setup_list: None,
-                        redundant_dl_qos_flow_per_tnl_information: None,
-                        additional_redundant_dl_qos_flow_per_tnl_information: None,
-                        used_rsn_information: None,
-                        global_ran_node_id: None,
-                    }
-                    .into_bytes()?,
-            };
-            new_sessions.push(new_session)
-        }
-        Ok(new_sessions)
-    }
-
     async fn perform_ue_context_setup(
         &self,
         ue: &UeState,
@@ -368,6 +326,37 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let rrc_reconfiguration_complete = rrc_transaction.recv().await?;
         self.log_message(">> RrcReconfigurationComplete");
         Ok(rrc_reconfiguration_complete)
+    }
+
+    async fn ngap_responses(
+        &self,
+        _ue: &UeState,
+        mut sessions: Vec<Stage5>,
+    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
+        let responses: Vec<PduSessionResourceSetupItemSuRes> = sessions
+            .drain(..)
+            .flat_map(|session| {
+                let pdu_session_id = PduSessionId(session.id());
+                let UpTnlInformation::GtpTunnel(gtp_tunnel) = session.ng_dl_up_tnl_information;
+                super::build_ngap::build_pdu_session_resource_setup_item_su_res(
+                    pdu_session_id,
+                    gtp_tunnel,
+                )
+                .map_err(|e| {
+                    warn!(
+                        self.logger,
+                        "Building pdu session resource setup response - {e}"
+                    )
+                })
+            })
+            .collect();
+
+        ensure!(
+            !responses.is_empty(),
+            "No Ngap responses built successfully"
+        );
+
+        Ok(responses)
     }
 }
 

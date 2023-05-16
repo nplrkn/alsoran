@@ -1,21 +1,18 @@
 
 ## O-RAN O-DU interop
-- Refactoring of pdu_session_resource_setup
-- Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
 - Fix hang on Ctrl-C when AMF connect doesn't complete
-- Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
-  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
 - don't set up SRB + 2 DBRs if all we need is one session = one DRB
 - FV regression test to reduce dependency on running with live ODU 
 
 # NEXT UP
 - Dataplane with O-RAN SC ODU
+- Session deletion (including on different worker)
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -42,8 +39,11 @@
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
-## MAINTAINABILITY
+## MAINTAINABILITY + DIAGNOSTICS
+- Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
 - Remove slog from workflow module and use log methods on Workflow instead
+- Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
+  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
@@ -82,6 +82,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Refactoring of pdu_session_resource_setup.rs
 - Add PduSessionId to xxap common
 - Improved case conversion of DLUPTNLInformation-ToBeSetup-List and similar
 - TransportLayerAddress has TryFrom<&str>
