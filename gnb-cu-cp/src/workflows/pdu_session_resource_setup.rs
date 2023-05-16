@@ -57,7 +57,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .map(|item| item.pdu_session_id)
             .collect();
 
-        // Go through all the stages of session resource setup.
+        // Go through the stages of session resource setup.
         let ok_sessions = self
             .pdu_session_resource_setup_stages(r)
             .await
@@ -107,30 +107,15 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
         let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
 
-        // E1 BearerContextSetupRequest.
         let sessions = self
-            .pdu_session_resource_setup_stage_1(&mut ue, r.pdu_session_resource_setup_list_su_req.0)
+            .e1_context_setup(&mut ue, r.pdu_session_resource_setup_list_su_req.0)
             .await?;
-
-        // F1 UeContextSetupRequest
-        let (sessions, cell_group_config) = self
-            .pdu_session_resource_setup_stage_2(&mut ue, sessions)
-            .await?;
-
-        // E1 BearerContextModifyRequest.
+        let (sessions, cell_group_config) = self.f1_context_setup(&mut ue, sessions).await?;
+        let sessions = self.e1_context_modify(&mut ue, sessions).await?;
         let sessions = self
-            .pdu_session_resource_setup_stage_3(&mut ue, sessions)
+            .rrc_reconfiguration(&mut ue, sessions, cell_group_config)
             .await?;
-
-        // RRC Reconfiguration.
-        let sessions = self
-            .pdu_session_resource_setup_stage_4(&mut ue, sessions, cell_group_config)
-            .await?;
-
-        // Production of NGAP setup responses.
-        let sessions = self
-            .pdu_session_resource_setup_stage_5(&mut ue, sessions)
-            .await?;
+        let sessions = self.ngap_responses(&mut ue, sessions).await?;
 
         // Write back UE.
         debug!(self.logger, "Store UE {:#010x}", ue.key);
@@ -139,50 +124,36 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok(sessions)
     }
 
-    async fn pdu_session_resource_setup_stage_1(
+    async fn e1_context_setup(
         &self,
         ue: &mut UeState,
         sessions: Vec<Stage1>,
     ) -> Result<Vec<Stage2>> {
-        let items: Vec<PduSessionResourceToSetupItem> = sessions
-            .iter()
-            .flat_map(|x| {
-                build_e1ap::build_e1_setup_item(&ue, &x).map_err(|e| {
-                    warn!(self.logger, "Build E1 setup item failed {:?}", e);
-                    e
-                })
-            })
-            .collect();
-        ensure!(!items.is_empty(), "No E1 setup items built successfully");
-
-        let items = self.perform_bearer_context_setup(ue, items).await;
-        Ok(keep_matching_items(sessions, items, self.logger))
+        let requested = build_e1_setup_items(ue, &sessions, self.logger)?;
+        let successes = self.perform_bearer_context_setup(ue, requested).await;
+        Ok(keep_matching_items(sessions, successes, self.logger))
     }
 
-    async fn pdu_session_resource_setup_stage_2(
+    async fn f1_context_setup(
         &self,
         ue: &UeState,
         sessions: Vec<Stage2>,
     ) -> Result<(Vec<Stage3>, CellGroupConfig)> {
-        let f1_drbs_to_be_setup_items = build_drbs_to_be_setup_items(&sessions, self.logger)?;
-        let (f1_drbs_setup_list, cell_group_config) = self
-            .perform_ue_context_setup(ue, f1_drbs_to_be_setup_items)
-            .await?;
-        let successful_sessions = keep_matching_items(sessions, f1_drbs_setup_list, self.logger);
+        let requested = build_drbs_to_be_setup_items(&sessions, self.logger)?;
+        let (successes, cell_group_config) = self.perform_ue_context_setup(ue, requested).await?;
+        let successful_sessions = keep_matching_items(sessions, successes, self.logger);
         Ok((successful_sessions, cell_group_config))
     }
 
-    async fn pdu_session_resource_setup_stage_3(
-        &self,
-        ue: &UeState,
-        sessions: Vec<Stage3>,
-    ) -> Result<Vec<Stage4>> {
-        let e1_items = build_e1_modify_items(&sessions, self.logger)?;
-        let f1_items = self.perform_bearer_context_modification(ue, e1_items).await;
-        Ok(keep_matching_items(sessions, f1_items, self.logger))
+    async fn e1_context_modify(&self, ue: &UeState, sessions: Vec<Stage3>) -> Result<Vec<Stage4>> {
+        let requested = build_e1_modify_items(&sessions, self.logger)?;
+        let successes = self
+            .perform_bearer_context_modification(ue, requested)
+            .await;
+        Ok(keep_matching_items(sessions, successes, self.logger))
     }
 
-    async fn pdu_session_resource_setup_stage_4(
+    async fn rrc_reconfiguration(
         &self,
         ue: &UeState,
         mut sessions: Vec<Stage4>,
@@ -202,7 +173,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         Ok(sessions)
     }
 
-    async fn pdu_session_resource_setup_stage_5(
+    async fn ngap_responses(
         &self,
         _ue: &UeState,
         mut sessions: Vec<Stage5>,
@@ -494,6 +465,24 @@ fn build_drbs_to_be_setup_items(
         .collect();
 
     ensure!(!items.is_empty(), "No Drb items built successfully");
+    Ok(items)
+}
+
+fn build_e1_setup_items(
+    ue: &UeState,
+    sessions: &Vec<Stage1>,
+    logger: &Logger,
+) -> Result<Vec<PduSessionResourceToSetupItem>> {
+    let items: Vec<PduSessionResourceToSetupItem> = sessions
+        .iter()
+        .flat_map(|x| {
+            build_e1ap::build_e1_setup_item(&ue, &x).map_err(|e| {
+                warn!(logger, "Build E1 setup item failed {:?}", e);
+                e
+            })
+        })
+        .collect();
+    ensure!(!items.is_empty(), "No E1 setup items built successfully");
     Ok(items)
 }
 
