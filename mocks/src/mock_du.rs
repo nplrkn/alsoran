@@ -9,6 +9,7 @@ use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
+use xxap::*;
 
 const F1AP_SCTP_PPID: u32 = 62;
 const F1AP_BIND_PORT: u16 = 38472;
@@ -189,7 +190,7 @@ impl MockDu {
                     selected_plmn_identity: 1,
                     registered_amf: None,
                     guami_type: None,
-                    s_nssai_list: None,
+                    snssai_list: None,
                     dedicated_nas_message: DedicatedNasMessage(nas_message),
                     ng_5g_s_tmsi_value: None,
                     late_non_critical_extension: None,
@@ -368,7 +369,22 @@ impl MockDu {
                 c_rnti: None,
                 resource_coordination_transfer_container: None,
                 full_configuration: None,
-                drbs_setup_list: None,
+                drbs_setup_list: Some(DrbsSetupList(vec![DrbsSetupItem {
+                    drb_id: DrbId(1),
+                    lcid: None,
+                    dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList(vec![
+                        DlUpTnlInformationToBeSetupItem {
+                            dl_up_tnl_information: UpTransportLayerInformation::GtpTunnel(
+                                GtpTunnel {
+                                    transport_layer_address: "1.2.3.4".try_into().unwrap(),
+                                    gtp_teid: GtpTeid(vec![5, 6, 1, 2]),
+                                },
+                            ),
+                        },
+                    ]),
+                    additional_pdcp_duplication_tnl_list: None,
+                    current_qos_para_set_index: None,
+                }])),
                 srbs_failed_to_be_setup_list: None,
                 drbs_failed_to_be_setup_list: None,
                 s_cell_failedto_setup_list: None,
@@ -464,10 +480,9 @@ impl MockDu {
 
     pub async fn handle_cu_configuration_update(
         &mut self,
-        expected_addr_string: &String,
+        expected_addr_string: &str,
     ) -> Result<()> {
-        let expected_address =
-            TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
+        let expected_address = expected_addr_string.try_into()?;
         let (transaction_id, assoc_id) = self
             .receive_gnb_cu_configuration_update(&expected_address)
             .await?;

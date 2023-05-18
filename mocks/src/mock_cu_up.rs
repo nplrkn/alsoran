@@ -4,6 +4,7 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{bail, Result};
 use bitvec::prelude::*;
 use e1ap::*;
+use xxap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
 
@@ -94,10 +95,9 @@ impl MockCuUp {
 
     pub async fn handle_cu_cp_configuration_update(
         &mut self,
-        expected_addr_string: &String,
+        expected_addr_string: &str,
     ) -> Result<()> {
-        let expected_address =
-            TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
+        let expected_address = expected_addr_string.try_into()?;
         let (transaction_id, assoc_id) = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;
@@ -286,7 +286,17 @@ impl MockCuUp {
                             // TODO - supply these to make a proper reply to the request
                             pdu_session_resource_setup_mod_list: None,
                             pdu_session_resource_failed_mod_list: None,
-                            pdu_session_resource_modified_list: None,
+                            pdu_session_resource_modified_list: Some(PduSessionResourceModifiedList(vec![
+                                PduSessionResourceModifiedItem{ 
+                                    pdu_session_id: PduSessionId(1), 
+                                    ng_dl_up_tnl_information: None, 
+                                    security_result: None, 
+                                    pdu_session_data_forwarding_information_response: None, 
+                                    drb_setup_list_ng_ran: None, 
+                                    drb_failed_list_ng_ran: None, 
+                                    drb_modified_list_ng_ran: None, 
+                                    drb_failed_to_modify_list_ng_ran: None, 
+                                    redundant_n_g_dl_up_tnl_information: None }])),
                             pdu_session_resource_failed_to_modify_list: None,
                             retainability_measurements_info: None,
                         },

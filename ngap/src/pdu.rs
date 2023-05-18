@@ -2,7 +2,8 @@
 use super::common::*;
 use super::ies::*;
 use asn1_per::{aper::*, *};
-use xxap::*;
+#[allow(unused_imports)]
+use xxap::{GtpTunnel, PduSessionId, TransportLayerAddress};
 
 // PduSessionResourceSetupRequest
 #[derive(Clone, Debug)]
@@ -3964,7 +3965,7 @@ pub struct UeInformationTransfer {
     pub five_g_s_tmsi: FiveGSTmsi,
     pub nb_iot_ue_priority: Option<NbIotUePriority>,
     pub ue_radio_capability: Option<UeRadioCapability>,
-    pub s_nssai: Option<SNssai>,
+    pub snssai: Option<Snssai>,
     pub allowed_nssai: Option<AllowedNssai>,
     pub ue_differentiation_info: Option<UeDifferentiationInfo>,
 }
@@ -3977,7 +3978,7 @@ impl UeInformationTransfer {
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
         let mut nb_iot_ue_priority: Option<NbIotUePriority> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
-        let mut s_nssai: Option<SNssai> = None;
+        let mut snssai: Option<Snssai> = None;
         let mut allowed_nssai: Option<AllowedNssai> = None;
         let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
 
@@ -3989,7 +3990,7 @@ impl UeInformationTransfer {
                 26 => five_g_s_tmsi = Some(FiveGSTmsi::decode(data)?),
                 210 => nb_iot_ue_priority = Some(NbIotUePriority::decode(data)?),
                 117 => ue_radio_capability = Some(UeRadioCapability::decode(data)?),
-                148 => s_nssai = Some(SNssai::decode(data)?),
+                148 => snssai = Some(Snssai::decode(data)?),
                 0 => allowed_nssai = Some(AllowedNssai::decode(data)?),
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
@@ -4002,7 +4003,7 @@ impl UeInformationTransfer {
             five_g_s_tmsi,
             nb_iot_ue_priority,
             ue_radio_capability,
-            s_nssai,
+            snssai,
             allowed_nssai,
             ue_differentiation_info,
         })
@@ -4039,7 +4040,7 @@ impl UeInformationTransfer {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.s_nssai {
+        if let Some(x) = &self.snssai {
             let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;
@@ -12512,7 +12513,7 @@ pub struct ConnectionEstablishmentIndication {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub ue_radio_capability: Option<UeRadioCapability>,
     pub end_indication: Option<EndIndication>,
-    pub s_nssai: Option<SNssai>,
+    pub snssai: Option<Snssai>,
     pub allowed_nssai: Option<AllowedNssai>,
     pub ue_differentiation_info: Option<UeDifferentiationInfo>,
     pub dl_cp_security_information: Option<DlCpSecurityInformation>,
@@ -12531,7 +12532,7 @@ impl ConnectionEstablishmentIndication {
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
         let mut end_indication: Option<EndIndication> = None;
-        let mut s_nssai: Option<SNssai> = None;
+        let mut snssai: Option<Snssai> = None;
         let mut allowed_nssai: Option<AllowedNssai> = None;
         let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
         let mut dl_cp_security_information: Option<DlCpSecurityInformation> = None;
@@ -12549,7 +12550,7 @@ impl ConnectionEstablishmentIndication {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 117 => ue_radio_capability = Some(UeRadioCapability::decode(data)?),
                 226 => end_indication = Some(EndIndication::decode(data)?),
-                148 => s_nssai = Some(SNssai::decode(data)?),
+                148 => snssai = Some(Snssai::decode(data)?),
                 0 => allowed_nssai = Some(AllowedNssai::decode(data)?),
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
                 212 => dl_cp_security_information = Some(DlCpSecurityInformation::decode(data)?),
@@ -12573,7 +12574,7 @@ impl ConnectionEstablishmentIndication {
             ran_ue_ngap_id,
             ue_radio_capability,
             end_indication,
-            s_nssai,
+            snssai,
             allowed_nssai,
             ue_differentiation_info,
             dl_cp_security_information,
@@ -12623,7 +12624,7 @@ impl ConnectionEstablishmentIndication {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.s_nssai {
+        if let Some(x) = &self.snssai {
             let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;
@@ -12885,7 +12886,7 @@ impl PerCodec for UeRadioCapabilityIdMappingResponse {
 pub struct AmfcpRelocationIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
-    pub s_nssai: Option<SNssai>,
+    pub snssai: Option<Snssai>,
     pub allowed_nssai: Option<AllowedNssai>,
 }
 
@@ -12896,7 +12897,7 @@ impl AmfcpRelocationIndication {
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
-        let mut s_nssai: Option<SNssai> = None;
+        let mut snssai: Option<Snssai> = None;
         let mut allowed_nssai: Option<AllowedNssai> = None;
 
         for _ in 0..len {
@@ -12906,7 +12907,7 @@ impl AmfcpRelocationIndication {
             match id {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
-                148 => s_nssai = Some(SNssai::decode(data)?),
+                148 => snssai = Some(Snssai::decode(data)?),
                 0 => allowed_nssai = Some(AllowedNssai::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
@@ -12920,7 +12921,7 @@ impl AmfcpRelocationIndication {
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
-            s_nssai,
+            snssai,
             allowed_nssai,
         })
     }
@@ -12944,7 +12945,7 @@ impl AmfcpRelocationIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.s_nssai {
+        if let Some(x) = &self.snssai {
             let ie = &mut Allocator::new();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;

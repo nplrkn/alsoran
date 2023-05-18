@@ -17,6 +17,10 @@ SPECIALS = [(re.compile("^DU"), "DU-"),
             (re.compile(r"SRB(s?)"), r"-srb\1-"),
             (re.compile(r"DRB(s?)"), r"-drb\1-"),
             (re.compile(r"E-UTRAN"), r"EUTRAN"),
+            (re.compile(r"([^I])DL"), r"\1-DL-"),
+            (re.compile(r"([^SN])UL"), r"\1-UL-"),
+            (re.compile(r"UPTNL"), r"-UP-TNL-"),
+            (re.compile(r"S-NSSAI"), r"SNSSAI"),
             ]
 
 
@@ -79,6 +83,18 @@ class TestCase(unittest.TestCase):
     def test_pmlns(self):
         self.assertEqual(pascal_case(
             "SupportedPLMNs-List"), "SupportedPlmnsList")
+
+    def test_snssai(self):
+        self.assertEqual(pascal_case(
+            "S-NSSAI"), "Snssai")
+
+    def test_nid(self):
+        self.assertEqual(pascal_case(
+            "BroadcastNIDList"), "BroadcastNidList")
+
+    def test_sul(self):
+        self.assertEqual(pascal_case(
+            "SULAccessIndication"), "SulAccessIndication")
 
 
 if __name__ == '__main__':

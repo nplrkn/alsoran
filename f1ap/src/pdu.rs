@@ -2,7 +2,8 @@
 use super::common::*;
 use super::ies::*;
 use asn1_per::{aper::*, *};
-use xxap::*;
+#[allow(unused_imports)]
+use xxap::{GtpTunnel, PduSessionId, TransportLayerAddress};
 
 // Reset
 #[derive(Clone, Debug)]

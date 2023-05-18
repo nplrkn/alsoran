@@ -7,6 +7,7 @@ use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
+use xxap::{GtpTeid, GtpTunnel, PduSessionId};
 
 impl Pdu for NgapPdu {}
 
@@ -89,7 +90,7 @@ impl MockAmf {
                 plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
                     plmn_identity: self.plmn_identity(),
                     slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        s_nssai: self.snssai(),
+                        snssai: self.snssai().into(),
                     }]),
                     npn_support: None,
                     extended_slice_support_list: None,
@@ -146,11 +147,8 @@ impl MockAmf {
         PlmnIdentity(vec![2, 3, 2])
     }
 
-    fn snssai(&self) -> SNssai {
-        SNssai {
-            sst: Sst(vec![0x01]),
-            sd: None,
-        }
+    fn snssai(&self) -> xxap::Snssai {
+        xxap::Snssai(1, Some([0x02, 0x03, 0x04])) // (Necessary for ODU interop when using AMF-SIM)
     }
 
     pub async fn receive_initial_ue_message(&self, ue_id: u32) -> Result<UeContext> {
@@ -196,7 +194,7 @@ impl MockAmf {
                 guami: self.guami(),
                 pdu_session_resource_setup_list_cxt_req: None,
                 allowed_nssai: AllowedNssai(vec![AllowedNssaiItem {
-                    s_nssai: self.snssai(),
+                    snssai: self.snssai().into(),
                 }]),
                 ue_security_capabilities: UeSecurityCapabilities {
                     nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![u8,Msb0;0;16]),
@@ -325,7 +323,7 @@ impl MockAmf {
     pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
 
-        let transport_layer_address = TransportLayerAddress(bitvec![u8, Msb0;0,1,0,1,0,1]);
+        let transport_layer_address = "1.2.1.2".try_into()?;
 
         let pdu_session_resource_setup_request_transfer = PduSessionResourceSetupRequestTransfer {
             pdu_session_aggregate_maximum_bit_rate: None,
@@ -375,6 +373,8 @@ impl MockAmf {
         }
         .into_bytes()?;
 
+        let dummy_nas_session_establishment_accept = NasPdu(vec![1]);
+
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceSetupRequest(
             PduSessionResourceSetupRequest {
                 amf_ue_ngap_id: AmfUeNgapId(ue_context.ue_id.into()),
@@ -384,8 +384,8 @@ impl MockAmf {
                 pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(vec![
                     PduSessionResourceSetupItemSuReq {
                         pdu_session_id: PduSessionId(1),
-                        pdu_session_nas_pdu: Some(NasPdu(vec![])),
-                        s_nssai: self.snssai(),
+                        pdu_session_nas_pdu: Some(dummy_nas_session_establishment_accept),
+                        snssai: self.snssai().into(),
                         pdu_session_resource_setup_request_transfer,
                     },
                 ]),

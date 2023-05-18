@@ -10,8 +10,9 @@ use rrc::{
     FreqBandIndicatorNr, ModulationOrder, PdcpParameters, PhyParameters, RfParameters,
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
+use xxap::{GtpTeid, GtpTunnel, PduSessionId, Snssai};
 
-fn build_drb_to_be_setup_item(
+pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,
     snssai: Snssai,
     gtp_tunnel: GtpTunnel,
@@ -41,7 +42,7 @@ fn build_drb_to_be_setup_item(
                 ulpdu_session_aggregate_maximum_bit_rate: None,
                 qos_monitoring_request: None,
             },
-            snssai,
+            snssai: snssai.into(),
             notification_control: None,
             flows_mapped_to_drb_list: FlowsMappedToDrbList(vec![FlowsMappedToDrbItem {
                 qos_flow_identifier: QosFlowIdentifier(0),
@@ -71,9 +72,9 @@ fn build_drb_to_be_setup_item(
                 tsc_traffic_characteristics: None,
             }]),
         }),
-        uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList(vec![
-            UluptnlInformationToBeSetupItem {
-                uluptnl_information: UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
+        ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList(vec![
+            UlUpTnlInformationToBeSetupItem {
+                ul_up_tnl_information: UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
                 bh_info: None,
             },
         ]),
@@ -104,49 +105,59 @@ pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> Result<UeContextSetupRequest> {
-    build_ue_context_setup_request(gnb_cu_cp, ue, rrc_container)
+    build_ue_context_setup_request(
+        gnb_cu_cp,
+        ue,
+        Some(default_drb_to_be_setup_list()?),
+        rrc_container,
+    )
 }
 
-pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
-    gnb_cu_cp: &G,
-    _r: &ngap::PduSessionResourceSetupRequest,
-    ue: &UeState,
-    rrc_container: Option<f1ap::RrcContainer>,
-) -> Result<UeContextSetupRequest> {
-    build_ue_context_setup_request(gnb_cu_cp, ue, rrc_container)
-}
+// pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
+//     gnb_cu_cp: &G,
+//     _r: &ngap::PduSessionResourceSetupRequest,
+//     ue: &UeState,
+//     rrc_container: Option<f1ap::RrcContainer>,
+// ) -> Result<UeContextSetupRequest> {
+//     build_ue_context_setup_request(
+//         gnb_cu_cp,
+//         ue,
+//         Some(default_drb_to_be_setup_list()?),
+//         rrc_container,
+//     )
+// }
 
-fn build_ue_context_setup_request<G: GnbCuCp>(
-    _gnb_cu_cp: &G,
-    ue: &UeState,
-    rrc_container: Option<f1ap::RrcContainer>,
-) -> Result<UeContextSetupRequest> {
-    // TODO: derive and use frunk for the common ngap / f1ap structures seen here?
-
-    // Build a Ue Context Setup Request similar to the one sent by the O-RAN-SC O-DU's CU Stub to the ODU.
-    // This has one SRB and two DRBs.
+fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
     let first_gtp_tunnel = GtpTunnel {
-        transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
+        transport_layer_address: "192.168.130.82".try_into()?,
         gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
     };
-    let first_slice = Snssai {
-        sst: vec![1],
-        sd: Some(vec![2, 3, 4]),
-    };
+    let first_slice = Snssai(1, Some([2, 3, 4]));
+
     let first_drb_to_setup_item =
-        build_drb_to_be_setup_item(DrbId(1), first_slice, first_gtp_tunnel)?;
+        build_drb_to_be_setup_item(DrbId(1), first_slice.into(), first_gtp_tunnel)?;
 
     let second_gtp_tunnel = GtpTunnel {
-        transport_layer_address: TransportLayerAddress(net::ip_bits_from_string("192.168.130.82")?),
+        transport_layer_address: "192.168.130.82".try_into()?,
         gtp_teid: GtpTeid(vec![0, 0, 0, 2]),
     };
-    let second_slice = Snssai {
-        sst: vec![5],
-        sd: Some(vec![6, 7, 8]),
-    };
+    let second_slice = Snssai(5, Some([6, 7, 8]));
     let second_drb_to_setup_item =
-        build_drb_to_be_setup_item(DrbId(2), second_slice, second_gtp_tunnel)?;
+        build_drb_to_be_setup_item(DrbId(2), second_slice.into(), second_gtp_tunnel)?;
+    Ok(DrbsToBeSetupList(vec![
+        first_drb_to_setup_item,
+        second_drb_to_setup_item,
+    ]))
+}
 
+pub fn build_ue_context_setup_request<G: GnbCuCp>(
+    _gnb_cu_cp: &G,
+    ue: &UeState,
+    drbs_to_be_setup_list: Option<DrbsToBeSetupList>,
+    rrc_container: Option<f1ap::RrcContainer>,
+) -> Result<UeContextSetupRequest> {
+    // Build a Ue Context Setup Request similar to the one sent by the O-RAN-SC O-DU's CU Stub to the ODU.
+    // This has one SRB and two DRBs.
     let rrc_ue_capability_rat_container_list =
         rrc::UeCapabilityRatContainerList(vec![UeCapabilityRatContainer {
             rat_type: rrc::RatType::Nr,
@@ -266,10 +277,7 @@ fn build_ue_context_setup_request<G: GnbCuCp>(
             duplication_indication: None,
             additional_duplication_indication: None,
         }])),
-        drbs_to_be_setup_list: Some(DrbsToBeSetupList(vec![
-            first_drb_to_setup_item,
-            second_drb_to_setup_item,
-        ])),
+        drbs_to_be_setup_list,
         inactivity_monitoring_request: None,
         rat_frequency_priority_information: None,
         rrc_container,

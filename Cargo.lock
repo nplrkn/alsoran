@@ -1121,6 +1121,7 @@ dependencies = [
  "net",
  "slog",
  "stop-token",
+ "xxap",
 ]
 
 [[package]]
@@ -1560,6 +1561,7 @@ dependencies = [
  "rrc",
  "slog",
  "stop-token",
+ "xxap",
 ]
 
 [[package]]
@@ -2995,7 +2997,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "asn1-per",
+ "async-net",
  "async-trait",
+ "bitvec",
  "hex",
  "net",
  "num_enum",

@@ -12,7 +12,7 @@ pub mod ngap_gnb;
 pub use ngap_gnb::*;
 mod display;
 pub use display::*;
-pub use xxap::*;
+mod conversion;
 
 #[cfg(test)]
 mod test;

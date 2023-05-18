@@ -6,11 +6,10 @@ use anyhow::Result;
 use f1ap::{
     CpTransportLayerAddress, GnbCuConfigurationUpdate, GnbCuConfigurationUpdateProcedure,
     GnbCuTnlAssociationToAddItem, GnbCuTnlAssociationToAddList, TnlAssociationUsage, TransactionId,
-    TransportLayerAddress,
 };
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
-    pub async fn gnb_cu_configuration_update(&self, f1ap_endpoint_ip_addr: &String) -> Result<()> {
+    pub async fn gnb_cu_configuration_update(&self, f1ap_endpoint_ip_addr: &str) -> Result<()> {
         let gnb_cu_configuration_update = GnbCuConfigurationUpdate {
             transaction_id: TransactionId(1), // TODO
             cells_to_be_activated_list: None,
@@ -18,9 +17,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             gnb_cu_tnl_association_to_add_list: Some(GnbCuTnlAssociationToAddList(vec![
                 GnbCuTnlAssociationToAddItem {
                     tnl_association_transport_layer_address:
-                        CpTransportLayerAddress::EndpointIpAddress(TransportLayerAddress(
-                            net::ip_bits_from_string(f1ap_endpoint_ip_addr)?,
-                        )),
+                        CpTransportLayerAddress::EndpointIpAddress(
+                            f1ap_endpoint_ip_addr.try_into()?,
+                        ),
                     tnl_association_usage: TnlAssociationUsage::Both,
                 },
             ])),

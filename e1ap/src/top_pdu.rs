@@ -820,26 +820,26 @@ impl Indication for ResourceStatusReportingProcedure {
     }
 }
 
-pub struct IabUptnlAddressUpdateProcedure {}
+pub struct IabUpTnlAddressUpdateProcedure {}
 
 #[async_trait]
-impl Procedure for IabUptnlAddressUpdateProcedure {
+impl Procedure for IabUpTnlAddressUpdateProcedure {
     type TopPdu = E1apPdu;
-    type Request = IabUptnlAddressUpdate;
-    type Success = IabUptnlAddressUpdateAcknowledge;
-    type Failure = IabUptnlAddressUpdateFailure;
+    type Request = IabUpTnlAddressUpdate;
+    type Success = IabUpTnlAddressUpdateAcknowledge;
+    type Failure = IabUpTnlAddressUpdateFailure;
     const CODE: u8 = 24;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: IabUptnlAddressUpdate,
+        req: IabUpTnlAddressUpdate,
         logger: &Logger,
     ) -> Option<ResponseAction<E1apPdu>> {
-        match <T as RequestProvider<IabUptnlAddressUpdateProcedure>>::request(provider, req, logger)
+        match <T as RequestProvider<IabUpTnlAddressUpdateProcedure>>::request(provider, req, logger)
             .await
         {
             Ok((r, f)) => Some((
-                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabUptnlAddressUpdateAcknowledge(r)),
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabUpTnlAddressUpdateAcknowledge(r)),
                 f,
             )),
             Err(_) => todo!(),
@@ -847,16 +847,16 @@ impl Procedure for IabUptnlAddressUpdateProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError> {
-        E1apPdu::InitiatingMessage(InitiatingMessage::IabUptnlAddressUpdate(r)).into_bytes()
+        E1apPdu::InitiatingMessage(InitiatingMessage::IabUpTnlAddressUpdate(r)).into_bytes()
     }
 
     fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         let response_pdu = Self::TopPdu::from_bytes(bytes)?;
         match response_pdu {
-            E1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabUptnlAddressUpdateAcknowledge(x)) => {
+            E1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabUpTnlAddressUpdateAcknowledge(x)) => {
                 Ok(x)
             }
-            E1apPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::IabUptnlAddressUpdateFailure(x)) => {
+            E1apPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::IabUpTnlAddressUpdateFailure(x)) => {
                 Err(RequestError::UnsuccessfulOutcome(x))
             }
             _ => Err(RequestError::Other("Unexpected pdu contents".to_string())),
@@ -933,7 +933,7 @@ pub enum InitiatingMessage {
     TraceStart(TraceStart),
     ResourceStatusRequest(ResourceStatusRequest),
     ResourceStatusUpdate(ResourceStatusUpdate),
-    IabUptnlAddressUpdate(IabUptnlAddressUpdate),
+    IabUpTnlAddressUpdate(IabUpTnlAddressUpdate),
     CellTrafficTrace(CellTrafficTrace),
     EarlyForwardingSnTransfer(EarlyForwardingSnTransfer),
 }
@@ -1000,7 +1000,7 @@ impl InitiatingMessage {
             23 => Ok(Self::ResourceStatusUpdate(ResourceStatusUpdate::decode(
                 data,
             )?)),
-            24 => Ok(Self::IabUptnlAddressUpdate(IabUptnlAddressUpdate::decode(
+            24 => Ok(Self::IabUpTnlAddressUpdate(IabUpTnlAddressUpdate::decode(
                 data,
             )?)),
             25 => Ok(Self::CellTrafficTrace(CellTrafficTrace::decode(data)?)),
@@ -1353,7 +1353,7 @@ impl InitiatingMessage {
                 )?;
                 data.append_aligned(container);
             }
-            Self::IabUptnlAddressUpdate(x) => {
+            Self::IabUpTnlAddressUpdate(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
                 Criticality::Reject.encode(data)?;
                 let container = &mut Allocator::new();
@@ -1429,7 +1429,7 @@ pub enum SuccessfulOutcome {
     BearerContextModificationConfirm(BearerContextModificationConfirm),
     BearerContextReleaseComplete(BearerContextReleaseComplete),
     ResourceStatusResponse(ResourceStatusResponse),
-    IabUptnlAddressUpdateAcknowledge(IabUptnlAddressUpdateAcknowledge),
+    IabUpTnlAddressUpdateAcknowledge(IabUpTnlAddressUpdateAcknowledge),
 }
 
 impl SuccessfulOutcome {
@@ -1467,8 +1467,8 @@ impl SuccessfulOutcome {
             22 => Ok(Self::ResourceStatusResponse(
                 ResourceStatusResponse::decode(data)?,
             )),
-            24 => Ok(Self::IabUptnlAddressUpdateAcknowledge(
-                IabUptnlAddressUpdateAcknowledge::decode(data)?,
+            24 => Ok(Self::IabUpTnlAddressUpdateAcknowledge(
+                IabUpTnlAddressUpdateAcknowledge::decode(data)?,
             )),
             x => {
                 return Err(PerCodecError::new(format!(
@@ -1634,7 +1634,7 @@ impl SuccessfulOutcome {
                 )?;
                 data.append_aligned(container);
             }
-            Self::IabUptnlAddressUpdateAcknowledge(x) => {
+            Self::IabUpTnlAddressUpdateAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
                 Criticality::Reject.encode(data)?;
                 let container = &mut Allocator::new();
@@ -1678,7 +1678,7 @@ pub enum UnsuccessfulOutcome {
     BearerContextSetupFailure(BearerContextSetupFailure),
     BearerContextModificationFailure(BearerContextModificationFailure),
     ResourceStatusFailure(ResourceStatusFailure),
-    IabUptnlAddressUpdateFailure(IabUptnlAddressUpdateFailure),
+    IabUpTnlAddressUpdateFailure(IabUpTnlAddressUpdateFailure),
 }
 
 impl UnsuccessfulOutcome {
@@ -1708,8 +1708,8 @@ impl UnsuccessfulOutcome {
             22 => Ok(Self::ResourceStatusFailure(ResourceStatusFailure::decode(
                 data,
             )?)),
-            24 => Ok(Self::IabUptnlAddressUpdateFailure(
-                IabUptnlAddressUpdateFailure::decode(data)?,
+            24 => Ok(Self::IabUpTnlAddressUpdateFailure(
+                IabUpTnlAddressUpdateFailure::decode(data)?,
             )),
             x => {
                 return Err(PerCodecError::new(format!(
@@ -1819,7 +1819,7 @@ impl UnsuccessfulOutcome {
                 )?;
                 data.append_aligned(container);
             }
-            Self::IabUptnlAddressUpdateFailure(x) => {
+            Self::IabUpTnlAddressUpdateFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
                 Criticality::Reject.encode(data)?;
                 let container = &mut Allocator::new();

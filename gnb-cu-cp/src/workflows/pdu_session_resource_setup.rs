@@ -1,18 +1,27 @@
 //! pdu_session_resource_setup - AMF orders setup of PDU sessions and DRBs
 
-use super::{GnbCuCp, Workflow};
+use super::{build_e1ap, GnbCuCp, Workflow};
 use crate::datastore::UeState;
-use anyhow::Result;
+use anyhow::{anyhow, bail, ensure, Result};
 use e1ap::*;
-use f1ap::UeContextSetupProcedure;
-use net::SerDes;
+use f1ap::{
+    CellGroupConfig, DlUpTnlInformationToBeSetupItem, DrbsSetupItem, DrbsToBeSetupItem,
+    DrbsToBeSetupList, UeContextSetupProcedure,
+};
 use ngap::{
     PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
     PduSessionResourceSetupItemSuReq, PduSessionResourceSetupItemSuRes,
     PduSessionResourceSetupListSuRes, PduSessionResourceSetupRequest,
-    PduSessionResourceSetupRequestTransfer, PduSessionResourceSetupResponse,
+    PduSessionResourceSetupResponse,
 };
-use slog::debug;
+use slog::{debug, warn, Logger};
+use xxap::*;
+
+type Stage1 = ngap::PduSessionResourceSetupItemSuReq;
+type Stage2 = (Stage1, e1ap::PduSessionResourceSetupItem);
+type Stage3 = (Stage2, f1ap::DrbsSetupItem);
+type Stage4 = (Stage3, e1ap::PduSessionResourceModifiedItem);
+type Stage5 = e1ap::PduSessionResourceSetupItem;
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // Pdu session resource setup procedure.
@@ -29,148 +38,157 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // 8. << Dl Rrc Message Transfer + Rrc Reconfiguration + Nas PDU Session Establishment Accept
     // 9. >> Ul Rrc Message Transfer + Rrc Reconfiguration Complete
     // 8.    Pdu Session Resource Setup Response >>
-
     pub async fn pdu_session_resource_setup(
         &self,
         r: PduSessionResourceSetupRequest,
     ) -> PduSessionResourceSetupResponse {
         debug!(self.logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-        let (successful, unsuccessful) = match self.pdu_session_resource_setup_inner(&r).await {
-            Ok(x) => x,
-            Err(e) => {
-                debug!(self.logger, "Failed resource setup - {}", e);
-                (
-                    Vec::new(),
-                    r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
-                )
-            }
-        };
+        let amf_ue_ngap_id = r.amf_ue_ngap_id;
+        let ran_ue_ngap_id = r.ran_ue_ngap_id;
 
-        // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
+        // Save off the sessions IDs in case of error.
+        let requested_session_ids: Vec<PduSessionId> = r
+            .pdu_session_resource_setup_list_su_req
+            .0
+            .iter()
+            .map(|item| item.pdu_session_id)
+            .collect();
 
-        let pdu_session_resource_setup_list_su_res = if successful.is_empty() {
+        // Go through the stages of session resource setup.
+        let ok_sessions = self
+            .pdu_session_resource_setup_stages(r)
+            .await
+            .unwrap_or_else(|e| {
+                warn!(self.logger, "Error processing session setup - {}", e);
+                vec![]
+            });
+
+        // Construct PduSessionResourceFailedToSetupItemSuRes for any requested sessions that didn't
+        // make it through the setup process.
+        let failed_sessions: Vec<PduSessionResourceFailedToSetupItemSuRes> = requested_session_ids
+            .into_iter()
+            .filter(|x| ok_sessions.iter().all(|item| item.pdu_session_id.0 != x.0))
+            .map(|x| PduSessionResourceFailedToSetupItemSuRes {
+                pdu_session_id: x,
+                pdu_session_resource_setup_unsuccessful_transfer: vec![], // TODO,
+            })
+            .collect();
+
+        let pdu_session_resource_setup_list_su_res = if ok_sessions.is_empty() {
             None
         } else {
-            Some(PduSessionResourceSetupListSuRes(
-                successful
-                    .into_iter()
-                    .map(|x| PduSessionResourceSetupItemSuRes {
-                        pdu_session_id: x.pdu_session_id,
-                        pdu_session_resource_setup_response_transfer: x
-                            .pdu_session_resource_setup_request_transfer
-                            .clone(),
-                    })
-                    .collect(),
-            ))
+            Some(PduSessionResourceSetupListSuRes(ok_sessions))
         };
 
-        let pdu_session_resource_failed_to_setup_list_su_res = if unsuccessful.is_empty() {
+        let pdu_session_resource_failed_to_setup_list_su_res = if failed_sessions.is_empty() {
             None
         } else {
-            Some(PduSessionResourceFailedToSetupListSuRes(
-                unsuccessful
-                    .into_iter()
-                    .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                        pdu_session_id: x.pdu_session_id,
-                        pdu_session_resource_setup_unsuccessful_transfer: x
-                            .pdu_session_resource_setup_request_transfer
-                            .clone(),
-                    })
-                    .collect(),
-            ))
+            Some(PduSessionResourceFailedToSetupListSuRes(failed_sessions))
         };
 
         debug!(self.logger, "PduSessionResourceSetupResponse >> ");
         PduSessionResourceSetupResponse {
-            amf_ue_ngap_id: r.amf_ue_ngap_id,
-            ran_ue_ngap_id: r.ran_ue_ngap_id,
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
             pdu_session_resource_setup_list_su_res,
             pdu_session_resource_failed_to_setup_list_su_res,
             criticality_diagnostics: None,
         }
     }
 
-    pub async fn pdu_session_resource_setup_inner<'b>(
+    pub async fn pdu_session_resource_setup_stages(
         &self,
-        r: &'b PduSessionResourceSetupRequest,
-    ) -> Result<(
-        Vec<&'b PduSessionResourceSetupItemSuReq>,
-        Vec<&'b PduSessionResourceSetupItemSuReq>,
-    )> {
-        // Retrieve UE context by ran_ue_ngap_id.
+        r: PduSessionResourceSetupRequest,
+    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
+        // Load UE.
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
         let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
 
-        // Keep track of which sessions we managed to set up, via references into the original message.
-        let mut unsuccessful = vec![];
-        let mut successful = vec![];
-
-        // Build PduSessionResourceToSetupItems.
-        let mut items = vec![];
-        for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
-            match self.build_setup_item(&ue, x) {
-                Ok(item) => {
-                    items.push(item);
-                    successful.push(x);
-                }
-                Err(e) => {
-                    debug!(self.logger, "Failed to build session setup item {:?}", e);
-                    unsuccessful.push(x);
-                }
-            };
-        }
-
-        // TODO - the following functions hardcode a lot of things they shouldn't and will need work to signal session setup correctly.
-
-        // Send BearerContextSetup to CU-UP.
-        let bearer_context_setup = self.build_bearer_context_setup(&ue, items);
-        debug!(self.logger, "<< BearerContextSetupRequest");
-        let response = self
-            .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, self.logger)
+        let sessions = self
+            .e1_context_setup(&mut ue, r.pdu_session_resource_setup_list_su_req.0)
             .await?;
-        debug!(self.logger, ">> BearerContextSetupResponse");
+        let (sessions, cell_group_config) = self.f1_context_setup(&mut ue, sessions).await?;
+        let sessions = self.e1_context_modify(&mut ue, sessions).await?;
+        let sessions = self
+            .rrc_reconfiguration(&mut ue, sessions, cell_group_config)
+            .await?;
+        let sessions = self.ngap_responses(&mut ue, sessions).await?;
 
-        // Store CU-UP's UE ID.
-        let gnb_cu_up_ue_e1ap_id = response.gnb_cu_up_ue_e1ap_id;
-        ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
+        // Write back UE.
+        debug!(self.logger, "Store UE {:#010x}", ue.key);
+        self.store(ue.key, ue, self.config().ue_ttl_secs).await?;
+
+        Ok(sessions)
+    }
+
+    async fn e1_context_setup(
+        &self,
+        ue: &mut UeState,
+        sessions: Vec<Stage1>,
+    ) -> Result<Vec<Stage2>> {
+        let requested = build_e1_setup_items(ue, &sessions, self.logger)?;
+        let successes = self.perform_bearer_context_setup(ue, requested).await;
+        Ok(keep_matching_items(sessions, successes, self.logger))
+    }
+
+    async fn f1_context_setup(
+        &self,
+        ue: &UeState,
+        sessions: Vec<Stage2>,
+    ) -> Result<(Vec<Stage3>, CellGroupConfig)> {
+        let requested = build_drbs_to_be_setup_items(&sessions, self.logger)?;
+        let (successes, cell_group_config) = self.perform_ue_context_setup(ue, requested).await?;
+        let successful_sessions = keep_matching_items(sessions, successes, self.logger);
+        Ok((successful_sessions, cell_group_config))
+    }
+
+    async fn e1_context_modify(&self, ue: &UeState, sessions: Vec<Stage3>) -> Result<Vec<Stage4>> {
+        let requested = build_e1_modify_items(&sessions, self.logger)?;
+        let successes = self
+            .perform_bearer_context_modification(ue, requested)
+            .await;
+        Ok(keep_matching_items(sessions, successes, self.logger))
+    }
+
+    async fn rrc_reconfiguration(
+        &self,
+        ue: &UeState,
+        mut sessions: Vec<Stage4>,
+        cell_group_config: f1ap::CellGroupConfig,
+    ) -> Result<Vec<Stage5>> {
+        // Deconstruct the sessions input into a list of NAS messages (to give to UE)
+        // and a list of E1 setup items (with downlink tunnel information to give back to 5G core).
+        let (nas_messages, sessions) = sessions
+            .drain(..)
+            .filter_map(|(((a, b), _), _)| a.pdu_session_nas_pdu.map(|x| (x.0, b)))
+            .unzip();
+
+        let _rrc_reconfiguration_complete = self
+            .perform_rrc_reconfiguration(ue, nas_messages, cell_group_config)
+            .await?;
+
+        Ok(sessions)
+    }
+
+    async fn perform_ue_context_setup(
+        &self,
+        ue: &UeState,
+        items: Vec<DrbsToBeSetupItem>,
+    ) -> Result<(Vec<DrbsSetupItem>, CellGroupConfig)> {
+        let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
+            self.gnb_cu_cp,
+            &ue,
+            Some(DrbsToBeSetupList(items)),
+            None,
+        )?;
 
         // Send UeContextSetupRequest to DU.
-        let ue_context_setup_request =
-            super::build_f1ap::build_ue_context_setup_request_from_pdu_session_setup(
-                self.gnb_cu_cp,
-                r,
-                &ue,
-                None,
-            )?;
         self.log_message("<< UeContextSetupRequest");
         let ue_context_setup_response = self
             .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
             .await?;
         self.log_message(">> UeContextSetupResponse");
-
-        // Send BearerContextModification to CU-UP.
-        let bearer_context_modification = self.build_bearer_context_modification(
-            &ue,
-            gnb_cu_up_ue_e1ap_id,
-            &ue_context_setup_response,
-        );
-        self.log_message("<< BearerContextModificationRequest");
-        let _response = self
-            .e1ap_request::<BearerContextModificationProcedure>(
-                bearer_context_modification,
-                self.logger,
-            )
-            .await?;
-        self.log_message(">> BearerContextModificationResponse");
-
-        // Collect the Nas messages from the successful setups.
-        // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
-        // so that it doesn't have to clone.
-        let nas_messages: Vec<Vec<u8>> = successful
-            .iter()
-            .filter_map(|x| x.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
-            .collect();
 
         // TS38.473, 8.3.1.2: "If the CellGroupConfig IE is included in the DU to CU RRC Information IE contained in the UE CONTEXT SETUP RESPONSE message,
         // the gNB-CU shall perform RRC Reconfiguration or RRC connection resume as described in TS 38.331 [8]. The CellGroupConfig IE shall
@@ -179,7 +197,120 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .du_to_cu_rrc_information
             .cell_group_config
             .0;
+        let cell_group_config = CellGroupConfig(cell_group_config);
 
+        // Extract the session items from the response.
+        let drbs_setup_list = match ue_context_setup_response.drbs_setup_list {
+            Some(x) => x.0,
+            _ => {
+                bail!("UeContextSetupResponse without DRB setup list");
+            }
+        };
+        Ok((drbs_setup_list, cell_group_config))
+    }
+
+    async fn perform_bearer_context_setup(
+        &self,
+        ue: &mut UeState,
+        items: Vec<PduSessionResourceToSetupItem>,
+    ) -> Vec<PduSessionResourceSetupItem> {
+        // Send BearerContextSetup to CU-UP.
+        let bearer_context_setup = build_e1ap::build_bearer_context_setup(
+            &ue,
+            PlmnIdentity(self.config().plmn.clone()),
+            items,
+        );
+
+        debug!(self.logger, "<< BearerContextSetupRequest");
+        match self
+            .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, self.logger)
+            .await
+        {
+            Ok(BearerContextSetupResponse {
+                gnb_cu_up_ue_e1ap_id,
+                system_bearer_context_setup_response:
+                    SystemBearerContextSetupResponse::NgRanBearerContextSetupResponse(
+                        NgRanBearerContextSetupResponse {
+                            pdu_session_resource_setup_list: PduSessionResourceSetupList(x),
+                            ..
+                        },
+                    ),
+                ..
+            }) => {
+                debug!(self.logger, ">> BearerContextSetupResponse");
+
+                // Success - store CU-UP's UE ID.
+                ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
+
+                x
+            }
+            Ok(m) => {
+                warn!(
+                    self.logger,
+                    "BearerContextSetupRequest without NGRAN resource setup items: {:?}", m
+                );
+                vec![]
+            }
+            Err(e) => {
+                debug!(self.logger, "Failed bearer context setup {:?}", e);
+                vec![]
+            }
+        }
+    }
+
+    async fn perform_bearer_context_modification(
+        &self,
+        ue: &UeState,
+        items: Vec<PduSessionResourceToModifyItem>,
+    ) -> Vec<PduSessionResourceModifiedItem> {
+        let Some(gnb_cu_up_ue_e1ap_id) = ue.gnb_cu_up_ue_e1ap_id else {
+            warn!(self.logger, "No E1AP ID on UE");
+            return vec![]
+        };
+
+        let bearer_context_modification =
+            build_e1ap::build_bearer_context_modification(&ue, gnb_cu_up_ue_e1ap_id, items);
+        debug!(self.logger, "<< BearerContextSetupRequest");
+        let resource_modify_items = match self
+                .e1ap_request::<BearerContextModificationProcedure>(
+                    bearer_context_modification,
+                    self.logger,
+                )
+                .await
+            {
+                Ok(BearerContextModificationResponse {
+                    system_bearer_context_modification_response:
+                        Some(SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(
+                            NgRanBearerContextModificationResponse {
+                                pdu_session_resource_modified_list:
+                                    Some(PduSessionResourceModifiedList(x)),
+                                ..
+                            },
+                        )),
+                    ..
+                }) => x,
+                Ok(m) => {
+                    warn!(
+                        self.logger,
+                        "BearerContextModificationResponse without resource modify items: {:?}", m
+                    );
+                    return vec![];
+                },
+                Err(e) => {
+                    debug!(self.logger, "Failed bearer context modify {:?}", e);
+                    return vec![];
+                }
+            };
+        debug!(self.logger, ">> BearerContextSetupResponse");
+        resource_modify_items
+    }
+
+    async fn perform_rrc_reconfiguration(
+        &self,
+        ue: &UeState,
+        nas_messages: Vec<Vec<u8>>,
+        cell_group_config: f1ap::CellGroupConfig,
+    ) -> Result<rrc::UlDcchMessage> {
         // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
         let nas_messages = if nas_messages.is_empty() {
@@ -188,203 +319,194 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             Some(nas_messages)
         };
         let rrc_container =
-            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config)?;
+            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config.0)?;
         self.log_message("<< RrcReconfiguration");
         self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;
-        let _rrc_reconfiguration_complete: rrc::UlDcchMessage = rrc_transaction.recv().await?;
+        let rrc_reconfiguration_complete = rrc_transaction.recv().await?;
         self.log_message(">> RrcReconfigurationComplete");
-
-        // Write back UE.
-        debug!(self.logger, "Store UE {:#010x}", ue.key);
-        self.store(ue.key, ue, self.config().ue_ttl_secs).await?;
-
-        Ok((successful, unsuccessful))
+        Ok(rrc_reconfiguration_complete)
     }
 
-    pub fn build_setup_item(
+    async fn ngap_responses(
         &self,
         _ue: &UeState,
-        r: &PduSessionResourceSetupItemSuReq,
-    ) -> Result<PduSessionResourceToSetupItem> {
-        let _session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
-            &r.pdu_session_resource_setup_request_transfer,
-        )?;
-        Ok(PduSessionResourceToSetupItem {
-            pdu_session_id: PduSessionId(r.pdu_session_id.0),
-            pdu_session_type: PduSessionType::Ipv4,
-            snssai: Snssai {
-                sst: r.s_nssai.sst.0.clone(),
-                sd: r.s_nssai.sd.clone().map(|x| x.0),
-            },
-            security_indication: SecurityIndication {
-                integrity_protection_indication: IntegrityProtectionIndication::Preferred,
-                confidentiality_protection_indication:
-                    ConfidentialityProtectionIndication::Preferred,
-                maximum_i_pdatarate: None,
-            },
-            pdu_session_resource_dl_ambr: None,
-            // TODO: get transport information from the request
-            // TODO: Frunk transmogrify would be ideal
-            ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
-                transport_layer_address: TransportLayerAddress(net::ip_bits_from_string(
-                    "192.168.110.82",
-                )?),
-                gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
-            }),
-            pdu_session_data_forwarding_information_request: None,
-            pdu_session_inactivity_timer: None,
-            existing_allocated_ng_dl_up_tnl_info: None,
-            network_instance: None,
-            drb_to_setup_list_ng_ran: DrbToSetupListNgRan(vec![DrbToSetupItemNgRan {
-                drb_id: DrbId(1),
-                sdap_configuration: SdapConfiguration {
-                    default_drb: DefaultDrb::True, // test
-                    sdap_header_ul: SdapHeaderUl::Present,
-                    sdap_header_dl: SdapHeaderDl::Present,
+        mut sessions: Vec<Stage5>,
+    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
+        let responses: Vec<PduSessionResourceSetupItemSuRes> = sessions
+            .drain(..)
+            .flat_map(|session| {
+                let pdu_session_id = PduSessionId(session.id());
+                let UpTnlInformation::GtpTunnel(gtp_tunnel) = session.ng_dl_up_tnl_information;
+                super::build_ngap::build_pdu_session_resource_setup_item_su_res(
+                    pdu_session_id,
+                    gtp_tunnel,
+                )
+                .map_err(|e| {
+                    warn!(
+                        self.logger,
+                        "Building pdu session resource setup response - {e}"
+                    )
+                })
+            })
+            .collect();
+
+        ensure!(
+            !responses.is_empty(),
+            "No Ngap responses built successfully"
+        );
+
+        Ok(responses)
+    }
+}
+
+trait HasId {
+    fn id(&self) -> u8;
+}
+
+// Outputs a list of pairs of elements with matching ids from the two input lists.
+// (Not an efficient algorithm for long lists.)
+fn keep_matching_items<T1: HasId, T2: HasId>(
+    mut sessions: Vec<T1>,
+    mut items: Vec<T2>,
+    logger: &Logger,
+) -> Vec<(T1, T2)> {
+    let mut new_sessions: Vec<(T1, T2)> = vec![];
+    for session in sessions.drain(..) {
+        let pdu_session_id = session.id();
+        let index = items.iter().position(|item| item.id() == pdu_session_id);
+        match index {
+            Some(index) => new_sessions.push((session, items.swap_remove(index))),
+            None => {
+                warn!(logger, "Session {} not found", pdu_session_id);
+            }
+        };
+    }
+    new_sessions
+}
+
+impl HasId for Stage1 {
+    fn id(&self) -> u8 {
+        self.pdu_session_id.0
+    }
+}
+impl HasId for e1ap::PduSessionResourceSetupItem {
+    fn id(&self) -> u8 {
+        self.pdu_session_id.0
+    }
+}
+impl HasId for f1ap::DrbsSetupItem {
+    fn id(&self) -> u8 {
+        self.drb_id.0
+    }
+}
+impl HasId for e1ap::PduSessionResourceModifiedItem {
+    fn id(&self) -> u8 {
+        self.pdu_session_id.0
+    }
+}
+impl HasId for Stage2 {
+    fn id(&self) -> u8 {
+        self.0.id()
+    }
+}
+impl HasId for Stage3 {
+    fn id(&self) -> u8 {
+        self.0.id()
+    }
+}
+impl HasId for Stage4 {
+    fn id(&self) -> u8 {
+        self.0.id()
+    }
+}
+
+fn build_drbs_to_be_setup_items(
+    sessions: &Vec<Stage2>,
+    logger: &Logger,
+) -> Result<Vec<DrbsToBeSetupItem>> {
+    let items: Vec<DrbsToBeSetupItem> = sessions
+        .iter()
+        .flat_map(
+            |(
+                PduSessionResourceSetupItemSuReq {
+                    pdu_session_id,
+                    snssai,
+                    ..
                 },
-                pdcp_configuration: PdcpConfiguration {
-                    pdcp_sn_size_ul: PdcpSnSize::S12,
-                    pdcp_sn_size_dl: PdcpSnSize::S12,
-                    rlc_mode: RlcMode::RlcTm,
-                    rohc_parameters: None,
-                    t_reordering_timer: None,
-                    discard_timer: None,
-                    ul_data_split_threshold: None,
-                    pdcp_duplication: None,
-                    pdcp_reestablishment: None,
-                    pdcp_data_recovery: None,
-                    duplication_activation: None,
-                    out_of_order_delivery: None,
-                    pdcp_status_report_indication: None,
-                    additional_pdc_pduplication_information: None,
-                    ehc_parameters: None,
+                PduSessionResourceSetupItem {
+                    ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
+                    ..
                 },
-                cell_group_information: CellGroupInformation(vec![CellGroupInformationItem {
-                    cell_group_id: CellGroupId(1),
-                    ul_configuration: None,
-                    dl_tx_stop: None,
-                    rat_type: None,
-                    number_of_tunnels: None,
-                }]),
-                qos_flow_information_to_be_setup: QosFlowQosParameterList(vec![
-                    QosFlowQosParameterItem {
-                        qos_flow_identifier: QosFlowIdentifier(1),
-                        qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
-                            qos_characteristics: QosCharacteristics::NonDynamic5qi(
-                                NonDynamic5qiDescriptor {
-                                    five_qi: 1,
-                                    qos_priority_level: None,
-                                    averaging_window: None,
-                                    max_data_burst_volume: None,
-                                    cn_packet_delay_budget_downlink: None,
-                                    cn_packet_delay_budget_uplink: None,
-                                },
-                            ),
-                            ngran_allocation_retention_priority:
-                                NgranAllocationAndRetentionPriority {
-                                    priority_level: PriorityLevel(1),
-                                    pre_emption_capability:
-                                        PreEmptionCapability::MayTriggerPreEmption,
-                                    pre_emption_vulnerability:
-                                        PreEmptionVulnerability::NotPreEmptable,
-                                },
-                            gbr_qos_flow_information: None,
-                            reflective_qos_attribute: None,
-                            additional_qos_information: None,
-                            paging_policy_indicator: None,
-                            reflective_qos_indicator: None,
-                            qos_monitoring_request: None,
-                            mcg_offered_gbr_qos_flow_info: None,
-                            qos_monitoring_reporting_frequency: None,
-                            qos_monitoring_disabled: None,
-                        },
-                        qos_flow_mapping_indication: None,
-                        redundant_qos_flow_indicator: None,
-                        tsc_traffic_characteristics: None,
-                    },
-                ]),
-                drb_data_forwarding_information_request: None,
-                drb_inactivity_timer: None,
-                pdcp_sn_status_information: None,
-                drb_qos: None,
-                daps_request_info: None,
-                ignore_mapping_rule_indication: None,
-            }]),
-            common_network_instance: None,
-            redundant_n_g_ul_up_tnl_information: None,
-            redundant_common_network_instance: None,
-            redundant_pdu_session_information: None,
+            )| {
+                let snssai: xxap::Snssai = snssai.clone().into();
+                super::build_f1ap::build_drb_to_be_setup_item(
+                    f1ap::DrbId(pdu_session_id.0),
+                    snssai.into(),
+                    gtp_tunnel.clone(),
+                )
+                .map_err(|e| {
+                    warn!(logger, "Build Drb setup item failed {:?}", e);
+                    e
+                })
+            },
+        )
+        .collect();
+
+    ensure!(!items.is_empty(), "No Drb items built successfully");
+    Ok(items)
+}
+
+fn build_e1_setup_items(
+    ue: &UeState,
+    sessions: &Vec<Stage1>,
+    logger: &Logger,
+) -> Result<Vec<PduSessionResourceToSetupItem>> {
+    let items: Vec<PduSessionResourceToSetupItem> = sessions
+        .iter()
+        .flat_map(|x| {
+            build_e1ap::build_e1_setup_item(&ue, &x).map_err(|e| {
+                warn!(logger, "Build E1 setup item failed {:?}", e);
+                e
+            })
         })
-    }
+        .collect();
+    ensure!(!items.is_empty(), "No E1 setup items built successfully");
+    Ok(items)
+}
 
-    pub fn build_bearer_context_setup(
-        &self,
-        ue: &UeState,
-        items: Vec<PduSessionResourceToSetupItem>,
-    ) -> BearerContextSetupRequest {
-        let ue_dl_aggregate_maximum_bit_rate = BitRate(1000);
-
-        BearerContextSetupRequest {
-            gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId(ue.key),
-            security_information: SecurityInformation {
-                security_algorithm: SecurityAlgorithm {
-                    ciphering_algorithm: CipheringAlgorithm::Nea0,
-                    integrity_protection_algorithm: None,
+fn build_e1_modify_items(
+    sessions: &Vec<Stage3>,
+    logger: &Logger,
+) -> Result<Vec<PduSessionResourceToModifyItem>> {
+    let mut items = vec![];
+    for session in sessions {
+        match session
+            // Get the tunnel information returned by the DU...
+            .1
+            .dl_up_tnl_information_to_be_setup_list
+            .0
+            .first()
+            .ok_or_else(|| anyhow!("No GTP tunnel information from DU"))
+            // ...reformulate to give it to the CU-UP
+            .and_then(
+                |DlUpTnlInformationToBeSetupItem {
+                     dl_up_tnl_information:
+                         f1ap::UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
+                 }| {
+                    build_e1ap::build_e1_modify_item(
+                        PduSessionId(session.id()),
+                        gtp_tunnel.clone(),
+                    )
                 },
-                up_securitykey: UpSecuritykey {
-                    encryption_key: EncryptionKey(vec![]),
-                    integrity_protection_key: None,
-                },
-            },
-            ue_dl_aggregate_maximum_bit_rate,
-            ue_dl_maximum_integrity_protected_data_rate: None,
-            serving_plmn: PlmnIdentity(self.config().plmn.clone()),
-            activity_notification_level: ActivityNotificationLevel::PduSession,
-            ue_inactivity_timer: None,
-            bearer_context_status_change: None,
-            system_bearer_context_setup_request:
-                SystemBearerContextSetupRequest::NgRanBearerContextSetupRequest(
-                    NgRanBearerContextSetupRequest {
-                        pdu_session_resource_to_setup_list: PduSessionResourceToSetupList(items),
-                    },
-                ),
-            ran_ue_id: None,
-            gnb_du_id: None,
-            trace_activation: None,
-            npn_context_info: None,
-            management_based_mdt_plmn_list: None,
-            cho_initiation: None,
-            additional_handover_info: None,
-            direct_forwarding_path_availability: None,
-            gnb_cu_up_ue_e1ap_id: None,
-        }
+            ) {
+            // ...and store in the list
+            Ok(item) => items.push(item),
+            Err(e) => {
+                warn!(logger, "Build E1 setup item failed {:?}", e);
+            }
+        };
     }
-
-    pub fn build_bearer_context_modification(
-        &self,
-        ue: &UeState,
-        gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId,
-        _ue_context_setup_response: &f1ap::UeContextSetupResponse,
-    ) -> BearerContextModificationRequest {
-        // TODO incomplete - for example need to supply a system_bearer_context_modification_request
-        // with DrbToModifyListNgRan containing the UpTransportLayerInformation received in the
-        // DU's DrbsSetupList.
-
-        BearerContextModificationRequest {
-            gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId(ue.key),
-            gnb_cu_up_ue_e1ap_id,
-            security_information: None,
-            ue_dl_aggregate_maximum_bit_rate: None,
-            ue_dl_maximum_integrity_protected_data_rate: None,
-            bearer_context_status_change: None,
-            new_ul_tnl_information_required: None,
-            ue_inactivity_timer: None,
-            data_discard_required: None,
-            system_bearer_context_modification_request: None,
-            ran_ue_id: None,
-            gnb_du_id: None,
-            activity_notification_level: None,
-        }
-    }
+    ensure!(!items.is_empty(), "No E1 modify items built successfully");
+    Ok(items)
 }

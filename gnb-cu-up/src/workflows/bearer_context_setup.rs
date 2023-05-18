@@ -5,6 +5,7 @@ use super::{GnbCuUp, Workflow};
 use anyhow::Result;
 use e1ap::*;
 use net::{RequestError, ResponseAction};
+use xxap::*;
 
 impl<'a, G: GnbCuUp> Workflow<'a, G> {
     pub async fn bearer_context_setup(
@@ -16,8 +17,8 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
 
         // The userplane processing doesn't exist yet, but let's suppose it will be designed to
         // use the same GTP TEID on both sides for each bearer.
-        let my_uplink_address = TransportLayerAddress(net::ip_bits_from_string("3.3.3.3")?);
-        let my_downlink_address = TransportLayerAddress(net::ip_bits_from_string("4.4.4.4")?);
+        let my_uplink_address = "3.3.3.3".try_into()?;
+        let my_downlink_address = "4.4.4.4".try_into()?;
         let bearer_1_gtp_teid = GtpTeid(vec![1, 2, 3, 4]);
 
         self.log_message("BearerContextSetupResponse >>");

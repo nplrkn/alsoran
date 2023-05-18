@@ -492,7 +492,7 @@ class TypeTransformer(Transformer):
 def strip_xxap_common(tree):
     new_tree = Tree(tree.data, [])
     for definition in tree.children:
-        if definition.children[0] not in ["GtpTunnel", "GtpTeid", "TransportLayerAddress", "Snssai"]:
+        if definition.children[0] not in ["GtpTunnel", "GtpTeid", "TransportLayerAddress", "PduSessionId"]:
             new_tree.children.append(definition)
     return new_tree
 
@@ -703,7 +703,7 @@ SubcarrierSpacing ::= ENUMERATED { kHz15, kHz30, kHz60, kHz120, kHz240, spare3, 
 """, """\
 document
   sequence_def
-    ActiveUlbwp
+    ActiveUlBwp
     sequence
       field
         subcarrier_spacing

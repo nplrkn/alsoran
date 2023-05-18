@@ -2,6 +2,7 @@ use super::ies::*;
 use super::pdu::*;
 use super::top_pdu::*;
 use asn1_per::*;
+use xxap::Snssai;
 
 fn make_ng_setup() -> NgSetupRequest {
     let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);
@@ -16,10 +17,7 @@ fn make_ng_setup() -> NgSetupRequest {
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                 plmn_identity: plmn_identity,
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                    s_nssai: SNssai {
-                        sst: Sst(vec![0x01]),
-                        sd: Some(Sd(vec![1, 2, 3])),
-                    },
+                    snssai: Snssai(1, Some([1, 2, 3])).into(),
                 }]),
                 npn_support: None,
                 extended_tai_slice_support_list: None,
@@ -40,10 +38,8 @@ fn test_ngap_pdu_coding() -> Result<(), PerCodecError> {
     let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
     let bytes = ngap_pdu.into_bytes()?;
     let output_hex = hex::encode(bytes);
-
     let reference = "00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
     assert_eq!(reference, output_hex);
-
     let bytes = hex::decode(reference).unwrap();
     let bytes = NgapPdu::from_bytes(&bytes)?.into_bytes()?;
     let output_hex = hex::encode(bytes);
@@ -65,10 +61,7 @@ fn test_ng_setup() -> Result<(), PerCodecError> {
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                 plmn_identity: PlmnIdentity(vec![2, 3, 2]),
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                    s_nssai: SNssai {
-                        sst: Sst(vec![0x01]),
-                        sd: None,
-                    },
+                    snssai: Snssai(1, None).into(),
                 }]),
                 npn_support: None,
                 extended_tai_slice_support_list: None,
@@ -82,8 +75,8 @@ fn test_ng_setup() -> Result<(), PerCodecError> {
         extended_ran_node_name: None,
     }));
     let bytes = pdu.into_bytes()?;
-    let output_hex = hex::encode(bytes.clone());
-    println!("Output of encode is {}", output_hex);
+    //let output_hex = hex::encode(bytes.clone());
+    //println!("Output of encode is {}", output_hex);
 
     let _pdu = NgapPdu::from_bytes(&bytes)?;
     Ok(())
@@ -94,7 +87,7 @@ fn test_ran_ue_ngap_id() -> Result<(), PerCodecError> {
     let ran_ue_ngap_id = RanUeNgapId(0x10203040);
     let bytes = ran_ue_ngap_id.into_bytes()?;
     let output_hex = hex::encode(bytes.clone());
-    println!("Output of RAN UE NGAP ID encode is {}", output_hex);
+    //println!("Output of RAN UE NGAP ID encode is {}", output_hex);
     assert_eq!(output_hex, "c010203040");
     let ran_ue_ngap_id_2 = RanUeNgapId::from_bytes(&bytes)?;
     assert_eq!(0x10203040, ran_ue_ngap_id_2.0);

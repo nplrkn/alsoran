@@ -14,13 +14,5 @@ GTPTunnel-ExtIEs NGAP-PROTOCOL-EXTENSION ::= {
 	...
 }
 
--- This one is named S-NSSAI in NGAP
-SNSSAI ::= SEQUENCE {
-	sST			OCTET STRING (SIZE (1)),
-	sD			OCTET STRING (SIZE (3)) 	OPTIONAL	,
-	iE-Extensions				ProtocolExtensionContainer { { SNSSAI-ExtIEs } }	OPTIONAL
-}
-
-SNSSAI-ExtIEs	F1AP-PROTOCOL-EXTENSION ::= {
-	...
-}
+-- E1 PDU-Session-ID / F1 PDUSessionID / NG PDUSessionID / RRC PDU-SessionID
+PDU-Session-ID ::= INTEGER (0..255)

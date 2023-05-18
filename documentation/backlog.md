@@ -1,19 +1,18 @@
-# NEXT UP
 
 ## O-RAN O-DU interop
-- Unsupported UlDcchMessage C1(SecurityModeComplete(SecurityModeComplete { rrc_transaction_identifier: RrcTransactionIdentifier(1), critical_extensions: SecurityModeComplete(SecurityModeCompleteIEs { late_non_critical_extension: None }) }))
-- Move Serdes to common
-- avoid need for recompile of ODU by enabling O1
+- avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
+- document a method that other people could use to test ODU
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
-- Remove reference to malformed packet errors from free5GC-testing.md
 - Fix hang on Ctrl-C when AMF connect doesn't complete
-- Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
-  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
-- use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
-- provide TransportAddress constructor from string (and use common struct for all XXAP libraries)
+- don't set up SRB + 2 DBRs if all we need is one session = one DRB
+- FV regression test to reduce dependency on running with live ODU 
+
+# NEXT UP
+- Dataplane with O-RAN SC ODU
+- Session deletion (including on different worker)
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -40,8 +39,11 @@
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
-## MAINTAINABILITY
+## MAINTAINABILITY + DIAGNOSTICS
+- Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
 - Remove slog from workflow module and use log methods on Workflow instead
+- Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
+  - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
@@ -50,7 +52,10 @@
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 ## ASN.1 GENERATOR
-- Bugs that show up in Wireshark capture of session establishment test (PrintableString issue is a wireshark bug??).
+- fixed size octet string should be [] not Vec?
+- inlining of lists to avoid newtypes of vecs (e.g. PDU-Session-Resource-Activity-List)
+- use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
+- ENUMERATED{True} OPTIONAL (as seen in RRC) should appear in Rust as a bool
 - Cope with extension marker being set
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Implement Rrc setuprelease
@@ -77,6 +82,13 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Refactoring of pdu_session_resource_setup.rs
+- Add PduSessionId to xxap common
+- Improved case conversion of DLUPTNLInformation-ToBeSetup-List and similar
+- TransportLayerAddress has TryFrom<&str>
+- Form PDUSessionResourceSetupResponse correctly
+- Avoid missing NAS message Wireshark error on RrcReconfiguration
+- Find a way to get O-DU PHY stub to send ReconfigurationComplete in the right order (recompile with `ratio = 20`)
 - Common XXAP structures in Asn.1 generator (e.g. Snssai, GtpTunnel) to allow easy transfer between NGAP, F1AP, E1AP
 - Use proper 32 bit bitstrings for TransportAddress in E1AP messages (avoids Wireshark decode issue) 
 - Support for BearerContextModificationRequest in CU-UP

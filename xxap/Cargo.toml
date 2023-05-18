@@ -13,6 +13,8 @@ slog = "2.7.0"
 asn1-per = { path = "../asn1-per"}
 num_enum = "0.5.11"
 net = { path = "../net" }
+async-net = "1.6.1"
+bitvec = "1.0.1"
 
 [lib]
 doctest = false

@@ -10,4 +10,4 @@ mod e1ap_cp;
 pub use e1ap_cp::*;
 mod e1ap_up;
 pub use e1ap_up::*;
-pub use xxap::*;
+mod conversion;
