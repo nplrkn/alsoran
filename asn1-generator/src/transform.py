@@ -472,7 +472,7 @@ class TypeTransformer(Transformer):
     def octet_string(self, tree):
         if tree.children != None:
             self.transform_bounds(tree)
-        return Tree("Vec<u8>", tree.children)
+        return Tree("OctetString", tree.children)
 
     def boolean(self, tree):
         return Tree("bool", tree.children)

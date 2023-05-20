@@ -27,7 +27,7 @@ pub fn build_e1_setup_item(
         // TODO: get transport information from the request
         ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
             transport_layer_address: "192.168.110.82".try_into()?,
-            gtp_teid: GtpTeid(vec![0, 0, 0, 1]),
+            gtp_teid: GtpTeid([0, 0, 0, 1]),
         }),
         pdu_session_data_forwarding_information_request: None,
         pdu_session_inactivity_timer: None,

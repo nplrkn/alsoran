@@ -73,19 +73,18 @@ impl PerCodec for TransportLayerAddress {
 }
 // GtpTeid
 #[derive(Clone, Debug)]
-pub struct GtpTeid(pub Vec<u8>);
+pub struct GtpTeid(pub [u8; 4]);
 
 impl GtpTeid {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(4),
-            Some(4),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(4), Some(4), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(4), Some(4), false, &self.0, false)
+        encode::encode_octetstring(data, Some(4), Some(4), false, &self.0.to_vec(), false)
     }
 }
 

@@ -59,7 +59,7 @@ mod tests {
         let ue_state = UeState::new(
             GnbDuUeF1apId(3),
             f1ap::NrCgi {
-                plmn_identity: f1ap::PlmnIdentity(vec![2, 3, 2]),
+                plmn_identity: f1ap::PlmnIdentity([2, 3, 2]),
                 nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
             },
         );

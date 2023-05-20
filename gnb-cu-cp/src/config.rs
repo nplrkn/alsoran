@@ -26,7 +26,7 @@ pub struct Config {
     pub name: Option<String>,
 
     // PLMN
-    pub plmn: Vec<u8>,
+    pub plmn: [u8; 3],
 }
 
 impl Default for Config {
@@ -40,7 +40,7 @@ impl Default for Config {
             initial_ue_ttl_secs: 5,
             ue_ttl_secs: 86_400, // a day
             name: Some("Alsoran".to_string()),
-            plmn: vec![0x2, 0xf8, 0x39],
+            plmn: [0x2, 0xf8, 0x39],
         }
     }
 }

@@ -16,13 +16,13 @@ def bool_to_rust(b):
 class TypeInfo:
     def __init__(self):
         self.constraints = "None, None, false"
-        self.extra_type = None
         self.seqof = None
         self.typ = None
         self.criticality = None
         self.code = None
         self.inner_type_info = None
         self.is_ie = None
+        self.rust_type = ""
 
 
 # TODO - replace with a visitor?
@@ -51,7 +51,10 @@ def type_and_constraints(node):
             bounds = bounds[0: -1]
             type_info.typ = f"Vec<{type_info.inner_type_info.typ}>"
 
+        fixed_size = False
+
         if len(bounds) > 1:
+            fixed_size = (bounds[0] == bounds[1])
             MAX_U64 = 18446744073709551615
             MIN_I64 = -9223372036854775808
             lb = MAX_U64
@@ -74,9 +77,16 @@ def type_and_constraints(node):
 
             type_info.constraints = f"Some({lb}), {ub}, {ext}"
 
+    type_info.rust_type = type_info.typ
+
     if type_info.typ in ["VisibleString", "PrintableString", "UTF8String"]:
-        type_info.extra_type = snake_case(type_info.typ)
-        type_info.typ = "String"
+        type_info.rust_type = "String"
+
+    if type_info.typ == "OctetString":  # broaden to any vec
+        if fixed_size:
+            type_info.rust_type = f"[u8; {bounds[0]}]"
+        else:
+            type_info.rust_type = "Vec<u8>"
 
     return type_info
 
@@ -97,20 +107,24 @@ def decode_expression(tree):
             }}
             items
         }}"""
-    elif type_info.typ == "Vec<u8>":
-        return f"decode::decode_octetstring(data, {type_info.constraints})?"
+    elif type_info.typ == "OctetString":
+        if type_info.rust_type[0:3] == "Vec":
+            return f"decode::decode_octetstring(data, {type_info.constraints})?"
+        else:
+            assert(type_info.rust_type[0:3] == "[u8")
+            return f"decode::decode_octetstring(data, {type_info.constraints})?.try_into().unwrap()"
     elif type_info.typ == "BitString":
         return f"decode::decode_bitstring(data, {type_info.constraints})?"
-    elif type_info.typ == "String":
-        return f"decode::decode_{type_info.extra_type}(data, {type_info.constraints})?"
+    elif type_info.rust_type == "String":
+        return f"decode::decode_{snake_case(type_info.typ)}(data, {type_info.constraints})?"
     elif type_info.typ == "i128":
         return f"decode::decode_integer(data, {type_info.constraints})?.0"
     elif is_non_i128_int_type(type_info.typ):
-        return f"decode::decode_integer(data, {type_info.constraints})?.0 as {type_info.typ}"
+        return f"decode::decode_integer(data, {type_info.constraints})?.0 as {type_info.rust_type}"
     elif type_info.typ == "bool":
         return f"decode::decode_bool(data)?"
     else:
-        return f"""{type_info.typ.replace("<", "::<")}::decode(data)?"""
+        return f"""{type_info.rust_type.replace("<", "::<")}::decode(data)?"""
 
 
 # Returns a lambda (x, data="data", copy_type_deref=""), where x is the field name, data is the
@@ -145,22 +159,28 @@ encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.code}, fa
                 {encode_expression_fn(tree.children[2])("x", "ie")}?;
                 encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
                 Ok({data}.append_aligned(ie))"""
-    if type_info.typ == "Vec<u8>":
-        format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
-    elif type_info.typ == "BitString":
+    if type_info.typ == "OctetString":
+        if type_info.rust_type[0:3] == "Vec":
+            format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
+        else:
+            assert(type_info.rust_type[0:3] == "[u8")
+            format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &({{copy_type_deref}}{{value}}).into(), false)"
+    elif type_info.rust_type == "BitString":
         format_string = f"encode::encode_bitstring({{data}}, {type_info.constraints}, &{{value}}, false)"
-    elif type_info.typ == "String":
-        format_string = f"encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, &{{value}}, false)"
-    elif type_info.typ == "i128":
+    elif type_info.rust_type == "String":
+        format_string = f"encode::encode_{snake_case(type_info.typ)}({{data}}, {type_info.constraints}, &{{value}}, false)"
+    elif type_info.rust_type == "i128":
         format_string = f"encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}}, false)"
-    elif is_non_i128_int_type(type_info.typ):
+    elif is_non_i128_int_type(type_info.rust_type):
         format_string = f"encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}} as i128, false)"
-    elif type_info.typ == "bool":
+    elif type_info.rust_type == "bool":
         format_string = f"encode::encode_bool({{data}}, {{copy_type_deref}}{{value}})"
     else:
         format_string = f"""{{value}}.encode({{data}})"""
 
-    return lambda x, data="data", copy_type_deref="": format_string.format(value=x, data=data, copy_type_deref=copy_type_deref)
+    return lambda x, data="data", copy_type_deref="":\
+        format_string.format(value=x, data=data,
+                             copy_type_deref=copy_type_deref)
 
 
 class StructFieldsFrom(Interpreter):
@@ -256,16 +276,16 @@ class ChoiceFields(Interpreter):
 
     def choice_field(self, tree):
         name = tree.children[0]
-        typ = type_and_constraints(tree.children[1]).typ
+        typ = type_and_constraints(tree.children[1])
         self.choice_fields += f"""\
-    {name}{"("+typ+")" if typ != "null" else ""},
+    {name}{"("+typ.rust_type+")" if typ.rust_type != "null" else ""},
 """
 
     def choice_field_ie_container(self, tree):
         name = tree.children[0]
-        typ = type_and_constraints(tree.children[1]).typ
+        typ = type_and_constraints(tree.children[1])
         self.choice_fields += f"""
-            {name}{"("+typ+")" if typ != "null" else ""},
+            {name}{"("+typ.rust_type+")" if typ.rust_type != "null" else ""},
         """
 
     def choice_field_extension_ies(self, tree):
@@ -350,7 +370,7 @@ class ChoiceFieldsFrom(Interpreter):
             if ie.data != "extension_marker":
                 type_info = type_and_constraints(ie)
                 self.fields_from += f"""\
-                    {type_info.code} => Ok(Self::{type_info.typ}({type_info.typ}::decode(data)?)),
+                    {type_info.code} => Ok(Self::{type_info.rust_type}({type_info.rust_type}::decode(data)?)),
 """
         self.fields_from += f"""\
                     x => Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x))),
@@ -392,16 +412,16 @@ class StructFields(Interpreter):
 
     def field(self, tree):
         name = tree.children[0]
-        typ = type_and_constraints(tree.children[1]).typ
+        typ = type_and_constraints(tree.children[1])
         self.struct_fields += f"""\
-    pub {name}: {typ},
+    pub {name}: {typ.rust_type},
 """
 
     def optional_field(self, tree):
         name = tree.children[0]
-        typ = type_and_constraints(tree.children[1]).typ
+        typ = type_and_constraints(tree.children[1])
         self.struct_fields += f"""\
-    pub {name}: Option<{typ}>,
+    pub {name}: Option<{typ.rust_type}>,
 """
 
     def extension_ies(self, tree):
@@ -431,12 +451,12 @@ class IeFields(Interpreter):
         name = tree.children[0]
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
-        typ = type_and_constraints(tree.children[3]).typ
+        typ = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
-    pub {name}: {typ},
+    pub {name}: {typ.rust_type},
 """
         self.mut_field_vars += f"""\
-        let mut {name}: Option<{typ}> = None;
+        let mut {name}: Option<{typ.rust_type}> = None;
 """
         self.self_fields += f"            {name},\n"
         self.matches += f"""\
@@ -463,12 +483,12 @@ class IeFields(Interpreter):
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
         typ = tree.children[3]
-        typ = type_and_constraints(tree.children[3]).typ
+        typ = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
-    pub {name}: Option<{typ}>,
+    pub {name}: Option<{typ.rust_type}>,
 """
         self.mut_field_vars += f"""\
-        let mut {name}: Option<{typ}> = None;
+        let mut {name}: Option<{typ.rust_type}> = None;
 """
         self.self_fields += f"            {name},\n"
         self.matches += f"""\
@@ -504,9 +524,9 @@ class IeFieldsFrom(Interpreter):
     def common(self, tree):
         name = tree.children[0]
         id = tree.children[1]
-        typ = type_and_constraints(tree.children[3]).typ
+        typ = type_and_constraints(tree.children[3])
         self.mut_field_vars += f"""\
-        let mut {name}: Option<{typ}> = None;
+        let mut {name}: Option<{typ.rust_type}> = None;
 """
         self.self_fields += f"            {name},\n"
         self.matches += f"""\
@@ -577,7 +597,7 @@ class StructFieldsTo(Interpreter):
         self.add_optional_to_bitfield("false")
 
 
-xper_CODEC_IMPL_FORMAT = """\
+XPER_CODEC_IMPL_FORMAT = """\
 impl PerCodec for {name} {{
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
@@ -691,7 +711,7 @@ impl {name} {{
     }}
 }}
 
-""" + xper_CODEC_IMPL_FORMAT
+""" + XPER_CODEC_IMPL_FORMAT
         return f"""
 {self.initiating_enum}}}
 {impl.format(name="InitiatingMessage",decode_matches=self.initiating_decode_matches,
@@ -842,7 +862,7 @@ impl {name} {{
     }}
 }}
 
-""" + xper_CODEC_IMPL_FORMAT.format(name=name)
+""" + XPER_CODEC_IMPL_FORMAT.format(name=name)
         return name
 
     def choice_def(self, tree):
@@ -883,18 +903,19 @@ impl {name} {{
     }}
 }}
 
-""" + xper_CODEC_IMPL_FORMAT.format(name=name)
+""" + XPER_CODEC_IMPL_FORMAT.format(name=name)
 
     def primitive_def(self, tree):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
-        inner = type_and_constraints(tree.children[1]).typ
-        clone_copy = "Copy, " if is_copy_type(inner) else ""
+        inner = type_and_constraints(tree.children[1])
+        assert (inner.rust_type != "OctetString")
+        clone_copy = "Copy, " if is_copy_type(inner.rust_type) else ""
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone, {clone_copy}Debug)]
-pub struct {name}(pub {inner});
+pub struct {name}(pub {inner.rust_type});
 
 impl {name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
@@ -905,7 +926,7 @@ impl {name} {{
     }}
 }}
 
-""" + xper_CODEC_IMPL_FORMAT.format(name=name)
+""" + XPER_CODEC_IMPL_FORMAT.format(name=name)
 
     def ie(self, tree):
         pass
@@ -986,7 +1007,7 @@ impl {orig_name} {{
     }}
 }}
 
-""" + xper_CODEC_IMPL_FORMAT.format(name=name)
+""" + XPER_CODEC_IMPL_FORMAT.format(name=name)
 
     def sequence_def(self, tree):
         if tree.children[1].data == "ie_container_sequence":
@@ -1035,7 +1056,7 @@ impl {orig_name} {{
     }}
 }}
 
-""" + xper_CODEC_IMPL_FORMAT.format(name=name)
+""" + XPER_CODEC_IMPL_FORMAT.format(name=name)
 
         return name
 
@@ -1485,6 +1506,36 @@ impl PerCodec for WlanRtt {
 }"""
         self.should_generate(input, output)
 
+    def test_bounded_octet_string(self):
+        input = """\
+Test ::= OCTET STRING (SIZE(3))
+"""
+        output = """\
+
+// Test
+# [derive(Clone, Debug)]
+pub struct Test(pub [u8; 3]);
+
+impl Test {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        Ok(Self(decode::decode_octetstring(data, Some(3), Some(3), false)?.try_into().unwrap()))
+    }
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0.into(), false)
+    }
+}
+
+impl PerCodec for Test {
+    type Allocator = Allocator;
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        Test::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("Test"); e})
+    }
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("Test"); e})
+    }
+}"""
+        self.should_generate(input, output)
+
     def test_unbounded_octet_string(self):
         input = """\
 LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
@@ -1698,7 +1749,7 @@ PDUSessionResourceSetupRequest ::= SEQUENCE {
 
 PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 	{ ID id-AMF-UE-NGAP-ID							CRITICALITY reject	TYPE AMF-UE-NGAP-ID								PRESENCE mandatory	}|
-	{ ID id-RANPagingPriority						CRITICALITY ignore	TYPE OCTET STRING							PRESENCE optional		}|
+	{ ID id-RANPagingPriority						CRITICALITY ignore	TYPE OCTET STRING (SIZE(1))							PRESENCE optional		}|
 	...
 }
 """, """\
@@ -1707,7 +1758,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 # [derive(Clone, Debug)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
-    pub ran_paging_priority: Option<Vec<u8>>,
+    pub ran_paging_priority: Option<[u8; 1]>,
 }
 
 impl PduSessionResourceSetupRequest {
@@ -1716,7 +1767,7 @@ impl PduSessionResourceSetupRequest {
         let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
-        let mut ran_paging_priority: Option<Vec<u8>> = None;
+        let mut ran_paging_priority: Option<[u8; 1]> = None;
 
         for _ in 0..len {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -1724,7 +1775,7 @@ impl PduSessionResourceSetupRequest {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
-                83 => ran_paging_priority = Some(decode::decode_octetstring(data, None, None, false)?),
+                83 => ran_paging_priority = Some(decode::decode_octetstring(data, Some(1), Some(1), false)?.try_into().unwrap()),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
@@ -1750,7 +1801,7 @@ impl PduSessionResourceSetupRequest {
 
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut Allocator::new();
-            encode::encode_octetstring(ie, None, None, false, &x, false)?;
+            encode::encode_octetstring(ie, Some(1), Some(1), false, x.into(), false)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;

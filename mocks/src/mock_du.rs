@@ -132,7 +132,7 @@ impl MockDu {
             InitiatingMessage::InitialUlRrcMessageTransfer(InitialUlRrcMessageTransfer {
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_context.ue_id),
                 nr_cgi: NrCgi {
-                    plmn_identity: PlmnIdentity(vec![0, 1, 2]),
+                    plmn_identity: PlmnIdentity([0, 1, 2]),
                     nr_cell_identity: NrCellIdentity(bitvec![u8,Msb0;0;36]),
                 },
                 c_rnti: CRnti(14),
@@ -377,7 +377,7 @@ impl MockDu {
                             dl_up_tnl_information: UpTransportLayerInformation::GtpTunnel(
                                 GtpTunnel {
                                     transport_layer_address: "1.2.3.4".try_into().unwrap(),
-                                    gtp_teid: GtpTeid(vec![5, 6, 1, 2]),
+                                    gtp_teid: GtpTeid([5, 6, 1, 2]),
                                 },
                             ),
                         },

@@ -144,7 +144,7 @@ impl MockAmf {
     }
 
     fn plmn_identity(&self) -> PlmnIdentity {
-        PlmnIdentity(vec![2, 3, 2])
+        PlmnIdentity([2, 3, 2])
     }
 
     fn snssai(&self) -> xxap::Snssai {
@@ -329,7 +329,7 @@ impl MockAmf {
             pdu_session_aggregate_maximum_bit_rate: None,
             ul_ngu_up_tnl_information: UpTransportLayerInformation::GtpTunnel(GtpTunnel {
                 transport_layer_address,
-                gtp_teid: GtpTeid(vec![1, 2, 3, 4]),
+                gtp_teid: GtpTeid([1, 2, 3, 4]),
             }),
             additional_ul_ngu_up_tnl_information: None,
             data_forwarding_not_possible: None,
