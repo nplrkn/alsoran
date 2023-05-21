@@ -1521,7 +1521,7 @@ impl Test {
         Ok(Self(decode::decode_octetstring(data, Some(3), Some(3), false)?.try_into().unwrap()))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0.into(), false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -1801,7 +1801,7 @@ impl PduSessionResourceSetupRequest {
 
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut Allocator::new();
-            encode::encode_octetstring(ie, Some(1), Some(1), false, x.into(), false)?;
+            encode::encode_octetstring(ie, Some(1), Some(1), false, &(*x).into(), false)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;

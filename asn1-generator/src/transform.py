@@ -682,16 +682,16 @@ document
     sequence
       optional_field
         csi_rs_configuration
-        Vec<u8>\tNone
+        OctetString\tNone
       optional_field
         sr_configuration
-        Vec<u8>\tNone
+        OctetString\tNone
       optional_field
         pdcch_config_sib1
-        Vec<u8>\tNone
+        OctetString\tNone
       optional_field
         scs_common
-        Vec<u8>\tNone
+        OctetString\tNone
 """)
 
     def test_inline_name_clash(self):
@@ -822,7 +822,7 @@ document
     sequence
       optional_field
         sd
-        Vec<u8>
+        OctetString
           3
           3
 """)
