@@ -21536,19 +21536,18 @@ impl PerCodec for PhInfoScg {
 }
 // PlmnIdentity
 #[derive(Clone, Debug)]
-pub struct PlmnIdentity(pub Vec<u8>);
+pub struct PlmnIdentity(pub [u8; 3]);
 
 impl PlmnIdentity {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(3),
-            Some(3),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -24913,19 +24912,18 @@ impl PerCodec for RanUeMeasurementId {
 }
 // RanUeId
 #[derive(Clone, Debug)]
-pub struct RanUeId(pub Vec<u8>);
+pub struct RanUeId(pub [u8; 8]);
 
 impl RanUeId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(8),
-            Some(8),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(8), Some(8), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(8), Some(8), false, &self.0, false)
+        encode::encode_octetstring(data, Some(8), Some(8), false, &(self.0).into(), false)
     }
 }
 
@@ -27466,7 +27464,7 @@ impl PerCodec for RrcReconfigurationCompleteIndicator {
 #[derive(Clone, Debug)]
 pub struct RrcVersion {
     pub latest_rrc_version: BitString,
-    pub latest_rrc_version_enhanced: Option<Vec<u8>>,
+    pub latest_rrc_version_enhanced: Option<[u8; 3]>,
 }
 
 impl RrcVersion {
@@ -27475,7 +27473,7 @@ impl RrcVersion {
         let latest_rrc_version = decode::decode_bitstring(data, Some(3), Some(3), false)?;
 
         // Process the extension container
-        let mut latest_rrc_version_enhanced: Option<Vec<u8>> = None;
+        let mut latest_rrc_version_enhanced: Option<[u8; 3]> = None;
 
         if optionals[0] {
             let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
@@ -27485,8 +27483,11 @@ impl RrcVersion {
                 let ie_length = decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     199 => {
-                        latest_rrc_version_enhanced =
-                            Some(decode::decode_octetstring(data, Some(3), Some(3), false)?)
+                        latest_rrc_version_enhanced = Some(
+                            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                                .try_into()
+                                .unwrap(),
+                        )
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
@@ -30870,16 +30871,22 @@ impl PerCodec for SlotConfigurationItem {
 // Snssai
 #[derive(Clone, Debug)]
 pub struct Snssai {
-    pub sst: Vec<u8>,
-    pub sd: Option<Vec<u8>>,
+    pub sst: [u8; 1],
+    pub sd: Option<[u8; 3]>,
 }
 
 impl Snssai {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 2)?;
-        let sst = decode::decode_octetstring(data, Some(1), Some(1), false)?;
+        let sst = decode::decode_octetstring(data, Some(1), Some(1), false)?
+            .try_into()
+            .unwrap();
         let sd = if optionals[0] {
-            Some(decode::decode_octetstring(data, Some(3), Some(3), false)?)
+            Some(
+                decode::decode_octetstring(data, Some(3), Some(3), false)?
+                    .try_into()
+                    .unwrap(),
+            )
         } else {
             None
         };
@@ -30905,9 +30912,9 @@ impl Snssai {
         optionals.push(false);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
-        encode::encode_octetstring(data, Some(1), Some(1), false, &self.sst, false)?;
+        encode::encode_octetstring(data, Some(1), Some(1), false, &(self.sst).into(), false)?;
         if let Some(x) = &self.sd {
-            encode::encode_octetstring(data, Some(3), Some(3), false, &x, false)?;
+            encode::encode_octetstring(data, Some(3), Some(3), false, &(*x).into(), false)?;
         }
 
         Ok(())
@@ -34110,19 +34117,18 @@ impl PerCodec for SystemInformationAreaId {
 }
 // FiveGsTac
 #[derive(Clone, Debug)]
-pub struct FiveGsTac(pub Vec<u8>);
+pub struct FiveGsTac(pub [u8; 3]);
 
 impl FiveGsTac {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(3),
-            Some(3),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -34143,19 +34149,18 @@ impl PerCodec for FiveGsTac {
 }
 // ConfiguredEpsTac
 #[derive(Clone, Debug)]
-pub struct ConfiguredEpsTac(pub Vec<u8>);
+pub struct ConfiguredEpsTac(pub [u8; 2]);
 
 impl ConfiguredEpsTac {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(2),
-            Some(2),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(2), Some(2), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
+        encode::encode_octetstring(data, Some(2), Some(2), false, &(self.0).into(), false)
     }
 }
 
@@ -34967,19 +34972,18 @@ impl PerCodec for TraceDepth {
 }
 // TraceId
 #[derive(Clone, Debug)]
-pub struct TraceId(pub Vec<u8>);
+pub struct TraceId(pub [u8; 8]);
 
 impl TraceId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(8),
-            Some(8),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(8), Some(8), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(8), Some(8), false, &self.0, false)
+        encode::encode_octetstring(data, Some(8), Some(8), false, &(self.0).into(), false)
     }
 }
 

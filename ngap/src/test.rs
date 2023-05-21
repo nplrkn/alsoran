@@ -5,7 +5,7 @@ use asn1_per::*;
 use xxap::Snssai;
 
 fn make_ng_setup() -> NgSetupRequest {
-    let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);
+    let plmn_identity = PlmnIdentity([0x02, 0xf8, 0x39]);
     NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
             plmn_identity: plmn_identity.clone(),
@@ -13,7 +13,7 @@ fn make_ng_setup() -> NgSetupRequest {
         }),
         ran_node_name: Some(RanNodeName("free5gc".to_string())),
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {
-            tac: Tac(vec![0, 0, 1]),
+            tac: Tac([0, 0, 1]),
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                 plmn_identity: plmn_identity,
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
@@ -52,14 +52,14 @@ fn test_ngap_pdu_coding() -> Result<(), PerCodecError> {
 fn test_ng_setup() -> Result<(), PerCodecError> {
     let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
-            plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+            plmn_identity: PlmnIdentity([2, 3, 2]),
             gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
         }),
         ran_node_name: None,
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {
-            tac: Tac(vec![0, 1, 2]),
+            tac: Tac([0, 1, 2]),
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
-                plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                plmn_identity: PlmnIdentity([2, 3, 2]),
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
                     snssai: Snssai(1, None).into(),
                 }]),

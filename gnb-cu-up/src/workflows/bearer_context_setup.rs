@@ -19,7 +19,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         // use the same GTP TEID on both sides for each bearer.
         let my_uplink_address = "3.3.3.3".try_into()?;
         let my_downlink_address = "4.4.4.4".try_into()?;
-        let bearer_1_gtp_teid = GtpTeid(vec![1, 2, 3, 4]);
+        let bearer_1_gtp_teid = GtpTeid([1, 2, 3, 4]);
 
         self.log_message("BearerContextSetupResponse >>");
 

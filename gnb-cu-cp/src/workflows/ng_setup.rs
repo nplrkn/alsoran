@@ -20,7 +20,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             global_ran_node_id: super::build_ngap::build_global_ran_node_id(self.gnb_cu_cp),
             ran_node_name: self.config().name.clone().map(RanNodeName),
             supported_ta_list: SupportedTaList(vec![SupportedTaItem {
-                tac: Tac(vec![0x0, 0x0, 0x1]),
+                tac: Tac([0, 0, 1]),
                 broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                     plmn_identity: PlmnIdentity(self.config().plmn.clone()),
                     tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {

@@ -58,7 +58,7 @@ impl MockCuUp {
 
     async fn send_e1_setup_request(&self) -> Result<()> {
         let supported_plmns = SupportedPlmnsList(vec![SupportedPlmnsItem {
-            plmn_identity: PlmnIdentity(vec![0, 1, 2]),
+            plmn_identity: PlmnIdentity([0, 1, 2]),
             slice_support_list: None,
             nr_cgi_support_list: None,
             qos_parameters_support_list: None,
@@ -211,7 +211,7 @@ impl MockCuUp {
                                     security_result:None,
                                     ng_dl_up_tnl_information:UpTnlInformation::GtpTunnel(GtpTunnel{
                                         transport_layer_address:TransportLayerAddress(upf_facing_transport_layer_address),
-                                        gtp_teid:GtpTeid(vec![2,3,2,1]),
+                                        gtp_teid:GtpTeid([2,3,2,1]),
                                     }),
                                     pdu_session_data_forwarding_information_response:None,
                                     ng_dl_up_unchanged:None,
@@ -221,7 +221,7 @@ impl MockCuUp {
                                         ul_up_transport_parameters:UpParameters(vec![UpParametersItem{
                                             up_tnl_information:UpTnlInformation::GtpTunnel(GtpTunnel{
                                                 transport_layer_address:TransportLayerAddress(du_facing_transport_layer_address),
-                                                gtp_teid:GtpTeid(vec![2,3,2,1])}),
+                                                gtp_teid:GtpTeid([2,3,2,1])}),
                                             cell_group_id:CellGroupId(1), 
                                             qos_mapping_information: None }]),
                                         flow_setup_list:QosFlowList(vec![QosFlowItem{

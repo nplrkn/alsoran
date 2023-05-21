@@ -7945,19 +7945,18 @@ impl PerCodec for EdtSession {
 }
 // EmergencyAreaId
 #[derive(Clone, Debug)]
-pub struct EmergencyAreaId(pub Vec<u8>);
+pub struct EmergencyAreaId(pub [u8; 3]);
 
 impl EmergencyAreaId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(3),
-            Some(3),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -8896,19 +8895,18 @@ impl PerCodec for EquivalentPlmns {
 }
 // EpsTac
 #[derive(Clone, Debug)]
-pub struct EpsTac(pub Vec<u8>);
+pub struct EpsTac(pub [u8; 2]);
 
 impl EpsTac {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(2),
-            Some(2),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(2), Some(2), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
+        encode::encode_octetstring(data, Some(2), Some(2), false, &(self.0).into(), false)
     }
 }
 
@@ -10458,19 +10456,18 @@ impl PerCodec for FiveGSTmsi {
 }
 // FiveGTmsi
 #[derive(Clone, Debug)]
-pub struct FiveGTmsi(pub Vec<u8>);
+pub struct FiveGTmsi(pub [u8; 4]);
 
 impl FiveGTmsi {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(4),
-            Some(4),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(4), Some(4), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(4), Some(4), false, &self.0, false)
+        encode::encode_octetstring(data, Some(4), Some(4), false, &(self.0).into(), false)
     }
 }
 
@@ -13472,19 +13469,18 @@ impl PerCodec for IntersystemUnnecessaryHo {
 }
 // Lac
 #[derive(Clone, Debug)]
-pub struct Lac(pub Vec<u8>);
+pub struct Lac(pub [u8; 2]);
 
 impl Lac {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(2),
-            Some(2),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(2), Some(2), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
+        encode::encode_octetstring(data, Some(2), Some(2), false, &(self.0).into(), false)
     }
 }
 
@@ -16812,19 +16808,18 @@ impl PerCodec for NgranTnlAssociationToRemoveItem {
 }
 // NgranTraceId
 #[derive(Clone, Debug)]
-pub struct NgranTraceId(pub Vec<u8>);
+pub struct NgranTraceId(pub [u8; 8]);
 
 impl NgranTraceId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(8),
-            Some(8),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(8), Some(8), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(8), Some(8), false, &self.0, false)
+        encode::encode_octetstring(data, Some(8), Some(8), false, &(self.0).into(), false)
     }
 }
 
@@ -25165,19 +25160,18 @@ impl PerCodec for PeriodicRegistrationUpdateTimer {
 }
 // PlmnIdentity
 #[derive(Clone, Debug)]
-pub struct PlmnIdentity(pub Vec<u8>);
+pub struct PlmnIdentity(pub [u8; 3]);
 
 impl PlmnIdentity {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(3),
-            Some(3),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -25359,19 +25353,18 @@ impl PerCodec for PniNpnMobilityInformation {
 }
 // PortNumber
 #[derive(Clone, Debug)]
-pub struct PortNumber(pub Vec<u8>);
+pub struct PortNumber(pub [u8; 2]);
 
 impl PortNumber {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(2),
-            Some(2),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(2), Some(2), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
+        encode::encode_octetstring(data, Some(2), Some(2), false, &(self.0).into(), false)
     }
 }
 
@@ -29109,19 +29102,18 @@ impl PerCodec for SctpTlAs {
 }
 // Sd
 #[derive(Clone, Debug)]
-pub struct Sd(pub Vec<u8>);
+pub struct Sd(pub [u8; 3]);
 
 impl Sd {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(3),
-            Some(3),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -31006,19 +30998,18 @@ impl PerCodec for SrvccOperationPossible {
 }
 // ConfiguredNssai
 #[derive(Clone, Debug)]
-pub struct ConfiguredNssai(pub Vec<u8>);
+pub struct ConfiguredNssai(pub [u8; 128]);
 
 impl ConfiguredNssai {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(128),
-            Some(128),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(128), Some(128), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(128), Some(128), false, &self.0, false)
+        encode::encode_octetstring(data, Some(128), Some(128), false, &(self.0).into(), false)
     }
 }
 
@@ -31039,19 +31030,18 @@ impl PerCodec for ConfiguredNssai {
 }
 // RejectedNssaIinPlmn
 #[derive(Clone, Debug)]
-pub struct RejectedNssaIinPlmn(pub Vec<u8>);
+pub struct RejectedNssaIinPlmn(pub [u8; 32]);
 
 impl RejectedNssaIinPlmn {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(32),
-            Some(32),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(32), Some(32), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(32), Some(32), false, &self.0, false)
+        encode::encode_octetstring(data, Some(32), Some(32), false, &(self.0).into(), false)
     }
 }
 
@@ -31072,19 +31062,18 @@ impl PerCodec for RejectedNssaIinPlmn {
 }
 // RejectedNssaIinTa
 #[derive(Clone, Debug)]
-pub struct RejectedNssaIinTa(pub Vec<u8>);
+pub struct RejectedNssaIinTa(pub [u8; 32]);
 
 impl RejectedNssaIinTa {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(32),
-            Some(32),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(32), Some(32), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(32), Some(32), false, &self.0, false)
+        encode::encode_octetstring(data, Some(32), Some(32), false, &(self.0).into(), false)
     }
 }
 
@@ -31105,19 +31094,18 @@ impl PerCodec for RejectedNssaIinTa {
 }
 // Sst
 #[derive(Clone, Debug)]
-pub struct Sst(pub Vec<u8>);
+pub struct Sst(pub [u8; 1]);
 
 impl Sst {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(1),
-            Some(1),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(1), Some(1), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(1), Some(1), false, &self.0, false)
+        encode::encode_octetstring(data, Some(1), Some(1), false, &(self.0).into(), false)
     }
 }
 
@@ -31348,19 +31336,18 @@ impl PerCodec for SuspendResponseIndication {
 }
 // Tac
 #[derive(Clone, Debug)]
-pub struct Tac(pub Vec<u8>);
+pub struct Tac(pub [u8; 3]);
 
 impl Tac {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(3),
-            Some(3),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(3), Some(3), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
+        encode::encode_octetstring(data, Some(3), Some(3), false, &(self.0).into(), false)
     }
 }
 
@@ -32547,19 +32534,18 @@ impl PerCodec for TimerApproachForGuamiRemoval {
 }
 // TimeStamp
 #[derive(Clone, Debug)]
-pub struct TimeStamp(pub Vec<u8>);
+pub struct TimeStamp(pub [u8; 4]);
 
 impl TimeStamp {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(4),
-            Some(4),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(4), Some(4), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(4), Some(4), false, &self.0, false)
+        encode::encode_octetstring(data, Some(4), Some(4), false, &(self.0).into(), false)
     }
 }
 
@@ -36436,8 +36422,8 @@ impl PerCodec for VolumeTimedReportList {
 // VolumeTimedReportItem
 #[derive(Clone, Debug)]
 pub struct VolumeTimedReportItem {
-    pub start_time_stamp: Vec<u8>,
-    pub end_time_stamp: Vec<u8>,
+    pub start_time_stamp: [u8; 4],
+    pub end_time_stamp: [u8; 4],
     pub usage_count_ul: u64,
     pub usage_count_dl: u64,
 }
@@ -36445,8 +36431,12 @@ pub struct VolumeTimedReportItem {
 impl VolumeTimedReportItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let start_time_stamp = decode::decode_octetstring(data, Some(4), Some(4), false)?;
-        let end_time_stamp = decode::decode_octetstring(data, Some(4), Some(4), false)?;
+        let start_time_stamp = decode::decode_octetstring(data, Some(4), Some(4), false)?
+            .try_into()
+            .unwrap();
+        let end_time_stamp = decode::decode_octetstring(data, Some(4), Some(4), false)?
+            .try_into()
+            .unwrap();
         let usage_count_ul = decode::decode_integer(data, Some(0), None, false)?.0 as u64;
         let usage_count_dl = decode::decode_integer(data, Some(0), None, false)?.0 as u64;
 
@@ -36475,8 +36465,22 @@ impl VolumeTimedReportItem {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        encode::encode_octetstring(data, Some(4), Some(4), false, &self.start_time_stamp, false)?;
-        encode::encode_octetstring(data, Some(4), Some(4), false, &self.end_time_stamp, false)?;
+        encode::encode_octetstring(
+            data,
+            Some(4),
+            Some(4),
+            false,
+            &(self.start_time_stamp).into(),
+            false,
+        )?;
+        encode::encode_octetstring(
+            data,
+            Some(4),
+            Some(4),
+            false,
+            &(self.end_time_stamp).into(),
+            false,
+        )?;
         encode::encode_integer(
             data,
             Some(0),
@@ -36714,19 +36718,18 @@ impl PerCodec for WarningMessageContents {
 }
 // WarningSecurityInfo
 #[derive(Clone, Debug)]
-pub struct WarningSecurityInfo(pub Vec<u8>);
+pub struct WarningSecurityInfo(pub [u8; 50]);
 
 impl WarningSecurityInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(50),
-            Some(50),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(50), Some(50), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(50), Some(50), false, &self.0, false)
+        encode::encode_octetstring(data, Some(50), Some(50), false, &(self.0).into(), false)
     }
 }
 
@@ -36747,19 +36750,18 @@ impl PerCodec for WarningSecurityInfo {
 }
 // WarningType
 #[derive(Clone, Debug)]
-pub struct WarningType(pub Vec<u8>);
+pub struct WarningType(pub [u8; 2]);
 
 impl WarningType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(decode::decode_octetstring(
-            data,
-            Some(2),
-            Some(2),
-            false,
-        )?))
+        Ok(Self(
+            decode::decode_octetstring(data, Some(2), Some(2), false)?
+                .try_into()
+                .unwrap(),
+        ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
+        encode::encode_octetstring(data, Some(2), Some(2), false, &(self.0).into(), false)
     }
 }
 

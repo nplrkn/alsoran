@@ -1,5 +1,6 @@
 
 ## O-RAN O-DU interop
+- fix transform.py test etc
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created

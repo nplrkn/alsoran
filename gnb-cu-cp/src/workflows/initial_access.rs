@@ -79,7 +79,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                     nr_cgi,
                     tai: Tai {
                         plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn.clone()),
-                        tac: Tac(vec![0, 0, 1]),
+                        tac: Tac([0, 0, 1]),
                     },
                     time_stamp: None,
                     ps_cell_information: None,
