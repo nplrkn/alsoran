@@ -1,13 +1,7 @@
 
 ## O-RAN O-DU interop
-- fix transform.py test etc
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
-- state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
-- Regression test for tearing down requests when a connection dies
-- Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
-- Fix hang on Ctrl-C when AMF connect doesn't complete
-- two worker enablement (share DU configuration between workers - see [documentation/design/State - DU.md])
 - don't set up SRB + 2 DBRs if all we need is one session = one DRB
 - FV regression test to reduce dependency on running with live ODU 
 
@@ -33,6 +27,12 @@
 - All E1AP TNLAs drop - ?
 
 # TECH DEBT
+## CONNECTION MANAGEMENT
+- Regression test for tearing down requests when a connection dies
+- Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
+- Fix hang on Ctrl-C when AMF connect doesn't complete
+- two worker enablement of DU interactions (share DU configuration between workers - see [documentation/design/State - DU.md])
+
 ## FUNCTION
 - Proper graceful shutdown (waiting for / sending responses to pending requests)
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
@@ -83,6 +83,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Refactoring of pdu_session_resource_setup.rs
 - Add PduSessionId to xxap common
 - Improved case conversion of DLUPTNLInformation-ToBeSetup-List and similar

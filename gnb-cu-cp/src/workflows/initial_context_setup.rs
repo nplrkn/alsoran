@@ -28,10 +28,12 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> Result<ResponseAction<InitialContextSetupResponse>, Cause> {
         self.log_message("InitialContextSetupRequest(Nas) << ");
 
+        let ue_key = r.ran_ue_ngap_id.0;
+
         // Retrieve UE context by ran_ue_ngap_id.
-        debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
+        debug!(self.logger, "Retrieve UE {:#010x}", ue_key);
         let ue = self
-            .retrieve(&r.ran_ue_ngap_id.0)
+            .retrieve(&ue_key)
             .await
             .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::UnknownLocalUeNgapId))?;
 
@@ -123,12 +125,18 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             );
         }
 
+        // Write back UE.
+        debug!(self.logger, "Store UE {:#010x}", ue_key);
+        if let Err(e) = self.store(ue_key, ue, self.config().ue_ttl_secs).await {
+            debug!(self.logger, "Failed to write back UE- {:?}", e)
+        }
+
         // Reply to the AMF.
         self.log_message("InitialContextSetupResponse >>");
         Ok((
             InitialContextSetupResponse {
                 amf_ue_ngap_id: r.amf_ue_ngap_id,
-                ran_ue_ngap_id: RanUeNgapId(ue.key),
+                ran_ue_ngap_id: RanUeNgapId(ue_key),
                 pdu_session_resource_setup_list_cxt_res: None,
                 pdu_session_resource_failed_to_setup_list_cxt_res: None,
                 criticality_diagnostics: None,
