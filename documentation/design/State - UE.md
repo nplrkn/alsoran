@@ -70,11 +70,8 @@ sequenceDiagram
   participant AMF
   AMF->>CU: Initial Context Setup Request
   Note over CU: Retrieve
-  CU->>DU: Ue Context Setup Request -- Security Mode Command
-  DU->>CU: Ue Context Setup Response
+  CU->>DU: Dl Rrc Message Transfer -- Security Mode Command
   DU->>CU: Ul Rrc Message Transfer -- Security Mode Complete
-  CU->>DU: Dl Rrc Message Transfer -- Rrc Reconfiguration
-  DU->>CU: Ul Rrc Message Transfer -- Rrc Reconfiguration Complete
   Note over CU: Store (long TTL)
   CU->>AMF: Initial Context Setup Response
 ```
