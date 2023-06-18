@@ -66,21 +66,18 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         // encoded deterministically from other info so we can simply reconsistute it here.
         let session_1_downlink_gtp_teid = self.create_downlink_teid(ue_id.0, 1);
 
-        // Get the remote tunnel information of the DU.
-        let Some(UpTnlInformation::GtpTunnel(first_drb_tunnel)) = &mod_item.drb_to_modify_list_ng_ran
-            .map(|mut list| list.0.pop())
-            .flatten()
-            .map(|drb_item| drb_item.dl_up_parameters)
-            .flatten()
-            .map(|mut up_parameters| up_parameters.0.pop())
-            .flatten()
-            .map(|p| p.up_tnl_information)
-         else {
-            bail!("Missing downlink UpParameters on PduSessionResourceModifiedItem")
+        let Some(modify_list) = mod_item.drb_to_modify_list_ng_ran else {
+            bail!("No modify list on PduSessionResourceToModifyItem")
         };
 
+        let Some(up_parameters) = modify_list.0.head.dl_up_parameters else {
+            bail!("No UP parameters on DrbToModifyItemNgRan")
+        };
+
+        let UpTnlInformation::GtpTunnel(remote_tunnel_info) = up_parameters.0.head.up_tnl_information;
+
         let forwarding_action = ForwardingAction {
-            remote_tunnel_info: first_drb_tunnel.clone(),
+            remote_tunnel_info,
         };
 
         // Install it in the packet processor.

@@ -93,6 +93,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- E1 Setup
 - CU-UP passes through userplane packets
 - ASN.1 generator makes use of NonEmpty
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created

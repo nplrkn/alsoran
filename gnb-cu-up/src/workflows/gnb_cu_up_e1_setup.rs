@@ -17,10 +17,10 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         gnb_cu_up_id: u64,
         supported_plmns: SupportedPlmnsList,
     ) -> Result<()> {
-        // Connect to the AMF
+        // Connect to the CU-CP.
         self.e1ap_connect(cu_cp_address).await?;
 
-        // This uses the default expected values of free5GC.
+        // Send E1 setup request.
         let e1_setup_request = GnbCuUpE1SetupRequest {
             transaction_id: TransactionId(1),
             gnb_cu_up_id: GnbCuUpId(gnb_cu_up_id),
@@ -40,9 +40,6 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
             self.logger,
             "E1AP interface initialized with {:?}", response.gnb_cu_cp_name
         );
-
-        // Associate this TNLA with the E1AP interface instance.
-        //self.associate_connection();
 
         Ok(())
     }

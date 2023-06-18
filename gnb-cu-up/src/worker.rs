@@ -6,9 +6,11 @@ use std::time::Duration;
 
 use crate::handlers::E1apHandler;
 use crate::packet_processor::ForwardingAction;
+use crate::workflows::Workflow;
 use crate::GnbCuUp;
 use crate::{config::Config, packet_processor::PacketProcessor};
 use anyhow::Result;
+use asn1_per::{Procedure, RequestError, RequestProvider};
 use async_net::IpAddr;
 use async_trait::async_trait;
 use dashmap::DashMap;
@@ -69,23 +71,13 @@ impl Worker {
         let logger = &self.logger;
 
         // Infinitely retry to connect to GNB-CU-CP
-        let cp_address = format!("{}:{}", &self.config.cp_ip_address, E1AP_BIND_PORT);
         let stop_token = stop_token.fuse();
         pin_mut!(stop_token);
         loop {
-            let attempt = self
-                .e1ap
-                .connect(
-                    &cp_address,
-                    "0.0.0.0",
-                    E1AP_SCTP_PPID,
-                    E1apHandler::new_e1ap_application(self.clone()),
-                    self.logger.clone(),
-                )
-                .fuse();
-            pin_mut!(attempt);
-            select! {
-            result = attempt => match result {
+            match Workflow::new(&self, &logger.clone())
+                .gnb_cu_up_e1_setup(&self.config.cp_ip_address, 1, self.config.plmns())
+                .await
+            {
                 Ok(_) => {
                     info!(logger, "Startup complete - wait for instructions from CP");
 
@@ -94,12 +86,8 @@ impl Worker {
                     stop_token.await;
 
                     break;
-                },
-                Err(e) => warn!(logger, "Connection to GNB-CU-CP {} failed - {}", cp_address, e)
-            },
-
-            // Stopped while waiting for connection - break out and shut down
-            _ = stop_token => break
+                }
+                Err(e) => warn!(logger, "Connection to GNB-CU-CP failed - {}", e),
             }
 
             info!(logger, "Pausing for {}s before retry", RETRY_SECS);
@@ -161,9 +149,27 @@ impl GnbCuUp for Worker {
         ])
     }
 
-    async fn e1ap_connect(&self, _cp_address: &IpAddr) -> Result<()> {
-        // TODO - support multiple TNLAs
-        warn!(self.logger, "CU-UP can't create 2nd TNLA yet");
-        Ok(())
+    async fn e1ap_connect(&self, cp_address: &IpAddr) -> Result<()> {
+        let cp_address = format!("{}:{}", cp_address, E1AP_BIND_PORT);
+
+        self.e1ap
+            .connect(
+                &cp_address,
+                "0.0.0.0",
+                E1AP_SCTP_PPID,
+                E1apHandler::new_e1ap_application(self.clone()),
+                self.logger.clone(),
+            )
+            .await
+    }
+
+    async fn e1ap_request<P: Procedure>(
+        &self,
+        r: P::Request,
+        logger: &Logger,
+    ) -> Result<P::Success, RequestError<P::Failure>> {
+        <Stack as RequestProvider<P>>::request(&self.e1ap, r, logger)
+            .await
+            .map(|(x, _)| x)
     }
 }

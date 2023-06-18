@@ -2,6 +2,9 @@
 
 use std::net::{IpAddr, Ipv4Addr};
 
+use asn1_per::nonempty;
+use e1ap::{PlmnIdentity, SupportedPlmnsItem, SupportedPlmnsList};
+
 #[derive(Debug, Clone)]
 pub struct Config {
     // The IP address that the CU-UP instance binds its SCTP E1 port to,
@@ -17,6 +20,20 @@ pub struct Config {
 
     // Human readable name of this GNB-CU-UP.
     pub name: Option<String>,
+}
+
+impl Config {
+    pub fn plmns(&self) -> SupportedPlmnsList {
+        SupportedPlmnsList(nonempty![SupportedPlmnsItem {
+            plmn_identity: PlmnIdentity([1, 2, 3]),
+            slice_support_list: None,
+            nr_cgi_support_list: None,
+            qos_parameters_support_list: None,
+            npn_support_info: None,
+            extended_slice_support_list: None,
+            extended_nr_cgi_support_list: None
+        }])
+    }
 }
 
 impl Default for Config {
