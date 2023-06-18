@@ -1,6 +1,6 @@
 use crate::datastore::UeState;
 use anyhow::Result;
-use asn1_per::SerDes;
+use asn1_per::*;
 use e1ap::*;
 use ngap::{PduSessionResourceSetupItemSuReq, PduSessionResourceSetupRequestTransfer};
 use xxap::{GtpTeid, GtpTunnel, PduSessionId};
@@ -33,7 +33,7 @@ pub fn build_e1_setup_item(
         pdu_session_inactivity_timer: None,
         existing_allocated_ng_dl_up_tnl_info: None,
         network_instance: None,
-        drb_to_setup_list_ng_ran: DrbToSetupListNgRan(vec![DrbToSetupItemNgRan {
+        drb_to_setup_list_ng_ran: DrbToSetupListNgRan(nonempty![DrbToSetupItemNgRan {
             drb_id: DrbId(1),
             sdap_configuration: SdapConfiguration {
                 default_drb: DefaultDrb::True, // test
@@ -57,14 +57,14 @@ pub fn build_e1_setup_item(
                 additional_pdc_pduplication_information: None,
                 ehc_parameters: None,
             },
-            cell_group_information: CellGroupInformation(vec![CellGroupInformationItem {
+            cell_group_information: CellGroupInformation(nonempty![CellGroupInformationItem {
                 cell_group_id: CellGroupId(1),
                 ul_configuration: None,
                 dl_tx_stop: None,
                 rat_type: None,
                 number_of_tunnels: None,
             }]),
-            qos_flow_information_to_be_setup: QosFlowQosParameterList(vec![
+            qos_flow_information_to_be_setup: QosFlowQosParameterList(nonempty![
                 QosFlowQosParameterItem {
                     qos_flow_identifier: QosFlowIdentifier(1),
                     qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
@@ -115,7 +115,7 @@ pub fn build_e1_setup_item(
 pub fn build_bearer_context_setup(
     ue: &UeState,
     serving_plmn: PlmnIdentity,
-    items: Vec<PduSessionResourceToSetupItem>,
+    items: NonEmpty<PduSessionResourceToSetupItem>,
 ) -> BearerContextSetupRequest {
     let ue_dl_aggregate_maximum_bit_rate = BitRate(1000);
 
@@ -158,7 +158,7 @@ pub fn build_bearer_context_setup(
 pub fn build_bearer_context_modification(
     ue: &UeState,
     gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId,
-    items: Vec<PduSessionResourceToModifyItem>,
+    items: NonEmpty<PduSessionResourceToModifyItem>,
 ) -> BearerContextModificationRequest {
     // TODO incomplete - for example need to supply a system_bearer_context_modification_request
     // with DrbToModifyListNgRan containing the UpTransportLayerInformation received in the

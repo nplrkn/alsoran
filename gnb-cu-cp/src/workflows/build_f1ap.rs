@@ -3,14 +3,14 @@
 use super::GnbCuCp;
 use crate::datastore::UeState;
 use anyhow::Result;
-use asn1_per::SerDes;
+use asn1_per::*;
 use f1ap::*;
 use rrc::{
     AccessStratumRelease, BandNr, FeatureSetDownlinkPerCc, FeatureSetUplinkPerCc, FeatureSets,
     FreqBandIndicatorNr, ModulationOrder, PdcpParameters, PhyParameters, RfParameters,
     SupportedBandwidth, SupportedRohcProfiles, UeCapabilityRatContainer, UeNrCapability,
 };
-use xxap::{GtpTeid, GtpTunnel, PduSessionId, Snssai};
+use xxap::{GtpTunnel, PduSessionId, Snssai};
 
 pub fn build_drb_to_be_setup_item(
     drb_id: DrbId,
@@ -44,7 +44,7 @@ pub fn build_drb_to_be_setup_item(
             },
             snssai: snssai.into(),
             notification_control: None,
-            flows_mapped_to_drb_list: FlowsMappedToDrbList(vec![FlowsMappedToDrbItem {
+            flows_mapped_to_drb_list: FlowsMappedToDrbList(nonempty![FlowsMappedToDrbItem {
                 qos_flow_identifier: QosFlowIdentifier(0),
                 qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
                     qos_characteristics: QosCharacteristics::NonDynamic5qi(
@@ -72,7 +72,7 @@ pub fn build_drb_to_be_setup_item(
                 tsc_traffic_characteristics: None,
             }]),
         }),
-        ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList(vec![
+        ul_up_tnl_information_to_be_setup_list: UlUpTnlInformationToBeSetupList(nonempty![
             UlUpTnlInformationToBeSetupItem {
                 ul_up_tnl_information: UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
                 bh_info: None,
@@ -99,19 +99,19 @@ fn build_scell_to_be_setup_item(nr_cgi: NrCgi) -> SCellToBeSetupItem {
     }
 }
 
-pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
-    gnb_cu_cp: &G,
-    _r: &ngap::InitialContextSetupRequest,
-    ue: &UeState,
-    rrc_container: Option<f1ap::RrcContainer>,
-) -> Result<UeContextSetupRequest> {
-    build_ue_context_setup_request(
-        gnb_cu_cp,
-        ue,
-        Some(default_drb_to_be_setup_list()?),
-        rrc_container,
-    )
-}
+// pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
+//     gnb_cu_cp: &G,
+//     _r: &ngap::InitialContextSetupRequest,
+//     ue: &UeState,
+//     rrc_container: Option<f1ap::RrcContainer>,
+// ) -> Result<UeContextSetupRequest> {
+//     build_ue_context_setup_request(
+//         gnb_cu_cp,
+//         ue,
+//         Some(default_drb_to_be_setup_list()?),
+//         rrc_container,
+//     )
+// }
 
 // pub fn build_ue_context_setup_request_from_pdu_session_setup<G: GnbCuCp>(
 //     gnb_cu_cp: &G,
@@ -127,28 +127,28 @@ pub fn build_ue_context_setup_request_from_initial_context_setup<G: GnbCuCp>(
 //     )
 // }
 
-fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
-    let first_gtp_tunnel = GtpTunnel {
-        transport_layer_address: "192.168.130.82".try_into()?,
-        gtp_teid: GtpTeid([0, 0, 0, 1]),
-    };
-    let first_slice = Snssai(1, Some([2, 3, 4]));
+// fn default_drb_to_be_setup_list() -> Result<DrbsToBeSetupList> {
+//     let first_gtp_tunnel = GtpTunnel {
+//         transport_layer_address: "192.168.130.82".try_into()?,
+//         gtp_teid: GtpTeid([0, 0, 0, 1]),
+//     };
+//     let first_slice = Snssai(1, Some([2, 3, 4]));
 
-    let first_drb_to_setup_item =
-        build_drb_to_be_setup_item(DrbId(1), first_slice.into(), first_gtp_tunnel)?;
+//     let first_drb_to_setup_item =
+//         build_drb_to_be_setup_item(DrbId(1), first_slice.into(), first_gtp_tunnel)?;
 
-    let second_gtp_tunnel = GtpTunnel {
-        transport_layer_address: "192.168.130.82".try_into()?,
-        gtp_teid: GtpTeid([0, 0, 0, 2]),
-    };
-    let second_slice = Snssai(5, Some([6, 7, 8]));
-    let second_drb_to_setup_item =
-        build_drb_to_be_setup_item(DrbId(2), second_slice.into(), second_gtp_tunnel)?;
-    Ok(DrbsToBeSetupList(vec![
-        first_drb_to_setup_item,
-        second_drb_to_setup_item,
-    ]))
-}
+//     let second_gtp_tunnel = GtpTunnel {
+//         transport_layer_address: "192.168.130.82".try_into()?,
+//         gtp_teid: GtpTeid([0, 0, 0, 2]),
+//     };
+//     let second_slice = Snssai(5, Some([6, 7, 8]));
+//     let second_drb_to_setup_item =
+//         build_drb_to_be_setup_item(DrbId(2), second_slice.into(), second_gtp_tunnel)?;
+//     Ok(DrbsToBeSetupList(nonempty![
+//         first_drb_to_setup_item,
+//         second_drb_to_setup_item
+//     ]))
+// }
 
 pub fn build_ue_context_setup_request<G: GnbCuCp>(
     _gnb_cu_cp: &G,
@@ -194,7 +194,7 @@ pub fn build_ue_context_setup_request<G: GnbCuCp>(
                     phy_parameters_fr2: None,
                 },
                 rf_parameters: RfParameters {
-                    supported_band_list_nr: vec![BandNr {
+                    supported_band_list_nr: nonempty![BandNr {
                         band_nr: FreqBandIndicatorNr(1),
                         modified_mpr_behaviour: None,
                         mimo_parameters_per_band: None,
@@ -221,7 +221,7 @@ pub fn build_ue_context_setup_request<G: GnbCuCp>(
                 fr_2_add_ue_nr_capabilities: None,
                 feature_sets: Some(FeatureSets {
                     feature_sets_downlink: None,
-                    feature_sets_downlink_per_cc: Some(vec![FeatureSetDownlinkPerCc {
+                    feature_sets_downlink_per_cc: Some(nonempty![FeatureSetDownlinkPerCc {
                         supported_subcarrier_spacing_dl: rrc::SubcarrierSpacing::KHz15,
                         supported_bandwidth_dl: SupportedBandwidth::Fr1(rrc::Fr1_2::Mhz20),
                         channel_bw_90mhz: None,
@@ -229,7 +229,7 @@ pub fn build_ue_context_setup_request<G: GnbCuCp>(
                         supported_modulation_order_dl: Some(ModulationOrder::Qam64),
                     }]),
                     feature_sets_uplink: None,
-                    feature_sets_uplink_per_cc: Some(vec![FeatureSetUplinkPerCc {
+                    feature_sets_uplink_per_cc: Some(nonempty![FeatureSetUplinkPerCc {
                         supported_subcarrier_spacing_ul: rrc::SubcarrierSpacing::KHz15,
                         supported_bandwidth_ul: SupportedBandwidth::Fr1(rrc::Fr1_2::Mhz20),
                         channel_bw_90mhz: None,
@@ -269,10 +269,10 @@ pub fn build_ue_context_setup_request<G: GnbCuCp>(
         candidate_sp_cell_list: None,
         drx_cycle: None,
         resource_coordination_transfer_container: None,
-        s_cell_to_be_setup_list: Some(SCellToBeSetupList(vec![build_scell_to_be_setup_item(
+        s_cell_to_be_setup_list: Some(SCellToBeSetupList(nonempty![build_scell_to_be_setup_item(
             ue.nr_cgi.clone(),
         )])),
-        srbs_to_be_setup_list: Some(SrbsToBeSetupList(vec![SrbsToBeSetupItem {
+        srbs_to_be_setup_list: Some(SrbsToBeSetupList(nonempty![SrbsToBeSetupItem {
             srb_id: SrbId(2),
             duplication_indication: None,
             additional_duplication_indication: None,

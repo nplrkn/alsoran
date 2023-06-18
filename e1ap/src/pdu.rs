@@ -193,7 +193,9 @@ impl PerCodec for ResetAll {
 }
 // UeAssociatedLogicalE1ConnectionListRes
 #[derive(Clone, Debug)]
-pub struct UeAssociatedLogicalE1ConnectionListRes(pub Vec<UeAssociatedLogicalE1ConnectionItem>);
+pub struct UeAssociatedLogicalE1ConnectionListRes(
+    pub NonEmpty<UeAssociatedLogicalE1ConnectionItem>,
+);
 
 impl UeAssociatedLogicalE1ConnectionListRes {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -206,7 +208,7 @@ impl UeAssociatedLogicalE1ConnectionListRes {
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UeAssociatedLogicalE1ConnectionItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -339,7 +341,9 @@ impl PerCodec for ResetAcknowledge {
 }
 // UeAssociatedLogicalE1ConnectionListResAck
 #[derive(Clone, Debug)]
-pub struct UeAssociatedLogicalE1ConnectionListResAck(pub Vec<UeAssociatedLogicalE1ConnectionItem>);
+pub struct UeAssociatedLogicalE1ConnectionListResAck(
+    pub NonEmpty<UeAssociatedLogicalE1ConnectionItem>,
+);
 
 impl UeAssociatedLogicalE1ConnectionListResAck {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -352,7 +356,7 @@ impl UeAssociatedLogicalE1ConnectionListResAck {
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UeAssociatedLogicalE1ConnectionItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -671,7 +675,7 @@ impl PerCodec for GnbCuUpE1SetupRequest {
 }
 // SupportedPlmnsList
 #[derive(Clone, Debug)]
-pub struct SupportedPlmnsList(pub Vec<SupportedPlmnsItem>);
+pub struct SupportedPlmnsList(pub NonEmpty<SupportedPlmnsItem>);
 
 impl SupportedPlmnsList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -681,7 +685,7 @@ impl SupportedPlmnsList {
             for _ in 0..length {
                 items.push(SupportedPlmnsItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1557,7 +1561,7 @@ impl PerCodec for GnbCuUpConfigurationUpdate {
 }
 // GnbCuUpTnlaToRemoveList
 #[derive(Clone, Debug)]
-pub struct GnbCuUpTnlaToRemoveList(pub Vec<GnbCuUpTnlaToRemoveItem>);
+pub struct GnbCuUpTnlaToRemoveList(pub NonEmpty<GnbCuUpTnlaToRemoveItem>);
 
 impl GnbCuUpTnlaToRemoveList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -1567,7 +1571,7 @@ impl GnbCuUpTnlaToRemoveList {
             for _ in 0..length {
                 items.push(GnbCuUpTnlaToRemoveItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1938,7 +1942,7 @@ impl PerCodec for GnbCuCpConfigurationUpdate {
 }
 // GnbCuCpTnlaToAddList
 #[derive(Clone, Debug)]
-pub struct GnbCuCpTnlaToAddList(pub Vec<GnbCuCpTnlaToAddItem>);
+pub struct GnbCuCpTnlaToAddList(pub NonEmpty<GnbCuCpTnlaToAddItem>);
 
 impl GnbCuCpTnlaToAddList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -1948,7 +1952,7 @@ impl GnbCuCpTnlaToAddList {
             for _ in 0..length {
                 items.push(GnbCuCpTnlaToAddItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1977,7 +1981,7 @@ impl PerCodec for GnbCuCpTnlaToAddList {
 }
 // GnbCuCpTnlaToRemoveList
 #[derive(Clone, Debug)]
-pub struct GnbCuCpTnlaToRemoveList(pub Vec<GnbCuCpTnlaToRemoveItem>);
+pub struct GnbCuCpTnlaToRemoveList(pub NonEmpty<GnbCuCpTnlaToRemoveItem>);
 
 impl GnbCuCpTnlaToRemoveList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -1987,7 +1991,7 @@ impl GnbCuCpTnlaToRemoveList {
             for _ in 0..length {
                 items.push(GnbCuCpTnlaToRemoveItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2016,7 +2020,7 @@ impl PerCodec for GnbCuCpTnlaToRemoveList {
 }
 // GnbCuCpTnlaToUpdateList
 #[derive(Clone, Debug)]
-pub struct GnbCuCpTnlaToUpdateList(pub Vec<GnbCuCpTnlaToUpdateItem>);
+pub struct GnbCuCpTnlaToUpdateList(pub NonEmpty<GnbCuCpTnlaToUpdateItem>);
 
 impl GnbCuCpTnlaToUpdateList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -2026,7 +2030,7 @@ impl GnbCuCpTnlaToUpdateList {
             for _ in 0..length {
                 items.push(GnbCuCpTnlaToUpdateItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2177,7 +2181,7 @@ impl PerCodec for GnbCuCpConfigurationUpdateAcknowledge {
 }
 // GnbCuCpTnlaSetupList
 #[derive(Clone, Debug)]
-pub struct GnbCuCpTnlaSetupList(pub Vec<GnbCuCpTnlaSetupItem>);
+pub struct GnbCuCpTnlaSetupList(pub NonEmpty<GnbCuCpTnlaSetupItem>);
 
 impl GnbCuCpTnlaSetupList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -2187,7 +2191,7 @@ impl GnbCuCpTnlaSetupList {
             for _ in 0..length {
                 items.push(GnbCuCpTnlaSetupItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2216,7 +2220,7 @@ impl PerCodec for GnbCuCpTnlaSetupList {
 }
 // GnbCuCpTnlaFailedToSetupList
 #[derive(Clone, Debug)]
-pub struct GnbCuCpTnlaFailedToSetupList(pub Vec<GnbCuCpTnlaFailedToSetupItem>);
+pub struct GnbCuCpTnlaFailedToSetupList(pub NonEmpty<GnbCuCpTnlaFailedToSetupItem>);
 
 impl GnbCuCpTnlaFailedToSetupList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -2226,7 +2230,7 @@ impl GnbCuCpTnlaFailedToSetupList {
             for _ in 0..length {
                 items.push(GnbCuCpTnlaFailedToSetupItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -4338,7 +4342,7 @@ impl PerCodec for BearerContextReleaseRequest {
 }
 // DrbStatusList
 #[derive(Clone, Debug)]
-pub struct DrbStatusList(pub Vec<DrbStatusItem>);
+pub struct DrbStatusList(pub NonEmpty<DrbStatusItem>);
 
 impl DrbStatusList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -4348,7 +4352,7 @@ impl DrbStatusList {
             for _ in 0..length {
                 items.push(DrbStatusItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -6181,7 +6185,7 @@ impl PerCodec for IabUpTnlAddressUpdate {
 }
 // DlUpTnlAddressToUpdateList
 #[derive(Clone, Debug)]
-pub struct DlUpTnlAddressToUpdateList(pub Vec<DlUpTnlAddressToUpdateItem>);
+pub struct DlUpTnlAddressToUpdateList(pub NonEmpty<DlUpTnlAddressToUpdateItem>);
 
 impl DlUpTnlAddressToUpdateList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -6191,7 +6195,7 @@ impl DlUpTnlAddressToUpdateList {
             for _ in 0..length {
                 items.push(DlUpTnlAddressToUpdateItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -6314,7 +6318,7 @@ impl PerCodec for IabUpTnlAddressUpdateAcknowledge {
 }
 // UlUpTnlAddressToUpdateList
 #[derive(Clone, Debug)]
-pub struct UlUpTnlAddressToUpdateList(pub Vec<UlUpTnlAddressToUpdateItem>);
+pub struct UlUpTnlAddressToUpdateList(pub NonEmpty<UlUpTnlAddressToUpdateItem>);
 
 impl UlUpTnlAddressToUpdateList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -6324,7 +6328,7 @@ impl UlUpTnlAddressToUpdateList {
             for _ in 0..length {
                 items.push(UlUpTnlAddressToUpdateItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {

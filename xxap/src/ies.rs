@@ -84,7 +84,7 @@ impl GtpTeid {
         ))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_octetstring(data, Some(4), Some(4), false, &self.0.to_vec(), false)
+        encode::encode_octetstring(data, Some(4), Some(4), false, &(self.0).into(), false)
     }
 }
 

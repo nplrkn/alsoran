@@ -5,7 +5,6 @@ use crate::gnb_cu_cp::GnbCuCp;
 use anyhow::Result;
 use f1ap::*;
 use net::{RequestError, ResponseAction};
-use slog::warn;
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // F1 Setup Procedure
@@ -21,16 +20,16 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         self.log_message(">> GnbDuConfigurationUpdate");
 
         if let Some(_) = r.served_cells_to_add_list {
-            warn!(self.logger, "Served cells to add present on GnbDuConfigurationUpdate but not implemented and ignored")
+            self.log_message_error("Served cells to add present on GnbDuConfigurationUpdate but not implemented and ignored")
         }
         if let Some(_) = r.served_cells_to_modify_list {
-            warn!(self.logger, "Served cells to modify present on GnbDuConfigurationUpdate but not implemented and ignored")
+            self.log_message_error("Served cells to modify present on GnbDuConfigurationUpdate but not implemented and ignored")
         }
         if let Some(_) = r.served_cells_to_delete_list {
-            warn!(self.logger, "Served cells to delete present on GnbDuConfigurationUpdate but not implemented and ignored")
+            self.log_message_error("Served cells to delete present on GnbDuConfigurationUpdate but not implemented and ignored")
         }
         if let Some(_) = r.gnb_du_tnl_association_to_remove_list {
-            warn!(self.logger, "Tnl association to delete present on GnbDuConfigurationUpdate but not implemented and ignored")
+            self.log_message_error("Tnl association to delete present on GnbDuConfigurationUpdate but not implemented and ignored")
         }
 
         self.log_message("<< GnbDuConfigurationUpdateAcknowledge");

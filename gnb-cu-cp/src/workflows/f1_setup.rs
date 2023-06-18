@@ -26,9 +26,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Activate all served cells in the setup response.
         // TODO: store information about served cells for use later.
-        let cells_to_be_activated_list = r.gnb_du_served_cells_list.map(|cells| {
-            CellsToBeActivatedList(cells.0.iter().map(served_cell_to_activated).collect())
-        });
+        let cells_to_be_activated_list = r
+            .gnb_du_served_cells_list
+            .map(|cells| CellsToBeActivatedList(cells.0.map(served_cell_to_activated)));
 
         self.log_message("<< F1SetupResponse");
         Ok((
@@ -51,7 +51,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     }
 }
 
-fn served_cell_to_activated(served_cell: &GnbDuServedCellsItem) -> CellsToBeActivatedListItem {
+fn served_cell_to_activated(served_cell: GnbDuServedCellsItem) -> CellsToBeActivatedListItem {
     let served_cell_information = &served_cell.served_cell_information;
 
     CellsToBeActivatedListItem {

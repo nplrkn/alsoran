@@ -2,6 +2,7 @@
 
 use super::{GnbCuCp, Workflow};
 use anyhow::Result;
+use asn1_per::*;
 use ngap::*;
 use slog::info;
 use xxap::Snssai;
@@ -19,11 +20,11 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let ng_setup_request = NgSetupRequest {
             global_ran_node_id: super::build_ngap::build_global_ran_node_id(self.gnb_cu_cp),
             ran_node_name: self.config().name.clone().map(RanNodeName),
-            supported_ta_list: SupportedTaList(vec![SupportedTaItem {
+            supported_ta_list: SupportedTaList(nonempty![SupportedTaItem {
                 tac: Tac([0, 0, 1]),
-                broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
+                broadcast_plmn_list: BroadcastPlmnList(nonempty![BroadcastPlmnItem {
                     plmn_identity: PlmnIdentity(self.config().plmn.clone()),
-                    tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                    tai_slice_support_list: SliceSupportList(nonempty![SliceSupportItem {
                         snssai: Snssai(1, Some([1, 2, 3])).into(),
                     }]),
                     npn_support: None,

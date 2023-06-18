@@ -1,7 +1,8 @@
 //! build_rrc - construction of RRC messages
 
 use anyhow::Result;
-use net::SerDes;
+use asn1_per::NonEmpty;
+use net::*;
 use pdcp::PdcpPdu;
 use rrc::*;
 
@@ -77,11 +78,10 @@ pub fn build_rrc_dl_information_transfer(
 
 pub fn build_rrc_reconfiguration(
     rrc_transaction_identifier: u8,
-    nas_messages: Option<Vec<Vec<u8>>>,
+    nas_messages: Option<NonEmpty<Vec<u8>>>,
     cell_group_config: Vec<u8>,
 ) -> Result<f1ap::RrcContainer> {
-    let dedicated_nas_message_list =
-        nas_messages.map(|x| (x.into_iter().map(DedicatedNasMessage).collect()));
+    let dedicated_nas_message_list = nas_messages.map(|x| (x.map(DedicatedNasMessage)));
 
     make_pdcp_encapsulated_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::RrcReconfiguration(rrc::RrcReconfiguration {

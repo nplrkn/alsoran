@@ -3,6 +3,7 @@
 
 use super::{GnbCuUp, Workflow};
 use anyhow::Result;
+use asn1_per::*;
 use e1ap::*;
 use net::{RequestError, ResponseAction};
 use xxap::*;
@@ -31,8 +32,8 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                 system_bearer_context_setup_response:
                     e1ap::SystemBearerContextSetupResponse::NgRanBearerContextSetupResponse(
                         NgRanBearerContextSetupResponse {
-                            pdu_session_resource_setup_list: PduSessionResourceSetupList(vec![
-                                PduSessionResourceSetupItem {
+                            pdu_session_resource_setup_list: PduSessionResourceSetupList(
+                                nonempty![PduSessionResourceSetupItem {
                                     pdu_session_id: PduSessionId(1),
                                     security_result: None,
                                     ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(
@@ -43,11 +44,11 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                                     ),
                                     pdu_session_data_forwarding_information_response: None,
                                     ng_dl_up_unchanged: None,
-                                    drb_setup_list_ng_ran: DrbSetupListNgRan(vec![
+                                    drb_setup_list_ng_ran: DrbSetupListNgRan(nonempty![
                                         DrbSetupItemNgRan {
                                             drb_id: DrbId(1),
                                             drb_data_forwarding_information_response: None,
-                                            ul_up_transport_parameters: UpParameters(vec![
+                                            ul_up_transport_parameters: UpParameters(nonempty![
                                                 UpParametersItem {
                                                     up_tnl_information: UpTnlInformation::GtpTunnel(
                                                         GtpTunnel {
@@ -60,7 +61,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                                                     qos_mapping_information: None,
                                                 },
                                             ]),
-                                            flow_setup_list: QosFlowList(vec![QosFlowItem {
+                                            flow_setup_list: QosFlowList(nonempty![QosFlowItem {
                                                 qos_flow_identifier: QosFlowIdentifier(1),
                                                 qos_flow_mapping_indication: None,
                                             }]),
@@ -70,8 +71,8 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                                     drb_failed_list_ng_ran: None,
                                     redundant_n_g_dl_up_tnl_information: None,
                                     redundant_pdu_session_information_used: None,
-                                },
-                            ]),
+                                },],
+                            ),
                             pdu_session_resource_failed_list: None,
                         },
                     ),

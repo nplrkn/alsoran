@@ -2,8 +2,7 @@
 
 use crate::gnb_cu_cp::GnbCuCp;
 use anyhow::Result;
-use asn1_per::SerDes;
-use bitvec::prelude::*;
+use asn1_per::*;
 use ngap::{
     AssociatedQosFlowItem, AssociatedQosFlowList, GlobalGnbId, GlobalRanNodeId, GnbId,
     PduSessionResourceSetupItemSuRes, PduSessionResourceSetupResponseTransfer, PlmnIdentity,
@@ -27,7 +26,7 @@ pub fn build_pdu_session_resource_setup_item_su_res(
         pdu_session_resource_setup_response_transfer: PduSessionResourceSetupResponseTransfer {
             dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation {
                 up_transport_layer_information: UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
-                associated_qos_flow_list: AssociatedQosFlowList(vec![AssociatedQosFlowItem {
+                associated_qos_flow_list: AssociatedQosFlowList(nonempty![AssociatedQosFlowItem {
                     qos_flow_identifier: ngap::QosFlowIdentifier(1),
                     qos_flow_mapping_indication: None,
                     current_qos_para_set_index: None,
