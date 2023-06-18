@@ -9,7 +9,8 @@ use ue::Ue;
 #[async_std::main]
 async fn main() -> Result<()> {
     let logger = common::logging::init();
-    let mut du = MockDu::new(&logger).await;
+    let local_ip = "127.0.0.2";
+    let mut du = MockDu::new(local_ip, &logger).await.unwrap();
 
     du.perform_f1_setup(&"127.0.0.1".to_string()).await?;
 

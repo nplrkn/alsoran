@@ -3,10 +3,10 @@
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{bail, Result};
 use e1ap::*;
-use xxap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
 use asn1_per::*;
+use xxap::*;
 
 impl Pdu for E1apPdu {}
 
@@ -221,14 +221,14 @@ impl MockCuUp {
                                             up_tnl_information:UpTnlInformation::GtpTunnel(GtpTunnel{
                                                 transport_layer_address:TransportLayerAddress(du_facing_transport_layer_address),
                                                 gtp_teid:GtpTeid([2,3,2,1])}),
-                                            cell_group_id:CellGroupId(1), 
+                                            cell_group_id: CellGroupId(1), 
                                             qos_mapping_information: None }]),
                                         flow_setup_list:QosFlowList(nonempty![QosFlowItem{
                                             qos_flow_identifier:QosFlowIdentifier(1), 
                                             qos_flow_mapping_indication: None }]),
-                                        flow_failed_list:None}]),
-                                    drb_failed_list_ng_ran:None, 
-                                    redundant_n_g_dl_up_tnl_information: None, 
+                                        flow_failed_list: None}]),
+                                    drb_failed_list_ng_ran: None,
+                                    redundant_n_g_dl_up_tnl_information: None,
                                     redundant_pdu_session_information_used: None },
                             ]),
                             pdu_session_resource_failed_list: None,

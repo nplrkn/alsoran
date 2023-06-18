@@ -9,7 +9,7 @@ use slog::info;
 #[async_std::main]
 async fn main() -> Result<()> {
     let logger = common::logging::init();
-    let mut amf = MockAmf::new(&logger).await;
+    let mut amf = MockAmf::new("127.0.0.1", &logger).await?;
     amf.disable_receive_timeouts();
 
     // Wait for connection and do NG Setup.
@@ -56,8 +56,9 @@ async fn main() -> Result<()> {
     let _nas = amf.receive_uplink_nas_transport(&ue).await?;
     info!(&logger, ">> Nas Registration complete");
 
-    amf.send_pdu_session_resource_setup(&ue).await?;
-    amf.receive_pdu_session_resource_setup_response(&ue).await?;
+    let teid = amf.send_pdu_session_resource_setup(&ue).await?;
+    amf.receive_pdu_session_resource_setup_response(&ue, teid)
+        .await?;
 
     amf.terminate().await;
 

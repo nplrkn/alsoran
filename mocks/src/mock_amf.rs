@@ -1,6 +1,9 @@
 //! mock_amf - enables a test script to assume the role of the AMF on the NG reference point
 
-use crate::mock::{Mock, Pdu, ReceivedPdu};
+use crate::{
+    mock::{Mock, Pdu, ReceivedPdu},
+    userplane::MockUserplane,
+};
 use anyhow::{anyhow, bail, Result};
 use asn1_per::*;
 use net::{Binding, SerDes, TransportProvider};
@@ -14,12 +17,19 @@ impl Pdu for NgapPdu {}
 pub struct MockAmf {
     mock: Mock<NgapPdu>,
     ips: Vec<String>,
+    userplane: MockUserplane,
 }
 
 pub struct UeContext {
     ue_id: u32,
     ran_ue_ngap_id: RanUeNgapId,
     pub binding: Binding,
+}
+
+pub struct Session {
+    remote_tunnel_info: GtpTunnel,
+    local_gtp_teid: GtpTeid,
+    _id: PduSessionId,
 }
 
 impl Deref for MockAmf {
@@ -39,11 +49,16 @@ const NGAP_SCTP_PPID: u32 = 60;
 const NGAP_BIND_PORT: u16 = 38412;
 
 impl MockAmf {
-    pub async fn new(logger: &Logger) -> MockAmf {
-        MockAmf {
+    pub async fn new(userplane_ip: &str, logger: &Logger) -> Result<MockAmf> {
+        Ok(MockAmf {
             mock: Mock::new(logger.new(o!("amf" => 1))).await,
             ips: vec![],
-        }
+            userplane: MockUserplane::new(
+                userplane_ip.clone(),
+                logger.new(o!("upf" => userplane_ip.to_string())),
+            )
+            .await?,
+        })
     }
 
     pub async fn add_endpoint(&mut self, ip_address: &str) -> Result<()> {
@@ -320,16 +335,17 @@ impl MockAmf {
         }
     }
 
-    pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {
+    pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<GtpTeid> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
 
-        let transport_layer_address = "1.2.1.2".try_into()?;
+        let transport_layer_address = self.userplane.local_ip().clone().into();
+        let gtp_teid = GtpTeid([1, 2, 3, 4]);
 
         let pdu_session_resource_setup_request_transfer = PduSessionResourceSetupRequestTransfer {
             pdu_session_aggregate_maximum_bit_rate: None,
             ul_ngu_up_tnl_information: UpTransportLayerInformation::GtpTunnel(GtpTunnel {
                 transport_layer_address,
-                gtp_teid: GtpTeid([1, 2, 3, 4]),
+                gtp_teid: gtp_teid.clone(),
             }),
             additional_ul_ngu_up_tnl_information: None,
             data_forwarding_not_possible: None,
@@ -395,13 +411,14 @@ impl MockAmf {
             },
         ));
         self.send(pdu, Some(ue_context.binding.assoc_id)).await;
-        Ok(())
+        Ok(gtp_teid)
     }
 
     pub async fn receive_pdu_session_resource_setup_response(
         &self,
         ue_context: &UeContext,
-    ) -> Result<()> {
+        local_gtp_teid: GtpTeid,
+    ) -> Result<Session> {
         match self.receive_pdu().await.unwrap() {
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceSetupResponse(
                 PduSessionResourceSetupResponse {
@@ -412,19 +429,57 @@ impl MockAmf {
             )) => {
                 info!(&self.logger, ">> PduSessionResourceSetupResponse");
                 assert_eq!(amf_ue_ngap_id.0, ue_context.ue_id.into());
-                if let Some(xs) = pdu_session_resource_setup_list_su_res {
+                let session = if let Some(xs) = pdu_session_resource_setup_list_su_res {
                     // There should be exactly one successful session setup.
                     assert!(xs.0.len() == 1);
+                    let setup = &xs.0[0];
+                    let transfer = PduSessionResourceSetupResponseTransfer::from_bytes(
+                        &setup.pdu_session_resource_setup_response_transfer,
+                    )?;
+                    let UpTransportLayerInformation::GtpTunnel(remote_tunnel_info) = transfer
+                        .dl_qos_flow_per_tnl_information
+                        .up_transport_layer_information;
+
+                    Session {
+                        remote_tunnel_info,
+                        local_gtp_teid,
+                        _id: setup.pdu_session_id,
+                    }
                 } else {
                     panic!("Expected pdu_session_resource_setup_list_su_res on PduSessionResourceSetupResponse")
-                }
-                Ok(())
+                };
+                Ok(session)
             }
             x => panic!(
                 "Expecting PduSessionResourceSetupResponse, got unexpected message {:?}",
                 x
             ),
         }
+    }
+
+    pub async fn send_data_packet(&self, session: &Session) -> Result<()> {
+        self.userplane
+            .send_data_packet(
+                session
+                    .remote_tunnel_info
+                    .transport_layer_address
+                    .clone()
+                    .try_into()?,
+                session.remote_tunnel_info.gtp_teid.clone(),
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn recv_data_packet(&self, session: &Session) -> Result<()> {
+        self.userplane
+            .recv_data_packet(&session.local_gtp_teid)
+            .await?;
+
+        info!(self.logger, "Received data packet");
+
+        Ok(())
     }
 }
 

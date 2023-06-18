@@ -2,18 +2,33 @@ use crate::datastore::UeState;
 use anyhow::Result;
 use asn1_per::*;
 use e1ap::*;
-use ngap::{PduSessionResourceSetupItemSuReq, PduSessionResourceSetupRequestTransfer};
-use xxap::{GtpTeid, GtpTunnel, PduSessionId};
+use ngap::{
+    PduSessionResourceSetupItemSuReq, PduSessionResourceSetupRequestTransfer,
+    UpTransportLayerInformation,
+};
+use slog::{debug, Logger};
+use xxap::{GtpTunnel, PduSessionId};
 
-// TODO: move to build_e1ap
 pub fn build_e1_setup_item(
     _ue: &UeState,
     r: &PduSessionResourceSetupItemSuReq,
+    logger: &Logger,
 ) -> Result<PduSessionResourceToSetupItem> {
     let snssai: xxap::Snssai = r.snssai.clone().into();
-    let _session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
+    let session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
         &r.pdu_session_resource_setup_request_transfer,
     )?;
+
+    let UpTransportLayerInformation::GtpTunnel(gtp_tunnel) =
+        session_params.ul_ngu_up_tnl_information;
+
+    debug!(
+        logger,
+        "Pass through UL tunnel information from 5GC to UP - {}/{:?}",
+        gtp_tunnel.transport_layer_address.to_string(),
+        gtp_tunnel.gtp_teid.0
+    );
+
     Ok(PduSessionResourceToSetupItem {
         pdu_session_id: PduSessionId(r.pdu_session_id.0),
         pdu_session_type: PduSessionType::Ipv4,
@@ -24,11 +39,7 @@ pub fn build_e1_setup_item(
             maximum_i_pdatarate: None,
         },
         pdu_session_resource_dl_ambr: None,
-        // TODO: get transport information from the request
-        ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
-            transport_layer_address: "192.168.110.82".try_into()?,
-            gtp_teid: GtpTeid([0, 0, 0, 1]),
-        }),
+        ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
         pdu_session_data_forwarding_information_request: None,
         pdu_session_inactivity_timer: None,
         existing_allocated_ng_dl_up_tnl_info: None,
@@ -195,17 +206,41 @@ pub fn build_e1_modify_item(
     pdu_session_id: PduSessionId,
     gtp_tunnel: GtpTunnel,
 ) -> Result<PduSessionResourceToModifyItem> {
+    let drb_to_modify_list_ng_ran = Some(DrbToModifyListNgRan(nonempty![DrbToModifyItemNgRan {
+        drb_id: DrbId(pdu_session_id.0),
+        sdap_configuration: None,
+        pdcp_configuration: None,
+        drb_data_forwarding_information: None,
+        pdcp_sn_status_request: None,
+        pdcp_sn_status_information: None,
+        dl_up_parameters: Some(UpParameters(nonempty![UpParametersItem {
+            up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
+            cell_group_id: CellGroupId(1),
+            qos_mapping_information: None,
+        }])),
+        cell_group_to_add: None,
+        cell_group_to_modify: None,
+        cell_group_to_remove: None,
+        flow_mapping_information: None,
+        drb_inactivity_timer: None,
+        old_qos_flow_map_ul_endmarkerexpected: None,
+        drb_qos: None,
+        early_forwarding_count_req: None,
+        early_forwarding_count_info: None,
+    }]));
+
+    //: Some(UpTnlInformation::GtpTunnel(gtp_tunnel.clone()))
     Ok(PduSessionResourceToModifyItem {
         pdu_session_id,
         security_indication: None,
         pdu_session_resource_dl_ambr: None,
-        ng_ul_up_tnl_information: Some(UpTnlInformation::GtpTunnel(gtp_tunnel.clone())),
+        ng_ul_up_tnl_information: None,
         pdu_session_data_forwarding_information_request: None,
         pdu_session_data_forwarding_information: None,
         pdu_session_inactivity_timer: None,
         network_instance: None,
         drb_to_setup_list_ng_ran: None,
-        drb_to_modify_list_ng_ran: None,
+        drb_to_modify_list_ng_ran,
         drb_to_remove_list_ng_ran: None,
         snssai: None,
         common_network_instance: None,

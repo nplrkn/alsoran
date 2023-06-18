@@ -8,11 +8,15 @@ async fn successful_pdu_session_setup() -> Result<()> {
         .stage(Stage::DuConnected)
         .spawn()
         .await?;
-    let _ue = tc
+    let ue = tc
         .create_and_register_ue(1)
         .await?
         .establish_pdu_session(&mut tc)
         .await?;
+
+    ue.uplink_data_packet(&tc).await?;
+    ue.downlink_data_packet(&tc).await?;
+
     tc.terminate().await;
     Ok(())
 }

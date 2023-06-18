@@ -1,5 +1,6 @@
 use super::ue::*;
 use anyhow::Result;
+use async_net::IpAddr;
 use async_std::future;
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
@@ -7,7 +8,7 @@ use gnb_cu_cp::{
     Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig,
 };
 use gnb_cu_cp::{MockUeStore, RedisUeStore};
-use mocks::{MockAmf, MockCuUp, MockDu};
+use mocks::{MockAmf, MockDu}; // MockCuUp
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::time::Duration;
@@ -19,10 +20,11 @@ const CONNECTION_API_PORT: u16 = 50312;
 pub struct TestContext {
     pub amf: MockAmf,
     pub du: MockDu,
-    pub cu_up: MockCuUp,
+    //pub cu_up: MockCuUp,
     pub logger: Logger,
     workers: Vec<InternalWorkerInfo>,
     coordinator: Option<InternalCoordinatorInfo>,
+    cu_ups: Vec<ShutdownHandle>,
 }
 
 struct InternalWorkerInfo {
@@ -34,6 +36,7 @@ struct InternalCoordinatorInfo {
     pub shutdown_handle: ShutdownHandle,
     pub config: CoordinatorConfig,
 }
+
 #[derive(PartialEq, Eq, PartialOrd, Debug)]
 pub enum Stage {
     Init,
@@ -86,38 +89,18 @@ impl TestContextBuilder {
 
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
         let amf = start_amf_with_random_ips(&logger, self.amf_endpoint_count).await;
-        let du = MockDu::new(&logger).await;
-        let cu_up = MockCuUp::new(&logger).await;
+        let du = start_du_on_random_ip(&logger).await;
 
         let mut tc = TestContext {
             amf,
             du,
-            cu_up,
             logger,
             workers: vec![],
             coordinator: None,
+            cu_ups: vec![],
         };
 
-        // Start coordinator if there will be multiple workers.
-        if self.worker_count > 1 {
-            tc.start_coordinator().await;
-        }
-
-        // Maybe create a mock datastore to be shared by the workers (unless we're doing a live Redis test).
-        let datastore = if let Some(port) = self.redis_port {
-            WorkerDatastoreSetup::RedisPort(port)
-        } else {
-            WorkerDatastoreSetup::MockUeStore(MockUeStore::new())
-        };
-
-        // Start workers
-        info!(tc.logger, "Spawn {} worker(s)", self.worker_count);
-        for worker_index in 0..self.worker_count {
-            tc.start_worker_on_random_ip(&datastore).await;
-            tc.get_worker_to_stage(worker_index as usize, &self.stage, worker_index == 0)
-                .await?;
-        }
-
+        tc.start_cu(&self).await?;
         Ok(tc)
     }
 }
@@ -134,6 +117,36 @@ pub enum WorkerDatastoreSetup {
 }
 
 impl TestContext {
+    async fn start_cu(&mut self, builder: &TestContextBuilder) -> Result<()> {
+        // Start CU-CP coordinator if there will be multiple CU-CP workers.
+        if builder.worker_count > 1 {
+            self.start_coordinator().await;
+        }
+
+        // Maybe create a mock datastore to be shared by the CU-CP workers (unless we're doing a live Redis test).
+        let datastore = if let Some(port) = builder.redis_port {
+            WorkerDatastoreSetup::RedisPort(port)
+        } else {
+            WorkerDatastoreSetup::MockUeStore(MockUeStore::new())
+        };
+
+        // Start CU-CP workers
+        info!(self.logger, "Spawn {} worker(s)", builder.worker_count);
+        for worker_index in 0..builder.worker_count {
+            self.start_worker_on_random_ip(&datastore).await;
+            self.get_worker_to_stage(worker_index as usize, &builder.stage, worker_index == 0)
+                .await?;
+        }
+
+        // Start a CU-UP pointing at the first worker.
+        info!(self.logger, "Spawn CU-UP");
+        let first_worker_ip = self.workers[0].config.ip_addr.unwrap();
+        self.cu_ups
+            .push(start_cu_up_on_random_ip(first_worker_ip, &self.logger).await?);
+
+        Ok(())
+    }
+
     async fn start_coordinator(&mut self) {
         info!(self.logger, "Spawn coordinator");
         for _ in 0..IP_OR_PORT_RETRIES {
@@ -248,13 +261,13 @@ impl TestContext {
             }
             &Stage::AmfSecondaryEndpointsConnected => todo!(),
             &Stage::CuUpConnected => {
-                if setup_interface {
-                    self.cu_up.perform_e1_setup(&worker_ip).await?;
-                } else {
-                    self.cu_up
-                        .handle_cu_cp_configuration_update(&worker_ip)
-                        .await?;
-                }
+                //     if setup_interface {
+                //         self.cu_up.perform_e1_setup(&worker_ip).await?;
+                //     } else {
+                //         self.cu_up
+                //             .handle_cu_cp_configuration_update(&worker_ip)
+                //             .await?;
+                //     }
             }
             &Stage::DuConnected => {
                 if setup_interface {
@@ -352,7 +365,16 @@ impl TestContext {
 
 async fn start_amf_with_random_ips(logger: &Logger, num_endpoints: usize) -> MockAmf {
     assert!(num_endpoints > 0);
-    let mut amf = MockAmf::new(logger).await;
+    let mut maybe_amf = None;
+    for _ in 0..IP_OR_PORT_RETRIES {
+        if let Ok(amf) = MockAmf::new(&random_local_ip(), logger).await {
+            maybe_amf = Some(amf);
+            break;
+        }
+    }
+    let Some(mut amf) = maybe_amf else {
+        panic!("Failed to bind userplane")
+    };
 
     for _ in 0..(IP_OR_PORT_RETRIES + num_endpoints) {
         let _ = amf.add_endpoint(&random_local_ip()).await;
@@ -361,6 +383,38 @@ async fn start_amf_with_random_ips(logger: &Logger, num_endpoints: usize) -> Moc
         }
     }
     panic!("Failed to bind to {} random IPs", num_endpoints)
+}
+
+async fn start_du_on_random_ip(logger: &Logger) -> MockDu {
+    for _ in 0..IP_OR_PORT_RETRIES {
+        if let Ok(du) = MockDu::new(&random_local_ip(), logger).await {
+            return du;
+        }
+    }
+    panic!("Failed to find IP for DU")
+}
+
+async fn start_cu_up_on_random_ip(
+    cp_ip_address: IpAddr,
+    logger: &Logger,
+) -> Result<ShutdownHandle> {
+    info!(logger, "Spawn CU-UP");
+    for _ in 0..IP_OR_PORT_RETRIES {
+        let ip_address: IpAddr = random_local_ip().parse()?;
+
+        let config = gnb_cu_up::Config {
+            local_ip_address: ip_address.clone(),
+            userplane_ip_address: ip_address,
+            cp_ip_address,
+            name: None,
+        };
+        let logger = logger.new(o!("cu-up"=> ip_address.to_string()));
+
+        if let Ok(cu_up) = gnb_cu_up::spawn(config, logger) {
+            return Ok(cu_up);
+        }
+    }
+    panic!("Failed to find IP for CU-UP")
 }
 
 fn random_local_ip() -> String {

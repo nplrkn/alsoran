@@ -22,3 +22,5 @@ stop-token = "0.7.0"
 async-channel = "1.6.1"
 anyhow = "1.0.52"
 asn1-per = { path = "../asn1-per" }
+rand = "0.8.5"
+async-net = "1.6.1"
