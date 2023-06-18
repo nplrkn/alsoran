@@ -3,6 +3,7 @@
 
 use super::{GnbCuUp, Workflow};
 use anyhow::bail;
+use asn1_per::NonEmpty;
 use e1ap::*;
 use slog::warn;
 
@@ -55,11 +56,12 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                 ),
             })
         }
+        let gnb_cu_cp_tnla_setup_list = NonEmpty::from_vec(added_tnlas).map(GnbCuCpTnlaSetupList);
 
         Ok(GnbCuCpConfigurationUpdateAcknowledge {
             transaction_id: r.transaction_id,
             criticality_diagnostics: None,
-            gnb_cu_cp_tnla_setup_list: Some(GnbCuCpTnlaSetupList(added_tnlas)),
+            gnb_cu_cp_tnla_setup_list,
             gnb_cu_cp_tnla_failed_to_setup_list: None,
             transport_layer_address_info: None,
         })

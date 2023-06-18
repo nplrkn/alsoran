@@ -39,6 +39,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         }
 
         self.log_message("BearerContextSetupResponse >>");
+        let setup_items = NonEmpty::from_vec(setup_items).unwrap();
 
         Ok(BearerContextSetupResponse {
             gnb_cu_cp_ue_e1ap_id: r.gnb_cu_cp_ue_e1ap_id,

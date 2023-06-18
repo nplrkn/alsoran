@@ -206,14 +206,14 @@ pub fn build_e1_modify_item(
     pdu_session_id: PduSessionId,
     gtp_tunnel: GtpTunnel,
 ) -> Result<PduSessionResourceToModifyItem> {
-    let drb_to_modify_list_ng_ran = Some(DrbToModifyListNgRan(vec![DrbToModifyItemNgRan {
+    let drb_to_modify_list_ng_ran = Some(DrbToModifyListNgRan(nonempty![DrbToModifyItemNgRan {
         drb_id: DrbId(pdu_session_id.0),
         sdap_configuration: None,
         pdcp_configuration: None,
         drb_data_forwarding_information: None,
         pdcp_sn_status_request: None,
         pdcp_sn_status_information: None,
-        dl_up_parameters: Some(UpParameters(vec![UpParametersItem {
+        dl_up_parameters: Some(UpParameters(nonempty![UpParametersItem {
             up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
             cell_group_id: CellGroupId(1),
             qos_mapping_information: None,

@@ -1,7 +1,6 @@
 //! bearer_context_modification - update of userplane session, supplying the DU's tunnel info
 
 use super::{GnbCuUp, Workflow};
-use anyhow::Result;
 use asn1_per::*;
 use crate::packet_processor::ForwardingAction;
 use anyhow::{bail, Result, ensure};
@@ -22,7 +21,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
 
         let Some(SystemBearerContextModificationRequest::NgRanBearerContextModificationRequest(
             NgRanBearerContextModificationRequest{ 
-            pdu_session_resource_to_modify_list: Some(mut pdu_session_resource_to_modify_list), 
+            pdu_session_resource_to_modify_list: Some(pdu_session_resource_to_modify_list), 
             ..
             })) = r.system_bearer_context_modification_request 
         else {
@@ -30,10 +29,12 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         };
 
         let mut mod_items = vec![];
-        for to_mod_item in pdu_session_resource_to_modify_list.0.drain(..) {
+        let mut to_mod_items: Vec<PduSessionResourceToModifyItem> = pdu_session_resource_to_modify_list.0.into();
+        for to_mod_item in to_mod_items.drain(..) {
             let mod_item = self.modify_session(r.gnb_cu_up_ue_e1ap_id, to_mod_item).await?;
             mod_items.push(mod_item);
         }
+        let pdu_session_resource_modified_list = NonEmpty::from_vec(mod_items).map(PduSessionResourceModifiedList);
 
         self.log_message("BearerContextModificationResponse >>");
         Ok(BearerContextModificationResponse {
@@ -44,9 +45,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                     NgRanBearerContextModificationResponse {
                         pdu_session_resource_setup_mod_list: None,
                         pdu_session_resource_failed_mod_list: None,
-                        pdu_session_resource_modified_list: Some(PduSessionResourceModifiedList(
-                            mod_items,
-                        )),
+                        pdu_session_resource_modified_list,
                         pdu_session_resource_failed_to_modify_list: None,
                         retainability_measurements_info: None,
                     },
