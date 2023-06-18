@@ -3,6 +3,7 @@
 use super::Workflow;
 use crate::gnb_cu_cp::GnbCuCp;
 use anyhow::Result;
+use asn1_per::*;
 use f1ap::{
     CpTransportLayerAddress, GnbCuConfigurationUpdate, GnbCuConfigurationUpdateProcedure,
     GnbCuTnlAssociationToAddItem, GnbCuTnlAssociationToAddList, TnlAssociationUsage, TransactionId,
@@ -14,7 +15,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             transaction_id: TransactionId(1), // TODO
             cells_to_be_activated_list: None,
             cells_to_be_deactivated_list: None,
-            gnb_cu_tnl_association_to_add_list: Some(GnbCuTnlAssociationToAddList(vec![
+            gnb_cu_tnl_association_to_add_list: Some(GnbCuTnlAssociationToAddList(nonempty![
                 GnbCuTnlAssociationToAddItem {
                     tnl_association_transport_layer_address:
                         CpTransportLayerAddress::EndpointIpAddress(

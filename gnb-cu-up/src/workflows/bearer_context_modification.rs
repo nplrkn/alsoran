@@ -2,6 +2,7 @@
 
 use super::{GnbCuUp, Workflow};
 use anyhow::Result;
+use asn1_per::*;
 use e1ap::*;
 use net::{RequestError, ResponseAction};
 use xxap::PduSessionId;
@@ -29,7 +30,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
                             pdu_session_resource_setup_mod_list: None,
                             pdu_session_resource_failed_mod_list: None,
                             pdu_session_resource_modified_list: Some(
-                                PduSessionResourceModifiedList(vec![
+                                PduSessionResourceModifiedList(nonempty![
                                     PduSessionResourceModifiedItem {
                                         pdu_session_id: PduSessionId(1), // TODO
                                         ng_dl_up_tnl_information: None,

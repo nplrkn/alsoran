@@ -4,6 +4,7 @@ pub use transaction::*;
 pub use asn1_codecs::{PerCodecData, PerCodecError};
 pub use bitvec::prelude::*;
 pub type BitString = BitVec<u8, Msb0>;
+pub use nonempty::*;
 pub use num_enum::TryFromPrimitive;
 
 pub trait PerCodec: Sized {

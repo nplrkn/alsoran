@@ -2,7 +2,7 @@
 
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, ensure, Result};
-use bitvec::prelude::*;
+use asn1_per::*;
 use f1ap::*;
 use net::{Binding, SerDes, TransportProvider};
 use pdcp::PdcpPdu;
@@ -369,19 +369,19 @@ impl MockDu {
                 c_rnti: None,
                 resource_coordination_transfer_container: None,
                 full_configuration: None,
-                drbs_setup_list: Some(DrbsSetupList(vec![DrbsSetupItem {
+                drbs_setup_list: Some(DrbsSetupList(nonempty![DrbsSetupItem {
                     drb_id: DrbId(1),
                     lcid: None,
-                    dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList(vec![
-                        DlUpTnlInformationToBeSetupItem {
+                    dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList(
+                        nonempty![DlUpTnlInformationToBeSetupItem {
                             dl_up_tnl_information: UpTransportLayerInformation::GtpTunnel(
                                 GtpTunnel {
                                     transport_layer_address: "1.2.3.4".try_into().unwrap(),
                                     gtp_teid: GtpTeid([5, 6, 1, 2]),
                                 },
                             ),
-                        },
-                    ]),
+                        },]
+                    ),
                     additional_pdcp_duplication_tnl_list: None,
                     current_qos_para_set_index: None,
                 }])),
@@ -424,36 +424,32 @@ impl MockDu {
 
     pub async fn receive_rrc_reconfiguration(&self, ue_context: &UeContext) -> Result<Vec<u8>> {
         let dl_rrc_message_transfer = self.receive_dl_rrc(ue_context).await?;
-        let mut nas_messages =
-            match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
-                DlDcchMessageType::C1(C1_2::RrcReconfiguration(RrcReconfiguration {
-                    critical_extensions:
-                        CriticalExtensions15::RrcReconfiguration(RrcReconfigurationIEs {
-                            non_critical_extension:
-                                Some(RrcReconfigurationV1530IEs {
-                                    dedicated_nas_message_list: Some(x),
-                                    ..
-                                }),
-                            ..
-                        }),
-                    ..
-                })) => {
-                    info!(
-                        &self.logger,
-                        "DlRrcMessageTransfer(RrcReconfiguration(Nas)) <<"
-                    );
-                    Ok(x)
-                }
-                _ => Err(anyhow!(
-                    "Couldn't find NAS message list in Rrc Reconfiguration"
-                )),
-            }?;
+        let nas_messages = match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message
+        {
+            DlDcchMessageType::C1(C1_2::RrcReconfiguration(RrcReconfiguration {
+                critical_extensions:
+                    CriticalExtensions15::RrcReconfiguration(RrcReconfigurationIEs {
+                        non_critical_extension:
+                            Some(RrcReconfigurationV1530IEs {
+                                dedicated_nas_message_list: Some(x),
+                                ..
+                            }),
+                        ..
+                    }),
+                ..
+            })) => {
+                info!(
+                    &self.logger,
+                    "DlRrcMessageTransfer(RrcReconfiguration(Nas)) <<"
+                );
+                Ok(x)
+            }
+            _ => Err(anyhow!(
+                "Couldn't find NAS message list in Rrc Reconfiguration"
+            )),
+        }?;
 
-        ensure!(
-            nas_messages.len() == 1,
-            "Expected a single NAS message in list"
-        );
-        Ok(nas_messages.remove(0).0)
+        Ok(nas_messages.head.0)
     }
 
     pub async fn send_rrc_reconfiguration_complete(&self, ue_context: &UeContext) -> Result<()> {
@@ -517,7 +513,6 @@ impl MockDu {
         match &gnb_cu_tnl_association_to_add_list
             .0
             .first()
-            .expect("Expected nonempty gnb_cu_tnl_association_to_add_list")
             .tnl_association_transport_layer_address
         {
             CpTransportLayerAddress::EndpointIpAddress(ref x) => {
@@ -543,12 +538,12 @@ impl MockDu {
                     transaction_id,
                     cells_failed_to_be_activated_list: None,
                     criticality_diagnostics: None,
-                    gnb_cu_tnl_association_setup_list: Some(GnbCuTnlAssociationSetupList(vec![
-                        GnbCuTnlAssociationSetupItem {
+                    gnb_cu_tnl_association_setup_list: Some(GnbCuTnlAssociationSetupList(
+                        nonempty![GnbCuTnlAssociationSetupItem {
                             tnl_association_transport_layer_address:
                                 CpTransportLayerAddress::EndpointIpAddress(transport_layer_address),
-                        },
-                    ])),
+                        },],
+                    )),
                     gnb_cu_tnl_association_failed_to_setup_list: None,
                     dedicated_si_delivery_needed_ue_list: None,
                     transport_layer_address_info: None,

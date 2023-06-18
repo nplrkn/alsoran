@@ -2,11 +2,11 @@
 
 use super::{build_e1ap, GnbCuCp, Workflow};
 use crate::datastore::UeState;
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{anyhow, bail, Result};
+use asn1_per::*;
 use e1ap::*;
 use f1ap::{
-    CellGroupConfig, DlUpTnlInformationToBeSetupItem, DrbsSetupItem, DrbsToBeSetupItem,
-    DrbsToBeSetupList, UeContextSetupProcedure,
+    CellGroupConfig, DrbsSetupItem, DrbsToBeSetupItem, DrbsToBeSetupList, UeContextSetupProcedure,
 };
 use ngap::{
     PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
@@ -59,6 +59,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let ok_sessions = self
             .pdu_session_resource_setup_stages(r)
             .await
+            .map(|x| x.into())
             .unwrap_or_else(|e| {
                 warn!(self.logger, "Error processing session setup - {}", e);
                 vec![]
@@ -75,17 +76,11 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             })
             .collect();
 
-        let pdu_session_resource_setup_list_su_res = if ok_sessions.is_empty() {
-            None
-        } else {
-            Some(PduSessionResourceSetupListSuRes(ok_sessions))
-        };
+        let pdu_session_resource_setup_list_su_res =
+            NonEmpty::from_vec(ok_sessions).map(PduSessionResourceSetupListSuRes);
 
-        let pdu_session_resource_failed_to_setup_list_su_res = if failed_sessions.is_empty() {
-            None
-        } else {
-            Some(PduSessionResourceFailedToSetupListSuRes(failed_sessions))
-        };
+        let pdu_session_resource_failed_to_setup_list_su_res =
+            NonEmpty::from_vec(failed_sessions).map(PduSessionResourceFailedToSetupListSuRes);
 
         debug!(self.logger, "PduSessionResourceSetupResponse >> ");
         PduSessionResourceSetupResponse {
@@ -100,7 +95,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     pub async fn pdu_session_resource_setup_stages(
         &self,
         r: PduSessionResourceSetupRequest,
-    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
+    ) -> Result<NonEmpty<PduSessionResourceSetupItemSuRes>> {
         // Load UE.
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
         let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
@@ -125,11 +120,15 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn e1_context_setup(
         &self,
         ue: &mut UeState,
-        sessions: Vec<Stage1>,
+        sessions: NonEmpty<Stage1>,
     ) -> Result<Vec<Stage2>> {
         let requested = build_e1_setup_items(ue, &sessions, self.logger)?;
-        let successes = self.perform_bearer_context_setup(ue, requested).await;
-        Ok(keep_matching_items(sessions, successes, self.logger))
+        let successes = self.perform_bearer_context_setup(ue, requested).await?;
+        Ok(keep_matching_items(
+            sessions.into(),
+            successes.into(),
+            self.logger,
+        ))
     }
 
     async fn f1_context_setup(
@@ -139,7 +138,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> Result<(Vec<Stage3>, CellGroupConfig)> {
         let requested = build_drbs_to_be_setup_items(&sessions, self.logger)?;
         let (successes, cell_group_config) = self.perform_ue_context_setup(ue, requested).await?;
-        let successful_sessions = keep_matching_items(sessions, successes, self.logger);
+        let successful_sessions = keep_matching_items(sessions, successes.into(), self.logger);
         Ok((successful_sessions, cell_group_config))
     }
 
@@ -147,8 +146,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let requested = build_e1_modify_items(&sessions, self.logger)?;
         let successes = self
             .perform_bearer_context_modification(ue, requested)
-            .await;
-        Ok(keep_matching_items(sessions, successes, self.logger))
+            .await?;
+        Ok(keep_matching_items(sessions, successes.into(), self.logger))
     }
 
     async fn rrc_reconfiguration(
@@ -174,8 +173,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn perform_ue_context_setup(
         &self,
         ue: &UeState,
-        items: Vec<DrbsToBeSetupItem>,
-    ) -> Result<(Vec<DrbsSetupItem>, CellGroupConfig)> {
+        items: NonEmpty<DrbsToBeSetupItem>,
+    ) -> Result<(NonEmpty<DrbsSetupItem>, CellGroupConfig)> {
         let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
             self.gnb_cu_cp,
             &ue,
@@ -212,8 +211,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn perform_bearer_context_setup(
         &self,
         ue: &mut UeState,
-        items: Vec<PduSessionResourceToSetupItem>,
-    ) -> Vec<PduSessionResourceSetupItem> {
+        items: NonEmpty<PduSessionResourceToSetupItem>,
+    ) -> Result<NonEmpty<PduSessionResourceSetupItem>> {
         // Send BearerContextSetup to CU-UP.
         let bearer_context_setup = build_e1ap::build_bearer_context_setup(
             &ue,
@@ -242,18 +241,16 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 // Success - store CU-UP's UE ID.
                 ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
 
-                x
+                Ok(x)
             }
             Ok(m) => {
-                warn!(
-                    self.logger,
-                    "BearerContextSetupRequest without NGRAN resource setup items: {:?}", m
+                bail!(
+                    "BearerContextSetupRequest without NGRAN resource setup items: {:?}",
+                    m
                 );
-                vec![]
             }
             Err(e) => {
-                debug!(self.logger, "Failed bearer context setup {:?}", e);
-                vec![]
+                bail!("Failed bearer context setup {:?}", e);
             }
         }
     }
@@ -261,11 +258,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     async fn perform_bearer_context_modification(
         &self,
         ue: &UeState,
-        items: Vec<PduSessionResourceToModifyItem>,
-    ) -> Vec<PduSessionResourceModifiedItem> {
+        items: NonEmpty<PduSessionResourceToModifyItem>,
+    ) -> Result<NonEmpty<PduSessionResourceModifiedItem>> {
         let Some(gnb_cu_up_ue_e1ap_id) = ue.gnb_cu_up_ue_e1ap_id else {
-            warn!(self.logger, "No E1AP ID on UE");
-            return vec![]
+            bail!("No E1AP ID on UE");
         };
 
         let bearer_context_modification =
@@ -290,19 +286,14 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                     ..
                 }) => x,
                 Ok(m) => {
-                    warn!(
-                        self.logger,
-                        "BearerContextModificationResponse without resource modify items: {:?}", m
-                    );
-                    return vec![];
+                    bail!("BearerContextModificationResponse without resource modify items: {:?}", m);
                 },
                 Err(e) => {
-                    debug!(self.logger, "Failed bearer context modify {:?}", e);
-                    return vec![];
+                    bail!("Failed bearer context modify {:?}", e);
                 }
             };
         debug!(self.logger, ">> BearerContextSetupResponse");
-        resource_modify_items
+        Ok(resource_modify_items)
     }
 
     async fn perform_rrc_reconfiguration(
@@ -313,11 +304,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> Result<rrc::UlDcchMessage> {
         // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
-        let nas_messages = if nas_messages.is_empty() {
-            None
-        } else {
-            Some(nas_messages)
-        };
+        let nas_messages = NonEmpty::from_vec(nas_messages);
         let rrc_container =
             super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config.0)?;
         self.log_message("<< RrcReconfiguration");
@@ -332,7 +319,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         &self,
         _ue: &UeState,
         mut sessions: Vec<Stage5>,
-    ) -> Result<Vec<PduSessionResourceSetupItemSuRes>> {
+    ) -> Result<NonEmpty<PduSessionResourceSetupItemSuRes>> {
         let responses: Vec<PduSessionResourceSetupItemSuRes> = sessions
             .drain(..)
             .flat_map(|session| {
@@ -351,12 +338,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             })
             .collect();
 
-        ensure!(
-            !responses.is_empty(),
-            "No Ngap responses built successfully"
-        );
-
-        Ok(responses)
+        NonEmpty::from_vec(responses).ok_or_else(|| anyhow!("No Ngap responses built successfully"))
     }
 }
 
@@ -424,7 +406,7 @@ impl HasId for Stage4 {
 fn build_drbs_to_be_setup_items(
     sessions: &Vec<Stage2>,
     logger: &Logger,
-) -> Result<Vec<DrbsToBeSetupItem>> {
+) -> Result<NonEmpty<DrbsToBeSetupItem>> {
     let items: Vec<DrbsToBeSetupItem> = sessions
         .iter()
         .flat_map(
@@ -453,15 +435,14 @@ fn build_drbs_to_be_setup_items(
         )
         .collect();
 
-    ensure!(!items.is_empty(), "No Drb items built successfully");
-    Ok(items)
+    NonEmpty::from_vec(items).ok_or(anyhow!("No Drb items built successfully"))
 }
 
 fn build_e1_setup_items(
     ue: &UeState,
-    sessions: &Vec<Stage1>,
+    sessions: &NonEmpty<Stage1>,
     logger: &Logger,
-) -> Result<Vec<PduSessionResourceToSetupItem>> {
+) -> Result<NonEmpty<PduSessionResourceToSetupItem>> {
     let items: Vec<PduSessionResourceToSetupItem> = sessions
         .iter()
         .flat_map(|x| {
@@ -471,35 +452,25 @@ fn build_e1_setup_items(
             })
         })
         .collect();
-    ensure!(!items.is_empty(), "No E1 setup items built successfully");
-    Ok(items)
+    NonEmpty::from_vec(items).ok_or(anyhow!("No E1 setup items built successfully"))
 }
 
 fn build_e1_modify_items(
     sessions: &Vec<Stage3>,
     logger: &Logger,
-) -> Result<Vec<PduSessionResourceToModifyItem>> {
+) -> Result<NonEmpty<PduSessionResourceToModifyItem>> {
     let mut items = vec![];
     for session in sessions {
-        match session
+        let f1ap::UpTransportLayerInformation::GtpTunnel(gtp_tunnel) = &session
             // Get the tunnel information returned by the DU...
             .1
             .dl_up_tnl_information_to_be_setup_list
             .0
             .first()
-            .ok_or_else(|| anyhow!("No GTP tunnel information from DU"))
             // ...reformulate to give it to the CU-UP
-            .and_then(
-                |DlUpTnlInformationToBeSetupItem {
-                     dl_up_tnl_information:
-                         f1ap::UpTransportLayerInformation::GtpTunnel(gtp_tunnel),
-                 }| {
-                    build_e1ap::build_e1_modify_item(
-                        PduSessionId(session.id()),
-                        gtp_tunnel.clone(),
-                    )
-                },
-            ) {
+            .dl_up_tnl_information;
+
+        match build_e1ap::build_e1_modify_item(PduSessionId(session.id()), gtp_tunnel.clone()) {
             // ...and store in the list
             Ok(item) => items.push(item),
             Err(e) => {
@@ -507,6 +478,5 @@ fn build_e1_modify_items(
             }
         };
     }
-    ensure!(!items.is_empty(), "No E1 modify items built successfully");
-    Ok(items)
+    NonEmpty::from_vec(items).ok_or_else(|| anyhow!("No E1 modify items built successfully"))
 }

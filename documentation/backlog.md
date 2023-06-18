@@ -55,7 +55,6 @@
 ## ASN.1 GENERATOR
 - fixed size octet string should be [] not Vec?
 - inlining of lists to avoid newtypes of vecs (e.g. PDU-Session-Resource-Activity-List)
-- use NonEmpty instead of Vec in ASN.1 autogen if lower bound is 1
 - ENUMERATED{True} OPTIONAL (as seen in RRC) should appear in Rust as a bool
 - Cope with extension marker being set
 - Get rid of todo!() in top_pdu.rs and replace with a log
@@ -83,6 +82,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- ASN.1 generator makes use of NonEmpty
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Refactoring of pdu_session_resource_setup.rs
 - Add PduSessionId to xxap common

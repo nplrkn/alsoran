@@ -2,11 +2,11 @@
 
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{bail, Result};
-use bitvec::prelude::*;
 use e1ap::*;
 use xxap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
+use asn1_per::*;
 
 impl Pdu for E1apPdu {}
 
@@ -57,7 +57,7 @@ impl MockCuUp {
     }
 
     async fn send_e1_setup_request(&self) -> Result<()> {
-        let supported_plmns = SupportedPlmnsList(vec![SupportedPlmnsItem {
+        let supported_plmns = SupportedPlmnsList(nonempty![SupportedPlmnsItem {
             plmn_identity: PlmnIdentity([0, 1, 2]),
             slice_support_list: None,
             nr_cgi_support_list: None,
@@ -128,7 +128,6 @@ impl MockCuUp {
         match &gnb_cu_cp_tnla_to_add_list
             .0
             .first()
-            .expect("Expected nonempty gnb_cu_cp_tnla_to_add_list list")
             .tnl_association_transport_layer_address
         {
             CpTnlInformation::EndpointIpAddress(ref x) => {
@@ -151,7 +150,7 @@ impl MockCuUp {
                 GnbCuCpConfigurationUpdateAcknowledge {
                     transaction_id,
                     criticality_diagnostics: None,
-                    gnb_cu_cp_tnla_setup_list: Some(GnbCuCpTnlaSetupList(vec![
+                    gnb_cu_cp_tnla_setup_list: Some(GnbCuCpTnlaSetupList(nonempty![
                         GnbCuCpTnlaSetupItem {
                             tnl_association_transport_layer_address:
                                 CpTnlInformation::EndpointIpAddress(transport_layer_address),
@@ -205,7 +204,7 @@ impl MockCuUp {
                 system_bearer_context_setup_response:
                     SystemBearerContextSetupResponse::NgRanBearerContextSetupResponse(
                         NgRanBearerContextSetupResponse {
-                            pdu_session_resource_setup_list: PduSessionResourceSetupList(vec![
+                            pdu_session_resource_setup_list: PduSessionResourceSetupList(nonempty![
                                 PduSessionResourceSetupItem {
                                     pdu_session_id:PduSessionId(1),
                                     security_result:None,
@@ -215,16 +214,16 @@ impl MockCuUp {
                                     }),
                                     pdu_session_data_forwarding_information_response:None,
                                     ng_dl_up_unchanged:None,
-                                    drb_setup_list_ng_ran:DrbSetupListNgRan(vec![DrbSetupItemNgRan{
+                                    drb_setup_list_ng_ran:DrbSetupListNgRan(nonempty![DrbSetupItemNgRan{
                                         drb_id:DrbId(1),
                                         drb_data_forwarding_information_response:None,
-                                        ul_up_transport_parameters:UpParameters(vec![UpParametersItem{
+                                        ul_up_transport_parameters:UpParameters(nonempty![UpParametersItem{
                                             up_tnl_information:UpTnlInformation::GtpTunnel(GtpTunnel{
                                                 transport_layer_address:TransportLayerAddress(du_facing_transport_layer_address),
                                                 gtp_teid:GtpTeid([2,3,2,1])}),
                                             cell_group_id:CellGroupId(1), 
                                             qos_mapping_information: None }]),
-                                        flow_setup_list:QosFlowList(vec![QosFlowItem{
+                                        flow_setup_list:QosFlowList(nonempty![QosFlowItem{
                                             qos_flow_identifier:QosFlowIdentifier(1), 
                                             qos_flow_mapping_indication: None }]),
                                         flow_failed_list:None}]),
@@ -286,7 +285,7 @@ impl MockCuUp {
                             // TODO - supply these to make a proper reply to the request
                             pdu_session_resource_setup_mod_list: None,
                             pdu_session_resource_failed_mod_list: None,
-                            pdu_session_resource_modified_list: Some(PduSessionResourceModifiedList(vec![
+                            pdu_session_resource_modified_list: Some(PduSessionResourceModifiedList(nonempty![
                                 PduSessionResourceModifiedItem{ 
                                     pdu_session_id: PduSessionId(1), 
                                     ng_dl_up_tnl_information: None, 

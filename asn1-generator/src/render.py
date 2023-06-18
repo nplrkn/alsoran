@@ -49,7 +49,10 @@ def type_and_constraints(node):
             inner = bounds[-1]
             type_info.inner_type_info = type_and_constraints(inner)
             bounds = bounds[0: -1]
-            type_info.typ = f"Vec<{type_info.inner_type_info.typ}>"
+            if bounds[0] > 0:
+                type_info.typ = f"NonEmpty<{type_info.inner_type_info.typ}>"
+            else:
+                type_info.typ = f"Vec<{type_info.inner_type_info.typ}>"
 
         fixed_size = False
 
@@ -94,6 +97,11 @@ def type_and_constraints(node):
 def decode_expression(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof:
+        if type_info.rust_type.startswith("NonEmpty"):
+            items = "NonEmpty::from_vec(items).unwrap()"
+        else:
+            items = "items"
+
         ie_extra_lines = """
                 let _ = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
@@ -105,13 +113,13 @@ def decode_expression(tree):
 {ie_extra_lines}
                 items.push({(decode_expression(tree.children[2]))});
             }}
-            items
+            {items}
         }}"""
     elif type_info.typ == "OctetString":
         if type_info.rust_type[0:3] == "Vec":
             return f"decode::decode_octetstring(data, {type_info.constraints})?"
         else:
-            assert(type_info.rust_type[0:3] == "[u8")
+            assert (type_info.rust_type[0:3] == "[u8")
             return f"decode::decode_octetstring(data, {type_info.constraints})?.try_into().unwrap()"
     elif type_info.typ == "BitString":
         return f"decode::decode_bitstring(data, {type_info.constraints})?"
@@ -163,7 +171,7 @@ encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.code}, fa
         if type_info.rust_type[0:3] == "Vec":
             format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
         else:
-            assert(type_info.rust_type[0:3] == "[u8")
+            assert (type_info.rust_type[0:3] == "[u8")
             format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &({{copy_type_deref}}{{value}}).into(), false)"
     elif type_info.rust_type == "BitString":
         format_string = f"encode::encode_bitstring({{data}}, {type_info.constraints}, &{{value}}, false)"
@@ -339,7 +347,7 @@ class ChoiceFieldsTo(Interpreter):
                     "x", copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
             }}
 """
-        assert(not type_info.is_ie)
+        assert (not type_info.is_ie)
         self.field_index += 1
 
     def empty_sequence_field(self, tree):
@@ -613,7 +621,7 @@ class Procedure:
     def __init__(self, tree):
         self.name = next(tree.find_data("procedure_name")
                          ).children[0] + "Procedure"
-        assert(self.name != "Procedure")
+        assert (self.name != "Procedure")
         self.family = next(tree.find_data("family")).children[0]
         self.initiating = next(tree.find_data("initiating")).children[0]
         self.code = next(tree.find_data("procedure_code")).children[0]
@@ -1069,11 +1077,11 @@ impl {orig_name} {{
     #     print("Warning - object_def not implemented")
 
     def extension_container(self, tree):
-        assert(False)
+        assert (False)
         pass
 
     def extended_item(self, tree):
-        assert(False)
+        assert (False)
 
     def generate_top_level_enums(self):
         if self.top_level_enums:
@@ -1998,7 +2006,7 @@ AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalD
 """, """
 // AdditionalDlUpTnlInformationForHoList
 # [derive(Clone, Debug)]
-pub struct AdditionalDlUpTnlInformationForHoList(pub Vec<AdditionalDlUpTnlInformationForHoItem>);
+pub struct AdditionalDlUpTnlInformationForHoList(pub NonEmpty<AdditionalDlUpTnlInformationForHoItem>);
 
 impl AdditionalDlUpTnlInformationForHoList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -2008,7 +2016,7 @@ impl AdditionalDlUpTnlInformationForHoList {
             for _ in 0..length {
                 items.push(AdditionalDlUpTnlInformationForHoItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2047,7 +2055,7 @@ DLPRSResourceCoordinates-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
 // DlprsResourceCoordinates
 # [derive(Clone, Debug)]
 pub struct DlprsResourceCoordinates {
-    pub listof_dl_prs_resource_set_arp: Vec<DlprsResourceSetArp>,
+    pub listof_dl_prs_resource_set_arp: NonEmpty<DlprsResourceSetArp>,
     pub foo: Option<i8>,
 }
 
@@ -2060,7 +2068,7 @@ impl DlprsResourceCoordinates {
             for _ in 0..length {
                 items.push(DlprsResourceSetArp::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         };
         let foo = if optionals[0] {
             Some(decode::decode_integer(data, Some(-5), Some(5), false)?.0 as i8)
@@ -2126,7 +2134,7 @@ UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
 
 // UeAssociatedLogicalF1ConnectionListRes
 # [derive(Clone, Debug)]
-pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
+pub struct UeAssociatedLogicalF1ConnectionListRes(pub NonEmpty<UeAssociatedLogicalF1ConnectionItem>);
 
 impl UeAssociatedLogicalF1ConnectionListRes {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -2139,7 +2147,7 @@ impl UeAssociatedLogicalF1ConnectionListRes {
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2244,7 +2252,7 @@ impl PerCodec for BapMappingConfiguration {
 }
 // BhRoutingInformationAddedList
 # [derive(Clone, Debug)]
-pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
+pub struct BhRoutingInformationAddedList(pub NonEmpty<BhRoutingInformationAddedListItem>);
 
 impl BhRoutingInformationAddedList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
@@ -2257,7 +2265,7 @@ impl BhRoutingInformationAddedList {
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhRoutingInformationAddedListItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2301,7 +2309,7 @@ GNB-CUSystemInformation-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
 // GnbCuSystemInformation
 # [derive(Clone, Debug)]
 pub struct GnbCuSystemInformation {
-    pub sibtypetobeupdatedlist: Vec<SibtypetobeupdatedListItem>,
+    pub sibtypetobeupdatedlist: NonEmpty<SibtypetobeupdatedListItem>,
     pub system_information_area_id: Option<SystemInformationAreaId>,
 }
 
@@ -2314,7 +2322,7 @@ impl GnbCuSystemInformation {
             for _ in 0..length {
                 items.push(SibtypetobeupdatedListItem::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         };
 
         // Process the extension container
@@ -2568,7 +2576,7 @@ AvailabilityCombination-r16 ::=         SEQUENCE {
 // AvailabilityCombinationR16
 # [derive(Clone, Debug)]
 pub struct AvailabilityCombinationR16 {
-    pub resource_availability_r_16: Vec<u8>,
+    pub resource_availability_r_16: NonEmpty<u8>,
 }
 
 impl AvailabilityCombinationR16 {
@@ -2580,7 +2588,7 @@ impl AvailabilityCombinationR16 {
             for _ in 0..length {
                 items.push(decode::decode_integer(data, Some(0), Some(7), false)?.0 as u8);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         };
 
         Ok(Self {
@@ -2626,7 +2634,7 @@ SystemInformation-IEs ::=           SEQUENCE {
 // SystemInformationIEs
 # [derive(Clone, Debug)]
 pub struct SystemInformationIEs {
-    pub sib_type_and_info: Vec<SibTypeAndInfo>,
+    pub sib_type_and_info: NonEmpty<SibTypeAndInfo>,
 }
 
 impl SystemInformationIEs {
@@ -2638,7 +2646,7 @@ impl SystemInformationIEs {
             for _ in 0..length {
                 items.push(SibTypeAndInfo::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         };
 
         Ok(Self {
@@ -2757,7 +2765,7 @@ impl PerCodec for CsiAssociatedReportConfigInfo {
 // NzpCsiRs
 # [derive(Clone, Debug)]
 pub struct NzpCsiRs {
-    pub qcl_info: Option<Vec<TciStateId>>,
+    pub qcl_info: Option<NonEmpty<TciStateId>>,
 }
 
 impl NzpCsiRs {
@@ -2770,7 +2778,7 @@ impl NzpCsiRs {
             for _ in 0..length {
                 items.push(TciStateId::decode(data)?);
             }
-            items
+            NonEmpty::from_vec(items).unwrap()
         })
         } else {
             None

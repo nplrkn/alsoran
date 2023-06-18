@@ -2,7 +2,7 @@
 
 use super::{GnbCuCp, Workflow};
 use anyhow::Result;
-use f1ap::{SrbId, UeContextSetupProcedure};
+use f1ap::SrbId;
 use net::ResponseAction;
 use ngap::*;
 use rrc::*;
@@ -42,47 +42,16 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let rrc_container = super::build_rrc::build_rrc_security_mode_command(2)
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
 
-        let session_setup_info = if let Some(sessions) = &r.pdu_session_resource_setup_list_cxt_req
-        {
+        if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {
             // --- Sessions needed ---
-            // TODO: implementation incomplete and this arm not tested
-
-            // Build Ue Context Setup request and include the Rrc security mode command.
-            let ue_context_setup_request =
-                super::build_f1ap::build_ue_context_setup_request_from_initial_context_setup(
-                    self.gnb_cu_cp,
-                    r,
-                    &ue,
-                    Some(rrc_container),
-                )
-                .map_err(|e| {
-                    self.log_message_error(&format!(
-                        "Failed to build context setup request - {}",
-                        e
-                    ));
-                    Cause::Misc(CauseMisc::Unspecified)
-                })?;
-
-            // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
-            self.log_message("<< UeContextSetup(SecurityModeCommand)");
-            let ue_context_setup_response = self
-                .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
-                .await
-                .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
-            self.log_message(">> UeContextSetupResponse");
-            Some((
-                sessions,
-                ue_context_setup_response
-                    .du_to_cu_rrc_information
-                    .cell_group_config
-                    .0,
-            ))
+            // TODO
+            self.log_message_error("Combined context and session setup not suppported");
+            return Err(Cause::Misc(CauseMisc::Unspecified));
         } else {
             // --- No sessions needed ---
             self.log_message("<< SecurityModeCommand");
             self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
                 .await;
-            None
         };
 
         // Receive Security Mode Complete.
@@ -92,29 +61,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
         self.log_message(">> SecurityModeComplete");
 
-        if let Some((_sessions, cell_group_config)) = session_setup_info {
-            // --- Sessions needed ---
-            // TODO: implementation incomplete and this arm not tested
-
-            // Perform Rrc Reconfiguration including the Nas message from earlier.
-            let rrc_transaction = self.new_rrc_transaction(&ue).await;
-            let rrc_container = super::build_rrc::build_rrc_reconfiguration(
-                3,
-                r.nas_pdu.clone().map(|x| vec![x.0]),
-                cell_group_config,
-            )
-            .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
-
-            // Send to the UE and get back the response.
-            self.log_message("<< RrcReconfiguration");
-            self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
-                .await;
-            let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
-                .recv()
-                .await
-                .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
-            self.log_message(">> RrcReconfigurationComplete");
-        } else if let Some(nas) = r.nas_pdu.clone() {
+        if let Some(nas) = r.nas_pdu.clone() {
             if let Err(e) = self.send_nas_to_ue(&ue, DedicatedNasMessage(nas.0)).await {
                 debug!(self.logger, "Failed to send NAS to UE- {:?}", e)
             }

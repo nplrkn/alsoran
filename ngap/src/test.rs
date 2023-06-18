@@ -12,11 +12,11 @@ fn make_ng_setup() -> NgSetupRequest {
             gnb_id: GnbId::GnbId(vec![0x00, 0x01, 0x02].view_bits::<Msb0>().into()),
         }),
         ran_node_name: Some(RanNodeName("free5gc".to_string())),
-        supported_ta_list: SupportedTaList(vec![SupportedTaItem {
+        supported_ta_list: SupportedTaList(nonempty![SupportedTaItem {
             tac: Tac([0, 0, 1]),
-            broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
+            broadcast_plmn_list: BroadcastPlmnList(nonempty![BroadcastPlmnItem {
                 plmn_identity: plmn_identity,
-                tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                tai_slice_support_list: SliceSupportList(nonempty![SliceSupportItem {
                     snssai: Snssai(1, Some([1, 2, 3])).into(),
                 }]),
                 npn_support: None,
@@ -56,11 +56,11 @@ fn test_ng_setup() -> Result<(), PerCodecError> {
             gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
         }),
         ran_node_name: None,
-        supported_ta_list: SupportedTaList(vec![SupportedTaItem {
+        supported_ta_list: SupportedTaList(nonempty![SupportedTaItem {
             tac: Tac([0, 1, 2]),
-            broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
+            broadcast_plmn_list: BroadcastPlmnList(nonempty![BroadcastPlmnItem {
                 plmn_identity: PlmnIdentity([2, 3, 2]),
-                tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                tai_slice_support_list: SliceSupportList(nonempty![SliceSupportItem {
                     snssai: Snssai(1, None).into(),
                 }]),
                 npn_support: None,

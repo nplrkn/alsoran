@@ -2,7 +2,7 @@
 
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, Result};
-use bitvec::prelude::*;
+use asn1_per::*;
 use net::{Binding, SerDes, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
@@ -76,7 +76,7 @@ impl MockAmf {
         };
         info!(logger, ">> NgSetupRequest");
 
-        let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
+        let served_guami_list = ServedGuamiList(nonempty![ServedGuamiItem {
             guami: self.guami(),
             backup_amf_name: None,
             guami_type: None,
@@ -87,9 +87,9 @@ impl MockAmf {
                 amf_name: AmfName("MockAmf".to_string()),
                 served_guami_list,
                 relative_amf_capacity: RelativeAmfCapacity(100),
-                plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
+                plmn_support_list: PlmnSupportList(nonempty![PlmnSupportItem {
                     plmn_identity: self.plmn_identity(),
-                    slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                    slice_support_list: SliceSupportList(nonempty![SliceSupportItem {
                         snssai: self.snssai().into(),
                     }]),
                     npn_support: None,
@@ -193,7 +193,7 @@ impl MockAmf {
                 core_network_assistance_information_for_inactive: None,
                 guami: self.guami(),
                 pdu_session_resource_setup_list_cxt_req: None,
-                allowed_nssai: AllowedNssai(vec![AllowedNssaiItem {
+                allowed_nssai: AllowedNssai(nonempty![AllowedNssaiItem {
                     snssai: self.snssai().into(),
                 }]),
                 ue_security_capabilities: UeSecurityCapabilities {
@@ -264,7 +264,7 @@ impl MockAmf {
         info!(&self.logger, "<< AmfStatusIndication");
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::AmfStatusIndication(
             AmfStatusIndication {
-                unavailable_guami_list: UnavailableGuamiList(vec![UnavailableGuamiItem {
+                unavailable_guami_list: UnavailableGuamiList(nonempty![UnavailableGuamiItem {
                     guami: self.guami(),
                     timer_approach_for_guami_removal: None,
                     backup_amf_name: None,
@@ -336,34 +336,36 @@ impl MockAmf {
             pdu_session_type: PduSessionType::Ipv4,
             security_indication: None,
             network_instance: None,
-            qos_flow_setup_request_list: QosFlowSetupRequestList(vec![QosFlowSetupRequestItem {
-                qos_flow_identifier: QosFlowIdentifier(1),
-                qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
-                    qos_characteristics: QosCharacteristics::NonDynamic5qi(
-                        NonDynamic5qiDescriptor {
-                            five_qi: FiveQi(1),
-                            priority_level_qos: None,
-                            averaging_window: None,
-                            maximum_data_burst_volume: None,
-                            cn_packet_delay_budget_dl: None,
-                            cn_packet_delay_budget_ul: None,
+            qos_flow_setup_request_list: QosFlowSetupRequestList(nonempty![
+                QosFlowSetupRequestItem {
+                    qos_flow_identifier: QosFlowIdentifier(1),
+                    qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
+                        qos_characteristics: QosCharacteristics::NonDynamic5qi(
+                            NonDynamic5qiDescriptor {
+                                five_qi: FiveQi(1),
+                                priority_level_qos: None,
+                                averaging_window: None,
+                                maximum_data_burst_volume: None,
+                                cn_packet_delay_budget_dl: None,
+                                cn_packet_delay_budget_ul: None,
+                            },
+                        ),
+                        allocation_and_retention_priority: AllocationAndRetentionPriority {
+                            priority_level_arp: PriorityLevelArp(3),
+                            pre_emption_capability: PreEmptionCapability::ShallNotTriggerPreEmption,
+                            pre_emption_vulnerability: PreEmptionVulnerability::PreEmptable,
                         },
-                    ),
-                    allocation_and_retention_priority: AllocationAndRetentionPriority {
-                        priority_level_arp: PriorityLevelArp(3),
-                        pre_emption_capability: PreEmptionCapability::ShallNotTriggerPreEmption,
-                        pre_emption_vulnerability: PreEmptionVulnerability::PreEmptable,
+                        gbr_qos_information: None,
+                        reflective_qos_attribute: None,
+                        additional_qos_flow_information: None,
+                        qos_monitoring_request: None,
+                        qos_monitoring_reporting_frequency: None,
                     },
-                    gbr_qos_information: None,
-                    reflective_qos_attribute: None,
-                    additional_qos_flow_information: None,
-                    qos_monitoring_request: None,
-                    qos_monitoring_reporting_frequency: None,
-                },
-                e_rab_id: None,
-                tsc_traffic_characteristics: None,
-                redundant_qos_flow_indicator: None,
-            }]),
+                    e_rab_id: None,
+                    tsc_traffic_characteristics: None,
+                    redundant_qos_flow_indicator: None,
+                }
+            ]),
             common_network_instance: None,
             direct_forwarding_path_availability: None,
             redundant_ul_ngu_up_tnl_information: None,
@@ -381,14 +383,14 @@ impl MockAmf {
                 ran_ue_ngap_id: ue_context.ran_ue_ngap_id,
                 ran_paging_priority: None,
                 nas_pdu: None,
-                pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(vec![
-                    PduSessionResourceSetupItemSuReq {
+                pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(
+                    nonempty![PduSessionResourceSetupItemSuReq {
                         pdu_session_id: PduSessionId(1),
                         pdu_session_nas_pdu: Some(dummy_nas_session_establishment_accept),
                         snssai: self.snssai().into(),
                         pdu_session_resource_setup_request_transfer,
-                    },
-                ]),
+                    },],
+                ),
                 ue_aggregate_maximum_bit_rate: None,
             },
         ));
