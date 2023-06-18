@@ -4,17 +4,17 @@ use crate::{
     tnla_event_handler::{TnlaEvent, TnlaEventHandler},
     transport_provider::{AssocId, Binding},
 };
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{bail, ensure, Result};
 use async_std::sync::{Arc, Mutex};
 use common::ShutdownHandle;
+use dashmap::DashMap;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
 use slog::Logger;
-use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::{StopSource, StopToken};
-type SharedAssocHash = Arc<Mutex<Box<HashMap<AssocId, Arc<SctpAssociation>>>>>;
+type SharedAssocHash = Arc<DashMap<AssocId, Arc<SctpAssociation>>>;
 
 #[derive(Clone)]
 pub struct SctpTnlaPool {
@@ -25,7 +25,7 @@ pub struct SctpTnlaPool {
 impl SctpTnlaPool {
     pub fn new() -> SctpTnlaPool {
         SctpTnlaPool {
-            assocs: Arc::new(Mutex::new(Box::new(HashMap::new()))),
+            assocs: Arc::new(DashMap::new()),
             tasks: Arc::new(Mutex::new(Vec::new())),
         }
     }
@@ -38,28 +38,26 @@ impl SctpTnlaPool {
 
     pub async fn remote_addresses(&self) -> Vec<(AssocId, SocketAddr)> {
         self.assocs
-            .lock()
-            .await
             .iter()
-            .map(|(id, assoc)| (*id, assoc.remote_address))
+            .map(|x| (*x.key(), x.value().remote_address))
             .collect()
     }
 
     /// Picks a new binding (association and in future stream ID).  
     /// To load balance among different associations, use a different seed.
     pub async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
-        let assocs = self.assocs.lock().await;
-        ensure!(assocs.len() > 0, "No associations up");
-        let nth = seed as usize % assocs.len();
-        let assoc_id = *assocs.keys().nth(nth).unwrap();
+        let len = self.assocs.len();
+        ensure!(len > 0, "No associations up");
+        let nth = seed as usize % len;
+        let item = self.assocs.iter().nth(nth).unwrap();
         Ok(Binding {
-            assoc_id,
-            remote_ip: assocs[&assoc_id].remote_address.ip().to_string(),
+            assoc_id: *item.key(),
+            remote_ip: item.value().remote_address.ip().to_string(),
         })
     }
 
     pub async fn new_ue_binding_from_assoc(&self, assoc_id: &AssocId) -> Result<Binding> {
-        if let Some(assoc) = self.assocs.lock().await.get(assoc_id) {
+        if let Some(assoc) = self.assocs.get(assoc_id) {
             Ok(Binding {
                 assoc_id: *assoc_id,
                 remote_ip: assoc.remote_address.ip().to_string(),
@@ -75,19 +73,13 @@ impl SctpTnlaPool {
         assoc_id: Option<u32>,
         _logger: &Logger,
     ) -> Result<()> {
-        let assocs = self.assocs.lock().await;
-        if let Some((_id, assoc)) = if let Some(assoc_id) = assoc_id {
-            // Use the specified association
-            assocs.get(&assoc_id).map(|x| (assoc_id, x))
-        } else {
-            // Use the first one
-            assocs.iter().next().map(|(k, v)| (*k, v))
-        } {
-            //debug!(logger, "Send message on assoc {}", id);
-            Ok(assoc.send_msg(message).await?)
-        } else {
-            Err(anyhow!("No association found"))
-        }
+        let Some(assoc) = assoc_id
+            .and_then(|x| self.assocs.get(&x).map(|x| x.clone()))
+            .or(self.assocs.iter().next().map(|x| x.clone()))
+        else {
+            bail!("No association found")
+        };
+        assoc.send_msg(message).await
     }
 
     pub async fn add_and_handle<H>(
@@ -102,7 +94,7 @@ impl SctpTnlaPool {
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
         let self_clone = self.clone();
-        self.assocs.lock().await.insert(assoc_id, assoc.clone());
+        self.assocs.insert(assoc_id, assoc.clone());
         let shutdown_handle = ShutdownHandle::new(
             async_std::task::spawn(async move {
                 self_clone
@@ -164,6 +156,6 @@ impl SctpTnlaPool {
             }
         }
 
-        self.assocs.lock().await.remove(&assoc_id);
+        self.assocs.remove(&assoc_id);
     }
 }
