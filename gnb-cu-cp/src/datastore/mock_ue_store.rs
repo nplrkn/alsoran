@@ -1,20 +1,20 @@
 //! mock_ue_store - allows testing of UE stateful operations without needing to run a real datastore
 
 use super::{StateStore, UeState, UeStateStore};
-use anyhow::{Context, Result};
-use async_std::sync::{Arc, Mutex};
+use anyhow::{anyhow, Result};
+use async_std::sync::Arc;
 use async_trait::async_trait;
-use std::collections::HashMap;
+use dashmap::DashMap;
 
 #[derive(Clone, Debug)]
 pub struct MockUeStore {
-    kvs: Arc<Mutex<HashMap<u32, UeState>>>,
+    kvs: Arc<DashMap<u32, UeState>>,
 }
 
 impl MockUeStore {
     pub fn new() -> Self {
         MockUeStore {
-            kvs: Arc::new(Mutex::new(HashMap::new())),
+            kvs: Arc::new(DashMap::new()),
         }
     }
 }
@@ -28,19 +28,17 @@ impl Default for MockUeStore {
 #[async_trait]
 impl StateStore<UeState> for MockUeStore {
     async fn store(&self, k: u32, s: UeState, _ttl_secs: usize) -> Result<()> {
-        self.kvs.lock().await.insert(k, s);
+        self.kvs.insert(k, s);
         Ok(())
     }
     async fn retrieve(&self, k: &u32) -> Result<UeState> {
         self.kvs
-            .lock()
-            .await
             .get(k)
-            .cloned()
-            .context("No such key)")
+            .ok_or_else(|| anyhow!("No such key"))
+            .map(|x| x.clone())
     }
     async fn delete(&self, k: &u32) -> Result<()> {
-        self.kvs.lock().await.remove(k);
+        self.kvs.remove(k);
         Ok(())
     }
 }

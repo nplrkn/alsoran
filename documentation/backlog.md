@@ -1,7 +1,6 @@
 
 
 # CURRENT - Dataplane
-- use dashmap throughout
 - mock_amf becomes mock_5gc
 - SDAP / PDCP should be added/stripped
 - With O-RAN-SC ODU
@@ -93,6 +92,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- dashmap
 - E1 Setup
 - CU-UP passes through userplane packets
 - ASN.1 generator makes use of NonEmpty
