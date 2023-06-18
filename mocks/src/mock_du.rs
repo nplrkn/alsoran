@@ -1,11 +1,14 @@
 //! mock_du - enables a test script to assume the role of the GNB-DU on the F1 reference point
 
+use super::userplane::MockUserplane;
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, ensure, Result};
 use asn1_per::*;
+use async_net::IpAddr;
 use f1ap::*;
 use net::{Binding, SerDes, TransportProvider};
 use pdcp::PdcpPdu;
+use rand::Rng;
 use rrc::*;
 use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
@@ -18,12 +21,21 @@ impl Pdu for F1apPdu {}
 
 pub struct MockDu {
     mock: Mock<F1apPdu>,
+    local_ip: String,
+    userplane: MockUserplane,
 }
 
 pub struct UeContext {
     ue_id: u32,
     gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
     pub binding: Binding,
+    drb: Option<Drb>,
+}
+
+pub struct Drb {
+    remote_tunnel_info: GtpTunnel,
+    local_teid: GtpTeid,
+    drb_id: DrbId,
 }
 
 impl Deref for MockDu {
@@ -41,10 +53,14 @@ impl DerefMut for MockDu {
 }
 
 impl MockDu {
-    pub async fn new(logger: &Logger) -> MockDu {
+    pub async fn new(local_ip: &str, logger: &Logger) -> Result<MockDu> {
         let logger = logger.new(o!("du" => 1));
-        let mock = Mock::new(logger).await;
-        MockDu { mock }
+        let mock = Mock::new(logger.clone()).await;
+        Ok(MockDu {
+            mock,
+            local_ip: local_ip.to_string(),
+            userplane: MockUserplane::new(local_ip, logger.clone()).await?,
+        })
     }
 
     pub async fn terminate(self) {
@@ -56,13 +72,15 @@ impl MockDu {
             ue_id,
             binding: self.transport.new_ue_binding_from_ip(worker_ip).await?,
             gnb_cu_ue_f1ap_id: None,
+            drb: None,
         })
     }
 
     pub async fn perform_f1_setup(&mut self, worker_ip: &String) -> Result<()> {
         let transport_address = format!("{}:{}", worker_ip, F1AP_BIND_PORT);
+        let bind_address = self.local_ip.clone();
         info!(self.logger, "Connect to CU {}", transport_address);
-        self.connect(&transport_address, "0.0.0.0", F1AP_SCTP_PPID)
+        self.connect(&transport_address, &bind_address, F1AP_SCTP_PPID)
             .await;
         self.send_f1_setup_request().await?;
         self.receive_f1_setup_response().await
@@ -292,29 +310,33 @@ impl MockDu {
         Ok(security_mode_command)
     }
 
-    pub async fn handle_ue_context_setup(&self, ue_context: &UeContext) -> Result<()> {
+    pub async fn handle_ue_context_setup(&self, ue_context: &mut UeContext) -> Result<()> {
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
-        let _ = self.check_ue_context_setup_request(pdu, ue_context)?;
+        let ue_context_setup_request = self.check_ue_context_setup_request(pdu, ue_context)?;
         info!(&self.logger, "UeContextSetupRequest <<");
 
-        // Code to check for an Rrc Container of a particular type
-        // match match rrc_container {
-        //     Some(x) => rrc_from_container(x)?,
-        //     None => return Err(anyhow!("Expected Rrc container on UeContextSetupRequest",)),
-        // }
-        // .message
-        // {
-        //     DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
-        //         info!(
-        //             &self.logger,
-        //             "UeContextSetupRequest(SecurityModeCommand) <<"
-        //         );
-        //         Ok(x)
-        //     }
-        //     x => Err(anyhow!("Expected security mode command - got {:?}", x)),
-        // }
+        ensure!(ue_context.drb.is_none());
+        let Some(drbs_to_be_setup_list) = ue_context_setup_request.drbs_to_be_setup_list else {
+            bail!("No Drbs supplied")
+        };
 
-        let ue_context_setup_response = self.build_ue_context_setup_response(ue_context);
+        let first_drb = &drbs_to_be_setup_list.0[0];
+        let first_tnl_of_first_drb = &first_drb.ul_up_tnl_information_to_be_setup_list.0[0];
+        let UpTransportLayerInformation::GtpTunnel(remote_tunnel_info) =
+            &first_tnl_of_first_drb.ul_up_tnl_information;
+
+        // Check we have been given a real IP address.
+        let Ok(_ip_addr) = IpAddr::try_from(remote_tunnel_info.transport_layer_address.clone()) else {
+            bail!("Bad remote transport layer address in {:?}", first_tnl_of_first_drb);
+        };
+
+        ue_context.drb = Some(Drb {
+            drb_id: first_drb.drb_id,
+            remote_tunnel_info: remote_tunnel_info.clone(),
+            local_teid: GtpTeid(rand::thread_rng().gen::<[u8; 4]>().into()),
+        });
+
+        let ue_context_setup_response = self.build_ue_context_setup_response(ue_context)?;
         info!(&self.logger, "UeContextSetupResponse >>");
         self.send(ue_context_setup_response, Some(assoc_id)).await;
 
@@ -325,7 +347,7 @@ impl MockDu {
         &self,
         pdu: F1apPdu,
         ue_context: &UeContext,
-    ) -> Result<Option<RrcContainer>> {
+    ) -> Result<UeContextSetupRequest> {
         let F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(ue_context_setup_request)) = pdu
         else {
             bail!("Unexpected F1ap message {:?}", pdu)
@@ -336,15 +358,20 @@ impl MockDu {
             "Bad Ue Id"
         );
 
-        Ok(ue_context_setup_request.rrc_container)
+        Ok(ue_context_setup_request)
     }
 
-    pub fn build_ue_context_setup_response(&self, ue_context: &UeContext) -> F1apPdu {
-        let gnb_cu_ue_f1ap_id = ue_context.gnb_cu_ue_f1ap_id.unwrap();
-        let cell_group_config =
-            f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
-        F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextSetupResponse(
-            UeContextSetupResponse {
+    pub fn build_ue_context_setup_response(&self, ue_context: &UeContext) -> Result<F1apPdu> {
+        let Some(gnb_cu_ue_f1ap_id) = ue_context.gnb_cu_ue_f1ap_id else {
+            bail!("CU F1AP ID should be set on UE");
+        };
+        let Some(drb) = &ue_context.drb else {
+            bail!("Drb should be set on UE");
+        };
+        let cell_group_config = f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes()?);
+        let transport_layer_address = TransportLayerAddress::try_from(&self.local_ip)?;
+        Ok(F1apPdu::SuccessfulOutcome(
+            SuccessfulOutcome::UeContextSetupResponse(UeContextSetupResponse {
                 gnb_cu_ue_f1ap_id,
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_context.ue_id),
                 du_to_cu_rrc_information: DuToCuRrcInformation {
@@ -370,14 +397,14 @@ impl MockDu {
                 resource_coordination_transfer_container: None,
                 full_configuration: None,
                 drbs_setup_list: Some(DrbsSetupList(nonempty![DrbsSetupItem {
-                    drb_id: DrbId(1),
+                    drb_id: drb.drb_id,
                     lcid: None,
                     dl_up_tnl_information_to_be_setup_list: DlUpTnlInformationToBeSetupList(
                         nonempty![DlUpTnlInformationToBeSetupItem {
                             dl_up_tnl_information: UpTransportLayerInformation::GtpTunnel(
                                 GtpTunnel {
-                                    transport_layer_address: "1.2.3.4".try_into().unwrap(),
-                                    gtp_teid: GtpTeid([5, 6, 1, 2]),
+                                    transport_layer_address,
+                                    gtp_teid: drb.local_teid.clone(),
                                 },
                             ),
                         },]
@@ -396,7 +423,7 @@ impl MockDu {
                 sl_drbs_setup_list: None,
                 sl_drbs_failed_to_be_setup_list: None,
                 requested_target_cell_global_id: None,
-            },
+            }),
         ))
     }
 
@@ -589,11 +616,34 @@ impl MockDu {
         info!(self.logger, "GnbDuConfigurationUpdateAcknowledge <<");
         Ok(())
     }
+
+    pub async fn send_data_packet(&self, ue_context: &UeContext) -> Result<()> {
+        let drb = ue_context.drb.as_ref().ok_or(anyhow!("No pdu session"))?;
+
+        let GtpTunnel {
+            transport_layer_address,
+            gtp_teid,
+        } = &drb.remote_tunnel_info;
+
+        let transport_layer_address = transport_layer_address.clone().try_into()?;
+
+        self.userplane
+            .send_data_packet(transport_layer_address, gtp_teid.clone())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn recv_data_packet(&self, ue_context: &UeContext) -> Result<()> {
+        let drb = ue_context.drb.as_ref().ok_or(anyhow!("No pdu session"))?;
+        self.userplane.recv_data_packet(&drb.local_teid).await?;
+        Ok(())
+    }
 }
 
 fn make_rrc_cell_group_config() -> rrc::CellGroupConfig {
     rrc::CellGroupConfig {
-        cell_group_id: CellGroupId(0),
+        cell_group_id: CellGroupId(1),
         rlc_bearer_to_add_mod_list: None,
         rlc_bearer_to_release_list: None,
         mac_cell_group_config: None,

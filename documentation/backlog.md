@@ -1,13 +1,23 @@
 
+
+# CURRENT - Dataplane
+- use dashmap throughout
+- mock_amf becomes mock_5gc
+- SDAP / PDCP should be added/stripped
+- With O-RAN-SC ODU
+- standardize handler->workflow result handling and logging (who logs message, who forms failure) across CU-CP and CU-UP
+- multiple TNLAs on CU-UP?
+- >1 CU-UP?
+
+
+# NEXT UP
+- Session deletion (including on different worker)
+
+# TECH DEBT
 ## O-RAN O-DU interop
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
-- don't set up SRB + 2 DBRs if all we need is one session = one DRB
-- FV regression test to reduce dependency on running with live ODU 
-
-# NEXT UP
-- Dataplane with O-RAN SC ODU
-- Session deletion (including on different worker)
+- don't set up SRB + 2 DRBs if all we need is one session = one DRB
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -26,7 +36,6 @@
 - All F1AP TNLAs drop - reset. 
 - All E1AP TNLAs drop - ?
 
-# TECH DEBT
 ## CONNECTION MANAGEMENT
 - Regression test for tearing down requests when a connection dies
 - Retry connection to AMF if connection refused.  (e.g. just run GNB-CU-CP on its own)
@@ -40,6 +49,7 @@
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
+
 ## MAINTAINABILITY + DIAGNOSTICS
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
 - Remove slog from workflow module and use log methods on Workflow instead
@@ -48,10 +58,12 @@
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
+
 ## TESTS
 - Failure to retrieve UE for each kind of request
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
+
 ## ASN.1 GENERATOR
 - fixed size octet string should be [] not Vec?
 - inlining of lists to avoid newtypes of vecs (e.g. PDU-Session-Resource-Activity-List)
@@ -77,11 +89,11 @@
 
 # MEDIUM TERM
 - Selection and stickiness of SCTP streams
-- Sample userplane 
 - Dockerfiles and Helm charts
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- CU-UP passes through userplane packets
 - ASN.1 generator makes use of NonEmpty
 - state.md flow "Eventually the AMF furnishes the GNB" wrongly shows DU context being created
 - Refactoring of pdu_session_resource_setup.rs

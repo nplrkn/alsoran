@@ -31,6 +31,7 @@ where
 impl<T> Application for E1apUp<T> where
     T: RequestProvider<BearerContextSetupProcedure>
         + RequestProvider<BearerContextModificationProcedure>
+        + RequestProvider<GnbCuCpConfigurationUpdateProcedure>
         + EventHandler
         + Clone
 {
@@ -42,6 +43,7 @@ where
     T: Send
         + Sync
         + EventHandler
+        + RequestProvider<GnbCuCpConfigurationUpdateProcedure>
         + RequestProvider<BearerContextSetupProcedure>
         + RequestProvider<BearerContextModificationProcedure>, // Todo - add all other procedures
 {
@@ -60,6 +62,9 @@ where
             }
             InitiatingMessage::BearerContextModificationRequest(req) => {
                 BearerContextModificationProcedure::call_provider(&self.0, req, logger).await
+            }
+            InitiatingMessage::GnbCuCpConfigurationUpdate(req) => {
+                GnbCuCpConfigurationUpdateProcedure::call_provider(&self.0, req, logger).await
             }
             e => panic!("Missing implementation for {:?}", e),
         }

@@ -407,33 +407,44 @@ fn build_drbs_to_be_setup_items(
     sessions: &Vec<Stage2>,
     logger: &Logger,
 ) -> Result<NonEmpty<DrbsToBeSetupItem>> {
-    let items: Vec<DrbsToBeSetupItem> = sessions
-        .iter()
-        .flat_map(
-            |(
-                PduSessionResourceSetupItemSuReq {
-                    pdu_session_id,
-                    snssai,
-                    ..
-                },
-                PduSessionResourceSetupItem {
-                    ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(gtp_tunnel),
-                    ..
-                },
-            )| {
-                let snssai: xxap::Snssai = snssai.clone().into();
-                super::build_f1ap::build_drb_to_be_setup_item(
-                    f1ap::DrbId(pdu_session_id.0),
-                    snssai.into(),
-                    gtp_tunnel.clone(),
-                )
-                .map_err(|e| {
-                    warn!(logger, "Build Drb setup item failed {:?}", e);
-                    e
-                })
+    let mut items = vec![];
+    for session in sessions {
+        let (
+            PduSessionResourceSetupItemSuReq {
+                pdu_session_id,
+                snssai,
+                ..
             },
-        )
-        .collect();
+            PduSessionResourceSetupItem {
+                drb_setup_list_ng_ran,
+                ..
+            },
+        ) = session;
+        if drb_setup_list_ng_ran.0.len() > 1 {
+            warn!(
+                logger,
+                "More than 1 DRB not supported - later items are ignored"
+            )
+        }
+        let UpTnlInformation::GtpTunnel(gtp_tunnel) =
+            &drb_setup_list_ng_ran.0[0].ul_up_transport_parameters.0[0].up_tnl_information;
+
+        debug!(
+            logger,
+            "Pass through UL tunnel information from CU-UP to DU - {}/{:?}",
+            gtp_tunnel.transport_layer_address.to_string(),
+            gtp_tunnel.gtp_teid.0
+        );
+        let snssai: xxap::Snssai = snssai.clone().into();
+        match super::build_f1ap::build_drb_to_be_setup_item(
+            f1ap::DrbId(pdu_session_id.0),
+            snssai.into(),
+            gtp_tunnel.clone(),
+        ) {
+            Ok(item) => items.push(item),
+            Err(e) => warn!(logger, "Build Drb setup item failed {:?}", e),
+        }
+    }
 
     NonEmpty::from_vec(items).ok_or(anyhow!("No Drb items built successfully"))
 }
@@ -446,7 +457,7 @@ fn build_e1_setup_items(
     let items: Vec<PduSessionResourceToSetupItem> = sessions
         .iter()
         .flat_map(|x| {
-            build_e1ap::build_e1_setup_item(&ue, &x).map_err(|e| {
+            build_e1ap::build_e1_setup_item(&ue, &x, logger).map_err(|e| {
                 warn!(logger, "Build E1 setup item failed {:?}", e);
                 e
             })

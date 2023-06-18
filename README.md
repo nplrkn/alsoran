@@ -19,6 +19,7 @@ This project is currently a proof of concept and not yet a fully functional gNB-
 The gNB-CU-UP is currently a simple stub that replies to E1AP requests but does not process userplane packets.
 Generally only the success cases are covered, and there are a lot of 'To Dos'.  
 ### Procedure support
+#### CU-CP
 -  NG Setup
 -  RAN Configuration Update
 -  F1 Setup
@@ -27,12 +28,16 @@ Generally only the success cases are covered, and there are a lot of 'To Dos'.
 -  Uplink NAS
 -  Downlink NAS
 -  Initial Context Setup
--  Pdu Session Resource Setup (Bearer Context Setup)
+-  Pdu Session Resource Setup
 -  AMF Status Indication
 -  GNB CU Configuration Update
 -  GNB DU Configuration Update
 -  GNB CU CP Configuration Update.
-
+#### CU-UP
+-  E1 Setup
+-  Bearer Context Setup
+-  Bearer Context Modification
+-  GNB CU CP Configuration Update
 
 ## What's different about Alsoran?
 

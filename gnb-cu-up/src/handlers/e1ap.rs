@@ -6,7 +6,7 @@ use crate::GnbCuUp;
 use async_trait::async_trait;
 use e1ap::*;
 use net::{EventHandler, RequestError, RequestProvider, ResponseAction, TnlaEvent};
-use slog::{info, Logger};
+use slog::{info, warn, Logger};
 
 #[derive(Clone)]
 pub struct E1apHandler<G: GnbCuUp> {
@@ -22,7 +22,7 @@ impl<G: GnbCuUp> E1apHandler<G> {
 #[async_trait]
 impl<G: GnbCuUp> EventHandler for E1apHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
-        info!(logger, "E1AP TNLA {} {:?}", tnla_id, event)
+        info!(logger, "E1AP TNLA {tnla_id} {event:?}")
     }
 }
 
@@ -37,6 +37,16 @@ impl<G: GnbCuUp> RequestProvider<BearerContextSetupProcedure> for E1apHandler<G>
         Workflow::new(&self.gnb_cu_up, logger)
             .bearer_context_setup(&r)
             .await
+            .map(|ok_response| (ok_response, None))
+            .map_err(|e| {
+                warn!(logger, "Failed bearer context setup - {e}");
+                RequestError::UnsuccessfulOutcome(BearerContextSetupFailure {
+                    gnb_cu_cp_ue_e1ap_id: r.gnb_cu_cp_ue_e1ap_id,
+                    gnb_cu_up_ue_e1ap_id: None,
+                    cause: Cause::RadioNetwork(CauseRadioNetwork::Unspecified),
+                    criticality_diagnostics: None,
+                })
+            })
     }
 }
 
@@ -50,8 +60,39 @@ impl<G: GnbCuUp> RequestProvider<BearerContextModificationProcedure> for E1apHan
         ResponseAction<BearerContextModificationResponse>,
         RequestError<BearerContextModificationFailure>,
     > {
+        let gnb_cu_cp_ue_e1ap_id = r.gnb_cu_cp_ue_e1ap_id;
+        let gnb_cu_up_ue_e1ap_id = r.gnb_cu_up_ue_e1ap_id;
+
         Workflow::new(&self.gnb_cu_up, logger)
-            .bearer_context_modification(&r)
+            .bearer_context_modification(r)
             .await
+            .map(|ok_response| (ok_response, None))
+            .map_err(|e| {
+                warn!(logger, "Failed bearer context modifification - {e}");
+                RequestError::UnsuccessfulOutcome(BearerContextModificationFailure {
+                    gnb_cu_cp_ue_e1ap_id,
+                    gnb_cu_up_ue_e1ap_id,
+                    cause: Cause::RadioNetwork(CauseRadioNetwork::Unspecified),
+                    criticality_diagnostics: None,
+                })
+            })
+    }
+}
+
+#[async_trait]
+impl<G: GnbCuUp> RequestProvider<GnbCuCpConfigurationUpdateProcedure> for E1apHandler<G> {
+    async fn request(
+        &self,
+        r: GnbCuCpConfigurationUpdate,
+        logger: &Logger,
+    ) -> Result<
+        ResponseAction<GnbCuCpConfigurationUpdateAcknowledge>,
+        RequestError<GnbCuCpConfigurationUpdateFailure>,
+    > {
+        Workflow::new(&self.gnb_cu_up, logger)
+            .gnb_cu_cp_configuration_update(r)
+            .await
+            .map(|ok_response| (ok_response, None))
+            .map_err(|failure_response| RequestError::UnsuccessfulOutcome(failure_response))
     }
 }

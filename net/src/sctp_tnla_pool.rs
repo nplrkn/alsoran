@@ -10,7 +10,7 @@ use common::ShutdownHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{debug, Logger};
+use slog::Logger;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::{StopSource, StopToken};
@@ -73,17 +73,17 @@ impl SctpTnlaPool {
         &self,
         message: Message,
         assoc_id: Option<u32>,
-        logger: &Logger,
+        _logger: &Logger,
     ) -> Result<()> {
         let assocs = self.assocs.lock().await;
-        if let Some((id, assoc)) = if let Some(assoc_id) = assoc_id {
+        if let Some((_id, assoc)) = if let Some(assoc_id) = assoc_id {
             // Use the specified association
             assocs.get(&assoc_id).map(|x| (assoc_id, x))
         } else {
             // Use the first one
             assocs.iter().next().map(|(k, v)| (*k, v))
         } {
-            debug!(logger, "Send message on assoc {}", id);
+            //debug!(logger, "Send message on assoc {}", id);
             Ok(assoc.send_msg(message).await?)
         } else {
             Err(anyhow!("No association found"))
@@ -158,7 +158,7 @@ impl SctpTnlaPool {
                 }
                 // Received a message
                 Some(Ok(message)) => {
-                    debug!(logger, "Received message on assoc {}", assoc_id);
+                    //debug!(logger, "Received message on assoc {}", assoc_id);
                     handler.handle_message(message, assoc_id, &logger).await
                 }
             }

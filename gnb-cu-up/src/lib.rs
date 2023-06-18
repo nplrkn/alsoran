@@ -1,6 +1,7 @@
 mod config;
 mod gnb_cu_up;
 mod handlers;
+mod packet_processor;
 mod worker;
 mod workflows;
 

@@ -1,15 +1,18 @@
-//! config - the config of a GNB-CU
+//! config - the config of a GNB-CU-UP
 
 use std::net::{IpAddr, Ipv4Addr};
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    // The IP address that the worker binds all of it listen ports to.  If there is only one worker
-    // running on the system, this may be omitted.  To test multiple workers running on a
-    // single system, each can be given a different 127.0.0.0/8 IP address.
-    pub ip_address: Option<IpAddr>,
+    // The IP address that the CU-UP instance binds its SCTP E1 port to,
+    // and uses for nanomsg pub-sub.
+    pub local_ip_address: IpAddr,
 
-    // Set to the IP address of the GNB-CU-CP.
+    // The local userplane address used to terminate GTP-U.  For an HA cluster, this is
+    // set to be the same on all instances, meaning they can interchangeably forward packets.
+    pub userplane_ip_address: IpAddr,
+
+    // IP address of the GNB-CU-CP.
     pub cp_ip_address: IpAddr,
 
     // Human readable name of this GNB-CU-UP.
@@ -19,7 +22,8 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            ip_address: None,
+            local_ip_address: Ipv4Addr::LOCALHOST.into(),
+            userplane_ip_address: Ipv4Addr::LOCALHOST.into(),
             cp_ip_address: Ipv4Addr::LOCALHOST.into(),
             name: Some("Alsoran UP".to_string()),
         }

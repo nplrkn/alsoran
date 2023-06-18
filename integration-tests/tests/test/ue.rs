@@ -1,7 +1,7 @@
 use crate::TestContext;
 use anyhow::Result;
 use async_trait::async_trait;
-use mocks::{AmfUeContext, CuUpUeContext, DuUeContext, SecurityModeCommand};
+use mocks::{AmfUeContext, DuUeContext, NgcSession, SecurityModeCommand};
 use slog::info;
 
 // This module has a succession of struct representing the UE's progress towards registered.
@@ -87,17 +87,20 @@ pub struct RegisteredUe {
     pub amf_ue_context: AmfUeContext,
 }
 impl RegisteredUe {
-    pub async fn establish_pdu_session(self, tc: &mut TestContext) -> Result<UeWithSession> {
+    pub async fn establish_pdu_session(mut self, tc: &mut TestContext) -> Result<UeWithSession> {
         let logger = &tc.logger;
         info!(logger, "Establish PDU session for UE {}", self.ue_id);
-        tc.amf
+        let gtp_teid = tc
+            .amf
             .send_pdu_session_resource_setup(&self.amf_ue_context)
             .await?;
-        let cu_up_ue_context = tc.cu_up.handle_bearer_context_setup(self.ue_id).await?;
-        tc.du.handle_ue_context_setup(&self.du_ue_context).await?;
-        tc.cu_up
-            .handle_bearer_context_modification(&cu_up_ue_context)
+        //let cu_up_ue_context = tc.cu_up.handle_bearer_context_setup(self.ue_id).await?;
+        tc.du
+            .handle_ue_context_setup(&mut self.du_ue_context)
             .await?;
+        // tc.cu_up
+        //     .handle_bearer_context_modification(&cu_up_ue_context)
+        //     .await?;
         let _nas = tc
             .du
             .receive_rrc_reconfiguration(&self.du_ue_context)
@@ -105,8 +108,9 @@ impl RegisteredUe {
         tc.du
             .send_rrc_reconfiguration_complete(&self.du_ue_context)
             .await?;
-        tc.amf
-            .receive_pdu_session_resource_setup_response(&self.amf_ue_context)
+        let ngc_session = tc
+            .amf
+            .receive_pdu_session_resource_setup_response(&self.amf_ue_context, gtp_teid)
             .await?;
         info!(
             logger,
@@ -116,7 +120,7 @@ impl RegisteredUe {
             ue_id: self.ue_id,
             amf_ue_context: self.amf_ue_context,
             du_ue_context: self.du_ue_context,
-            cu_up_ue_context,
+            ngc_session, //cu_up_ue_context,
         })
     }
 }
@@ -129,5 +133,16 @@ pub struct UeWithSession {
     pub ue_id: u32,
     pub du_ue_context: DuUeContext,
     pub amf_ue_context: AmfUeContext,
-    pub cu_up_ue_context: CuUpUeContext,
+    pub ngc_session: NgcSession, //pub cu_up_ue_context: CuUpUeContext,
+}
+
+impl UeWithSession {
+    pub async fn uplink_data_packet(&self, tc: &TestContext) -> Result<()> {
+        tc.du.send_data_packet(&self.du_ue_context).await?;
+        tc.amf.recv_data_packet(&self.ngc_session).await
+    }
+    pub async fn downlink_data_packet(&self, tc: &TestContext) -> Result<()> {
+        tc.amf.send_data_packet(&self.ngc_session).await?;
+        tc.du.recv_data_packet(&self.du_ue_context).await
+    }
 }
