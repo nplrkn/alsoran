@@ -1,17 +1,22 @@
 use anyhow::Result;
 use clap::Parser;
 use common::{logging, panic, signal};
-use gnb_cu_cp::{Config, RedisUeStore};
+use coordinator::ConnectionControlConfig;
+use gnb_cu_cp::{Config, ConnectionStyle, RedisUeStore};
 use slog::info;
-use std::net::IpAddr;
+use std::net::{IpAddr, Ipv4Addr};
 use uuid::Uuid;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Optional local IP address to bind server ports to.
-    #[arg(short, long)]
-    local_ip: Option<IpAddr>,
+    /// Local IP address to bind server ports to (E1AP and F1AP).
+    #[arg(short, long, default_value_t = IpAddr::V4(Ipv4Addr::UNSPECIFIED))]
+    local_ip: IpAddr,
+
+    /// AMF's NGAP IP address to connect to.
+    #[arg(short, long, default_value_t = IpAddr::V4(Ipv4Addr::LOCALHOST))]
+    amf_ip: IpAddr,
 }
 
 #[async_std::main]
@@ -21,6 +26,12 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     let config = Config {
         ip_addr: args.local_ip,
+        connection_style: ConnectionStyle::Autonomous(ConnectionControlConfig {
+            fast_start: true,
+            amf_address: args.amf_ip.to_string(),
+            ..ConnectionControlConfig::default()
+        }),
+
         ..Config::default()
     };
     let root_logger = logging::init();

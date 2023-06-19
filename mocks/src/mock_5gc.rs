@@ -14,7 +14,7 @@ use xxap::{GtpTeid, GtpTunnel, PduSessionId};
 
 impl Pdu for NgapPdu {}
 
-pub struct MockAmf {
+pub struct Mock5gc {
     mock: Mock<NgapPdu>,
     ips: Vec<String>,
     userplane: MockUserplane,
@@ -32,14 +32,14 @@ pub struct Session {
     _id: PduSessionId,
 }
 
-impl Deref for MockAmf {
+impl Deref for Mock5gc {
     type Target = Mock<NgapPdu>;
 
     fn deref(&self) -> &Self::Target {
         &self.mock
     }
 }
-impl DerefMut for MockAmf {
+impl DerefMut for Mock5gc {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.mock
     }
@@ -48,9 +48,9 @@ impl DerefMut for MockAmf {
 const NGAP_SCTP_PPID: u32 = 60;
 const NGAP_BIND_PORT: u16 = 38412;
 
-impl MockAmf {
-    pub async fn new(userplane_ip: &str, logger: &Logger) -> Result<MockAmf> {
-        Ok(MockAmf {
+impl Mock5gc {
+    pub async fn new(userplane_ip: &str, logger: &Logger) -> Result<Mock5gc> {
+        Ok(Mock5gc {
             mock: Mock::new(logger.new(o!("amf" => 1))).await,
             ips: vec![],
             userplane: MockUserplane::new(
@@ -63,7 +63,7 @@ impl MockAmf {
 
     pub async fn add_endpoint(&mut self, ip_address: &str) -> Result<()> {
         let listen_address = format!("{}:{}", ip_address, NGAP_BIND_PORT);
-        info!(self.logger, "Mock AMF listening on {}", listen_address);
+        info!(self.logger, "Serving NGAP on {}", listen_address);
         self.mock
             .serve(listen_address.clone(), NGAP_SCTP_PPID)
             .await?;
@@ -99,7 +99,7 @@ impl MockAmf {
 
         let response =
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome::NgSetupResponse(NgSetupResponse {
-                amf_name: AmfName("MockAmf".to_string()),
+                amf_name: AmfName("Mock5gc".to_string()),
                 served_guami_list,
                 relative_amf_capacity: RelativeAmfCapacity(100),
                 plmn_support_list: PlmnSupportList(nonempty![PlmnSupportItem {

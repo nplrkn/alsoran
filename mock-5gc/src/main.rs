@@ -1,19 +1,31 @@
 // main - acts as an AMF for testing with O-RAN O-DU
 
 use anyhow::Result;
-use mocks::MockAmf;
+use clap::Parser;
+use mocks::Mock5gc;
 use slog::info;
+use std::net::{IpAddr, Ipv4Addr};
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Optional local IP address to bind server ports to - both NGAP (for N2) and GTP-U (for N3).
+    #[arg(short, long, default_value_t = IpAddr::V4(Ipv4Addr::UNSPECIFIED))]
+    local_ip: IpAddr,
+}
 
 // The purpose of this code is to cause Alsoran GNB-CU to produce the same message sequence as the O-RAN-SC O-DU Cu Stub.
 // The required call flow is documented in full at `documentation/odu.md`.
 #[async_std::main]
 async fn main() -> Result<()> {
     let logger = common::logging::init();
-    let mut amf = MockAmf::new("127.0.0.1", &logger).await?;
+    let args = Args::parse();
+
+    let mut amf = Mock5gc::new(&args.local_ip.to_string(), &logger).await?;
     amf.disable_receive_timeouts();
 
     // Wait for connection and do NG Setup.
-    amf.add_endpoint("127.0.0.1").await?;
+    amf.add_endpoint(&args.local_ip.to_string()).await?;
     amf.expect_connection_established().await;
     amf.handle_ng_setup().await?;
 

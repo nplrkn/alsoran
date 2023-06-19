@@ -1,14 +1,13 @@
 //! config - the config of a GNB-CU
 
 pub use coordinator::ConnectionControlConfig;
-use std::net::IpAddr;
+use std::net::{IpAddr, Ipv4Addr};
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    // The IP address that the worker binds all of it listen ports to.  If there is only one worker
-    // running on the system, this may be omitted.  To test multiple workers running on a
+    // The IP address that the worker binds all of it listen ports to. To test multiple workers running on a
     // single system, each can be given a different 127.0.0.0/8 IP address.
-    pub ip_addr: Option<IpAddr>,
+    pub ip_addr: IpAddr,
 
     // Set this to Autonomous to have a single worker that connects immediately to AMF on the given
     // IP address.
@@ -32,7 +31,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            ip_addr: None,
+            ip_addr: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
             connection_style: ConnectionStyle::Autonomous(ConnectionControlConfig {
                 fast_start: true,
                 ..ConnectionControlConfig::default()

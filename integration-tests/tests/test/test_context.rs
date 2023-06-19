@@ -8,7 +8,7 @@ use gnb_cu_cp::{
     Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig,
 };
 use gnb_cu_cp::{MockUeStore, RedisUeStore};
-use mocks::{MockAmf, MockDu}; // MockCuUp
+use mocks::{Mock5gc, MockDu}; // MockCuUp
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::time::Duration;
@@ -18,7 +18,7 @@ const IP_OR_PORT_RETRIES: usize = 10;
 const CONNECTION_API_PORT: u16 = 50312;
 
 pub struct TestContext {
-    pub amf: MockAmf,
+    pub amf: Mock5gc,
     pub du: MockDu,
     //pub cu_up: MockCuUp,
     pub logger: Logger,
@@ -140,7 +140,7 @@ impl TestContext {
 
         // Start a CU-UP pointing at the first worker.
         info!(self.logger, "Spawn CU-UP");
-        let first_worker_ip = self.workers[0].config.ip_addr.unwrap();
+        let first_worker_ip = self.workers[0].config.ip_addr;
         self.cu_ups
             .push(start_cu_up_on_random_ip(first_worker_ip, &self.logger).await?);
 
@@ -197,7 +197,7 @@ impl TestContext {
             };
 
             let config = Config {
-                ip_addr: Some(worker_ip.parse().unwrap()),
+                ip_addr: worker_ip.parse().unwrap(),
                 connection_style: connection_style.clone(),
                 ..Config::default()
             };
@@ -234,11 +234,7 @@ impl TestContext {
 
     pub fn worker_ip(&self, worker_index: usize) -> String {
         let worker_index = worker_index % self.workers.len();
-        self.workers[worker_index]
-            .config
-            .ip_addr
-            .unwrap()
-            .to_string()
+        self.workers[worker_index].config.ip_addr.to_string()
     }
 
     pub async fn interface_setup_stage<'a>(
@@ -363,11 +359,11 @@ impl TestContext {
     }
 }
 
-async fn start_amf_with_random_ips(logger: &Logger, num_endpoints: usize) -> MockAmf {
+async fn start_amf_with_random_ips(logger: &Logger, num_endpoints: usize) -> Mock5gc {
     assert!(num_endpoints > 0);
     let mut maybe_amf = None;
     for _ in 0..IP_OR_PORT_RETRIES {
-        if let Ok(amf) = MockAmf::new(&random_local_ip(), logger).await {
+        if let Ok(amf) = Mock5gc::new(&random_local_ip(), logger).await {
             maybe_amf = Some(amf);
             break;
         }
