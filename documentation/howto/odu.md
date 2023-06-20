@@ -55,19 +55,19 @@ Solution: ODU rebuilt to run on 127.0.0.2 and connect to 127.0.0.1.
 - uplink are in PHY STUB: 
 - downlink are in CU_STUB: src/cu_stub/cu_f1ap_msg_hdl.c
 
-# In terminal 1, projects/alsoran/amf-sim
-cargo run
+# In terminal 1, projects/alsoran/mock-5gc
+cargo run -- --local-ip=127.0.0.3
 
 # In terminal 2, projects/alsoran/gnb-cu-cp
 redis-server &
-RUST_LOG=debug cargo run -- --local-ip=127.0.0.1
+RUST_LOG=debug cargo run -- --local-ip=127.0.0.1 --amf-ip=127.0.0.3
 
 # In terminal 3, projects/alsoran/gnb-cu-up
 RUST_LOG=debug cargo run
 
 # in terminal 4, 
 ```
-sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412 or port 38462
+sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412 or port 38462 or 2512
 ```
 
 # in terminal 5, in projects/o-du-l2

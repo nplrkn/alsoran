@@ -1,7 +1,6 @@
 
 
 # CURRENT - Dataplane
-- mock_amf becomes mock_5gc
 - SDAP / PDCP should be added/stripped
 - With O-RAN-SC ODU
 - standardize handler->workflow result handling and logging (who logs message, who forms failure) across CU-CP and CU-UP
@@ -92,6 +91,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- local-ip arg for mock-5gc and amf-ip arg for gnb-cu-cp
+- mock_amf becomes mock_5gc
 - dashmap
 - E1 Setup
 - CU-UP passes through userplane packets

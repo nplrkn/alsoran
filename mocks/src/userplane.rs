@@ -17,7 +17,7 @@ pub struct MockUserplane {
 impl MockUserplane {
     pub async fn new(local_ip: &str, logger: Logger) -> Result<Self> {
         let transport_address = format!("{}:{}", local_ip, GTPU_PORT);
-        info!(logger, "Binding GTP-U socket to {transport_address}");
+        info!(logger, "Serving GTP-U on {transport_address}");
         let gtpu_socket = UdpSocket::bind(transport_address).await?;
         Ok(MockUserplane {
             local_ip: local_ip.parse()?,

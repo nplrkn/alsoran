@@ -2,7 +2,7 @@
 
 members = [
     "asn1-per",
-    "amf-sim",
+    "mock-5gc",
     "common",
     "sctp",
     "net",
@@ -18,6 +18,6 @@ members = [
     "connection-api",
     "coordination-api",
     "gnb-cu-cp-coordinator",
-    "gnb-du-sim",
+    "mock-du",
     "integration-tests"
 ]

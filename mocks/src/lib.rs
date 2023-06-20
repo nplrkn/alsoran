@@ -1,8 +1,8 @@
 mod mock;
 mod mock_du;
 pub use mock_du::{MockDu, UeContext as DuUeContext};
-mod mock_amf;
-pub use mock_amf::{MockAmf, Session as NgcSession, UeContext as AmfUeContext};
+mod mock_5gc;
+pub use mock_5gc::{Mock5gc, Session as NgcSession, UeContext as AmfUeContext};
 mod mock_cu_up;
 pub use mock_cu_up::{MockCuUp, UeContext as CuUpUeContext};
 pub use net::Binding;

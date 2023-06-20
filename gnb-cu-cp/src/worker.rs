@@ -26,7 +26,6 @@ use net::{
 use rrc::UlDcchMessage;
 use slog::{debug, info, warn, Logger};
 use std::future::Future;
-use std::net::Ipv4Addr;
 use std::pin::Pin;
 use std::sync::Arc;
 use stop_token::{StopSource, StopToken};
@@ -206,11 +205,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             }) => connection_api_base_path.clone(),
         };
 
-        let worker_ip = self
-            .config
-            .ip_addr
-            .unwrap_or_else(|| Ipv4Addr::LOCALHOST.into())
-            .to_string();
+        let worker_ip = self.config.ip_addr.to_string();
 
         self.coordinator
             .refresh_worker(
@@ -278,13 +273,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     }
 
     fn worker_listen_address(&self, port: u16) -> String {
-        format!(
-            "{}:{}",
-            self.config
-                .ip_addr
-                .unwrap_or_else(|| Ipv4Addr::UNSPECIFIED.into()),
-            port
-        )
+        format!("{}:{}", self.config.ip_addr, port)
     }
 
     async fn add_shutdown_handle(&self, shutdown_handle: ShutdownHandle) {
@@ -324,11 +313,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         self.ngap
             .connect(
                 &amf_address,
-                &self
-                    .config
-                    .ip_addr
-                    .map(|x| x.to_string())
-                    .unwrap_or("0.0.0.0".to_string()),
+                &self.config.ip_addr.to_string(),
                 NGAP_SCTP_PPID,
                 NgapHandler::new_ngap_application(self.clone()),
                 self.logger.clone(),
