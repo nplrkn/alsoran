@@ -105,7 +105,7 @@ async fn start_forwarding(
     logger: Logger,
 ) -> JoinHandle<()> {
     task::spawn(async move {
-        let mut buf = vec![0; 2000];
+        let mut buf = [0; 2000];
         loop {
             let Ok((n, _peer)) = gtpu_socket.recv_from(&mut buf).await else {
                 break;
@@ -119,6 +119,7 @@ async fn start_forwarding(
             let gtp_header = parse_gtp(&buf[0..GTP_HEADER_MIN_SIZE]);
             let gtp_teid = gtp_header.teid;
             let key = ((gtp_teid >> 1) & CAPACITY_MASK) as usize;
+            let downlink = (gtp_teid & 1) == 1;
 
             debug!(
                 logger,
@@ -129,7 +130,7 @@ async fn start_forwarding(
             let context = &forwarding_table.lock().await.0[key];
 
             // LSB clear for uplink; set for downlink
-            let action = if (gtp_teid & 1) == 1 {
+            let action = if downlink {
                 &context.session_1_downlink
             } else {
                 &context.session_1_uplink
@@ -153,6 +154,12 @@ async fn start_forwarding(
 
             overwrite_teid(&mut buf, &action.remote_tunnel_info.gtp_teid.0);
 
+            if downlink {
+                replace_n3_with_f1_headers(&mut buf);
+            } else {
+                replace_f1_with_n3_headers(&mut buf);
+            }
+
             match gtpu_socket.send_to(&buf[..n], dest_sock_addr).await {
                 Ok(_bytes_sent) => (), // TODO update stat
                 Err(_e) => (),         // TODO update stat
@@ -160,6 +167,50 @@ async fn start_forwarding(
         }
     })
 }
+
+const GTP_MESSAGE_TYPE_GPU: u8 = 255; // TS29.281, table 6.1-1
+
+fn replace_n3_with_f1_headers(buf: &mut [u8; 2000], offset: &mut usize, gtp_teid: [u8; 4]) {
+    // On the N3 side, we are expecting
+    // - a 12-byte GTP header - making the GTP header 12 bytes
+    // - a 4-byte PDU session container
+    // ...meaning that the inner packet is at offset 16.
+    // On the F1 side, we have
+    // - a minimal 8-byte GTP header
+    // - a 1-byte SDAP header
+    // - a 2-byte PDCP header
+    // ...meaning that the inner packet is at offset 11 and the packet is 5
+    // bytes shorter.
+
+    // TODO: read the inbound head and PDU session container
+    let buf = &buf[*offset..];
+    let orig_length = u16::from_be_bytes([buf[2], buf[3]]);
+    let new_length = (orig_length - 5).to_be_bytes();
+
+    // Advance offset and write in new header
+    *offset += 5;
+    let buf = &buf[5..];
+
+    // Rebuild the header, ovewriting the received data.
+    buf[0] = 0b001_1_0_0_0_0;
+    buf[1] = GTP_MESSAGE_TYPE_GPU;
+    buf[2] = new_length[0];
+    buf[3] = new_length[1];
+    buf[4] = gtp_teid[0];
+    buf[5] = gtp_teid[1];
+    buf[6] = gtp_teid[2];
+    buf[7] = gtp_teid[3];
+
+    // ---- SDAP DOWNLINK DATA PDU ----
+    buf[8] = 0b0_0_000001; // RDI, RQI, QFI - see TS37.324
+
+    // ---- PDCP Data PDU for DRB with 12 bit PDCP SN ----
+    // TODO: handle PDCP sequence number correctly
+    buf[9] = 0b1_0_0_0_0000; // D/C, R,R,R, SN
+    buf[10] = 0b00000001; // SN
+}
+
+fn replace_f1_with_n3_headers(buf: &mut [u8; 2000]) {}
 
 // From TS 29.281, 5.1
 struct GtpHeader {
