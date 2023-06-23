@@ -99,15 +99,17 @@ impl PacketProcessor {
     }
 }
 
+const HEADROOM: usize = 8;
 async fn start_forwarding(
     gtpu_socket: UdpSocket,
     forwarding_table: Arc<Mutex<ForwardingTable>>,
     logger: Logger,
 ) -> JoinHandle<()> {
     task::spawn(async move {
-        let mut buf = vec![0; 2000];
+        let mut buf = [0; 2000];
         loop {
-            let Ok((n, _peer)) = gtpu_socket.recv_from(&mut buf).await else {
+            let mut offset = HEADROOM;
+            let Ok((n, _peer)) = gtpu_socket.recv_from(&mut buf[offset..2000]).await else {
                 break;
             };
 
@@ -116,9 +118,10 @@ async fn start_forwarding(
                 continue;
             }
 
-            let gtp_header = parse_gtp(&buf[0..GTP_HEADER_MIN_SIZE]);
+            let gtp_header = parse_gtp(&buf[offset..offset + GTP_HEADER_MIN_SIZE]);
             let gtp_teid = gtp_header.teid;
             let key = ((gtp_teid >> 1) & CAPACITY_MASK) as usize;
+            let downlink = (gtp_teid & 1) == 1;
 
             debug!(
                 logger,
@@ -129,7 +132,7 @@ async fn start_forwarding(
             let context = &forwarding_table.lock().await.0[key];
 
             // LSB clear for uplink; set for downlink
-            let action = if (gtp_teid & 1) == 1 {
+            let action = if downlink {
                 &context.session_1_downlink
             } else {
                 &context.session_1_uplink
@@ -151,14 +154,107 @@ async fn start_forwarding(
                 "Tx data packet TEID {:?}, {dest_sock_addr}", &action.remote_tunnel_info.gtp_teid.0
             );
 
-            overwrite_teid(&mut buf, &action.remote_tunnel_info.gtp_teid.0);
+            if downlink {
+                replace_n3_with_f1_headers(
+                    &mut buf,
+                    &mut offset,
+                    &action.remote_tunnel_info.gtp_teid.0,
+                );
+            } else {
+                replace_f1_with_n3_headers(
+                    &mut buf,
+                    &mut offset,
+                    &action.remote_tunnel_info.gtp_teid.0,
+                );
+            }
 
-            match gtpu_socket.send_to(&buf[..n], dest_sock_addr).await {
+            match gtpu_socket
+                .send_to(&buf[offset..(n + HEADROOM)], dest_sock_addr)
+                .await
+            {
                 Ok(_bytes_sent) => (), // TODO update stat
                 Err(_e) => (),         // TODO update stat
             }
         }
     })
+}
+
+const GTP_MESSAGE_TYPE_GPU: u8 = 255; // TS29.281, table 6.1-1
+
+fn replace_n3_with_f1_headers(buf: &mut [u8; 2000], offset: &mut usize, gtp_teid: &[u8; 4]) {
+    // On the N3 side, there should be
+    // - a 12-byte GTP header
+    // - a 4-byte PDU session container
+    // ...meaning that the inner packet is at offset 16.
+    //
+    // On the F1 side, we have
+    // - an 8-byte GTP header
+    // - a 1-byte SDAP header
+    // - a 2-byte PDCP header
+    // ...meaning that the inner packet is at offset 11 and the packet is 5
+    // bytes shorter on tx.
+
+    // TODO: read the inbound header and PDU session container
+    let gtp_header = &mut buf[*offset..];
+    let orig_length = u16::from_be_bytes([gtp_header[2], gtp_header[3]]);
+    let new_length = (orig_length - 5).to_be_bytes();
+
+    // Advance offset and write in new header
+    *offset += 5;
+    let buf = &mut buf[*offset..];
+
+    // Rebuild the header, ovewriting the received data.
+    buf[0] = 0b001_1_0_0_0_0;
+    buf[1] = GTP_MESSAGE_TYPE_GPU;
+    buf[2] = new_length[0];
+    buf[3] = new_length[1];
+    buf[4] = gtp_teid[0];
+    buf[5] = gtp_teid[1];
+    buf[6] = gtp_teid[2];
+    buf[7] = gtp_teid[3];
+
+    // ---- SDAP DOWNLINK DATA PDU ----
+    buf[8] = 0b0_0_000001; // RDI, RQI, QFI - see TS37.324
+
+    // ---- PDCP Data PDU for DRB with 12 bit PDCP SN ----
+    // TODO: handle PDCP sequence number correctly
+    buf[9] = 0b1_0_0_0_0000; // D/C, R,R,R, SN
+    buf[10] = 0b00000001; // SN
+}
+
+fn replace_f1_with_n3_headers(buf: &mut [u8; 2000], offset: &mut usize, gtp_teid: &[u8; 4]) {
+    // The inverse of the case above - so we need to grow the packet by 5 bytes.
+
+    let gtp_header = &mut buf[*offset..];
+    let orig_length = u16::from_be_bytes([gtp_header[2], gtp_header[3]]);
+    let new_length = (orig_length + 5).to_be_bytes();
+
+    // TODO: check rather than assume the inbound headers are there
+
+    // Rewind offset and write in new header
+    *offset -= 5;
+    let buf = &mut buf[*offset..];
+
+    // Rebuild the header, ovewriting the received data.
+    // ---- GTP header, TS29.281 ----
+    buf[0] = 0b001_1_0_1_0_0; // version=1, PT=1, R, E=1, S, PN
+    buf[1] = GTP_MESSAGE_TYPE_GPU;
+    buf[2] = new_length[0];
+    buf[3] = new_length[1];
+    buf[4] = gtp_teid[0];
+    buf[5] = gtp_teid[1];
+    buf[6] = gtp_teid[2];
+    buf[7] = gtp_teid[3];
+    buf[8] = 0; // Sequence number
+    buf[9] = 0; // Sequence number
+    buf[10] = 0; // N-PDU number
+    buf[11] = 0b10000101; // next extension = PDU Session Container - see TS29.281, figure 5.2.1-3
+
+    // ---- PDU session container, TS38.415 ----
+    buf[12] = 1; // length of PDU session container = 4 bytes
+    buf[13] = 0b0001_0_0_0_0; // PDU type = UL PDU SESSION INFORMATION, QMP, DL delay, UL delay, SNP
+    buf[14] = 0b0_0_000001; // N3 delay, new IE, QFI=1,
+    buf[15] = 0; // next extension type = none
 }
 
 // From TS 29.281, 5.1
@@ -183,8 +279,4 @@ fn parse_gtp(packet: &[u8]) -> GtpHeader {
         _length: length,
         teid,
     }
-}
-
-fn overwrite_teid(packet: &mut [u8], new_teid: &[u8; 4]) {
-    packet[4..8].copy_from_slice(new_teid)
 }

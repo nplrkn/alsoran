@@ -628,7 +628,7 @@ impl MockDu {
         let transport_layer_address = transport_layer_address.clone().try_into()?;
 
         self.userplane
-            .send_data_packet(transport_layer_address, gtp_teid.clone())
+            .send_f1u_data_packet(transport_layer_address, gtp_teid.clone())
             .await?;
 
         Ok(())

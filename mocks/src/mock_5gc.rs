@@ -459,7 +459,7 @@ impl Mock5gc {
 
     pub async fn send_data_packet(&self, session: &Session) -> Result<()> {
         self.userplane
-            .send_data_packet(
+            .send_n3_data_packet(
                 session
                     .remote_tunnel_info
                     .transport_layer_address

@@ -1,7 +1,7 @@
 //! build_rrc - construction of RRC messages
 
 use anyhow::Result;
-use asn1_per::NonEmpty;
+use asn1_per::{nonempty, NonEmpty};
 use net::*;
 use pdcp::PdcpPdu;
 use rrc::*;
@@ -83,11 +83,44 @@ pub fn build_rrc_reconfiguration(
 ) -> Result<f1ap::RrcContainer> {
     let dedicated_nas_message_list = nas_messages.map(|x| (x.map(DedicatedNasMessage)));
 
+    // TODO - lots of hardcoding here
+
     make_pdcp_encapsulated_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::RrcReconfiguration(rrc::RrcReconfiguration {
             rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
             critical_extensions: CriticalExtensions15::RrcReconfiguration(RrcReconfigurationIEs {
-                radio_bearer_config: None,
+                radio_bearer_config: Some(RadioBearerConfig {
+                    srb_to_add_mod_list: None,
+                    srb_3_to_release: None,
+                    drb_to_add_mod_list: Some(DrbToAddModList(nonempty![DrbToAddMod {
+                        cn_association: Some(CnAssociation::SdapConfig(SdapConfig {
+                            pdu_session: PduSessionId(1),
+                            sdap_header_dl: SdapHeaderDl::Present,
+                            sdap_header_ul: SdapHeaderUl::Present,
+                            default_drb: true,
+                            mapped_qos_flows_to_add: None,
+                            mapped_qos_flows_to_release: None
+                        })),
+                        drb_identity: DrbIdentity(1),
+                        reestablish_pdcp: None,
+                        recover_pdcp: None,
+                        pdcp_config: Some(PdcpConfig {
+                            drb: Some(Drb {
+                                discard_timer: Some(DiscardTimer::Ms10),
+                                pdcp_sn_size_ul: Some(PdcpSnSizeUl::Len12bits),
+                                pdcp_sn_size_dl: Some(PdcpSnSizeDl::Len12bits),
+                                header_compression: HeaderCompression::NotUsed,
+                                integrity_protection: None,
+                                status_report_required: None,
+                                out_of_order_delivery: None
+                            }),
+                            more_than_one_rlc: None,
+                            t_reordering: None
+                        })
+                    }])),
+                    drb_to_release_list: None,
+                    security_config: None,
+                }),
                 secondary_cell_group: None,
                 meas_config: None,
                 late_non_critical_extension: None,
