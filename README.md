@@ -8,16 +8,18 @@ This project is currently a proof of concept and not yet a fully functional gNB-
 
 ## Current support
 - UE registration demo against free5GC.
-- Session setup (TS 23.502, figure 4.3.2.2.1-1).
-- UE state in Redis datastore.
-- ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
-- Connection management stack 
+- PDU session setup (TS 23.502, figure 4.3.2.2.1-1).
+- Relay of userplane packets between GNB-DU and UPF.
+- Separate CU-CP and CU-UP communicating using E1.
 - Scale-out of GNB-CU-CP workers using multiple TNLAs.
-- [Triangular redirection](documentation/design/triangular-redirection.md)
+- ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
 - Rust ASN.1 autogenerator (written in Python).
+- UE state in Redis datastore.
+- [Triangular redirection](documentation/design/triangular-redirection.md)
+- SCTP connection management stack 
 
-The gNB-CU-UP is currently a simple stub that replies to E1AP requests but does not process userplane packets.
-Generally only the success cases are covered, and there are a lot of 'To Dos'.  
+Generally only the success cases are covered, and there are a lot of 'To Dos'.
+
 ### Procedure support
 #### CU-CP
 -  NG Setup
@@ -38,6 +40,8 @@ Generally only the success cases are covered, and there are a lot of 'To Dos'.
 -  Bearer Context Setup
 -  Bearer Context Modification
 -  GNB CU CP Configuration Update
+-  Downlink user data
+-  Uplink user data
 
 ## What's different about Alsoran?
 
@@ -52,7 +56,7 @@ Rust is an attractive choice of language for new O-RAN development.  The main ba
 
 ## Building and running integration tests
 
-The build relies on `lld` to reduce linker memory needs.  You will either need to install it (`sudo apt install lld` or similar), or edit .cargo/config to remove the `target.x86_64-unknown-linux-gnu` config and revert to plain `cc` linking.
+The build relies on `lld` to reduce linker memory needs.  You will either need to install LLD (`sudo apt install lld` or similar), or edit .cargo/config to remove the `target.x86_64-unknown-linux-gnu` config, which reverts to plain `cc` linking.
 
 `cargo test` runs the integration test suite, minus the live Redis test.  
 
@@ -60,7 +64,7 @@ To run the live Redis test, `cargo test live_redis -- --ignored`.  For this to p
 
 ## A quick tour
 
-The following test shows the Alsoran CU-CP carrying out UE registration and session establishment.
+The following test shows the Alsoran CU-CP and CU-UP carrying out UE registration, session establishment and userplane forwarding.
 ```
 RUST_LOG=info cargo test successful_pdu_session_setup --test pdu_session -- --nocapture
 ```
@@ -72,7 +76,7 @@ RUST_LOG=info cargo test two_workers_base --test two_workers -- --nocapture
 
 You can packet capture during these tests by running the following in parallel. 
 ```
-sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462 or port 38462
+sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462 or port 38462 or port 2152
 ```
 ...then Ctrl-C at the end of the test and open alsoran.pcap in Wireshark.
 
@@ -94,14 +98,19 @@ Alsoran protocol handling and workflow logic is based on the following specifica
 
 -  3GPP TS23.501 - System architecture for the 5G System
 -  3GPP TS23.502 - Procedures for the 5G System
+-  3GPP TS29.281 - General Packet Radio System (GPRS) Tunnelling Protocol User Plane (GTPv1-U)
+-  3GPP TS37.324 - Service Data Adaptation Protocol (SDAP) specification
 -  3GPP TS38.300 - NR and NG-RAN Overall Description
 -  3GPP TS38.323 - Packet Data Convergence Protocol (PDCP) Specification
 -  3GPP TS38.331 - Radio Resource Control (RRC) protocol specification
 -  3GPP TS38.401 - NG-RAN; Architecture description 
 -  3GPP TS38.412 - NG signalling transport 
 -  3GPP TS38.413 - NG Application Protocol (NGAP)
+-  3GPP TS38.414 - NG data transport
+-  3GPP TS38.415 - PDU Session User Plane Protocol
 -  3GPP TS38.462 - E1 signalling transport
 -  3GPP TS38.463 - E1 Application Protocol (E1AP)
 -  3GPP TS38.472 - F1 signalling transport
 -  3GPP TS38.473 - F1 Application Protocol (F1AP)
+-  3GPP TS38.474 - F1 data transport
 -  O-RAN.WG5.C.1 - NR C-plane profile
