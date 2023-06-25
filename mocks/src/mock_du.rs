@@ -637,6 +637,7 @@ impl MockDu {
     pub async fn recv_data_packet(&self, ue_context: &UeContext) -> Result<()> {
         let drb = ue_context.drb.as_ref().ok_or(anyhow!("No pdu session"))?;
         self.userplane.recv_data_packet(&drb.local_teid).await?;
+        info!(self.logger, "Received data packet");
         Ok(())
     }
 }

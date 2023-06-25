@@ -77,7 +77,7 @@ pub fn spawn<U: UeStateStore>(
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
-    info!(&logger, "Started gNB-CU-CP worker {}", worker_id);
+    info!(&logger, "Starting gNB-CU-CP worker {}", worker_id);
 
     let handle = match config.connection_style {
         // Run a combined worker and coordinator.
@@ -309,7 +309,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     }
     async fn ngap_connect(&self, amf_ip_address: &str) -> Result<()> {
         let amf_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
-        info!(&self.logger, "Connect to AMF {}", amf_address);
+        debug!(&self.logger, "Connect to AMF {}", amf_address);
         self.ngap
             .connect(
                 &amf_address,

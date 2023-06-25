@@ -39,7 +39,7 @@ const E1AP_BIND_PORT: u16 = 38462;
 pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
-    info!(&logger, "Start gNB-CU-UP worker");
+    info!(&logger, "Starting gNB-CU-UP worker");
     let handle = async_std::task::spawn(async move {
         let worker = Worker::new(config, logger.clone())
             .await
