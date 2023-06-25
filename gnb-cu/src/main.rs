@@ -1,5 +1,6 @@
 //! main - starts a single-instance combined CU-CP and CU-UP
 
+#![allow(unused_parens)]
 use anyhow::Result;
 use clap::Parser;
 use common::{logging, panic, signal, ShutdownHandle};
@@ -15,12 +16,19 @@ use uuid::Uuid;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Local IP address to bind server ports to
-    #[arg(short, long, default_value_t = IpAddr::V4(Ipv4Addr::UNSPECIFIED))]
+    #[arg(long, default_value_t = IpAddr::V4(Ipv4Addr::UNSPECIFIED))]
     local_ip: IpAddr,
 
     /// AMF's NGAP IP address to connect to.
-    #[arg(short, long, default_value_t = IpAddr::V4(Ipv4Addr::LOCALHOST))]
+    #[arg(long, default_value_t = IpAddr::V4(Ipv4Addr::LOCALHOST))]
     amf_ip: IpAddr,
+
+    /// PLMN ID.
+    #[arg(long)]
+    mcc: String,
+
+    #[arg(long)]
+    mnc: String,
 }
 
 #[async_std::main]
@@ -42,13 +50,49 @@ async fn main() -> Result<()> {
 }
 
 fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
+    if args.mcc.len() != 3 {
+        panic!("MCC must be three decimal digits");
+    }
+
+    let mut plmn_digits = [0u8; 6];
+    let mut plmn = [0u8; 3];
+    for (n, c) in args.mcc.chars().enumerate() {
+        let Some(digit) = c.to_digit(10) else {
+            panic!("MCC must be three decimal digits");
+        };
+        plmn_digits[n] = digit as u8;
+    }
+    let offset = match args.mnc.len() {
+        2 => {
+            plmn_digits[3] = 0x0f;
+            4
+        }
+        3 => 3,
+        _ => panic!("MNC must be two or three digits"),
+    };
+    for (n, c) in args.mnc.chars().enumerate() {
+        let Some(digit) = c.to_digit(10) else {
+            panic!("MNC must be two or three digits")
+        };
+        plmn_digits[n + offset] = digit as u8;
+    }
+    for (n, digit) in plmn_digits.iter().enumerate() {
+        let index = n / 2;
+        plmn[index] = if (n % 2) == 0 {
+            *digit
+        } else {
+            plmn[index] | (digit << 4)
+        };
+    }
+
     let cp_config = CpConfig {
         ip_addr: args.local_ip,
         connection_style: ConnectionStyle::Autonomous(ConnectionControlConfig {
             fast_start: true,
             amf_address: args.amf_ip.to_string(),
-            ..ConnectionControlConfig::default()
+            worker_refresh_interval_secs: 10,
         }),
+        plmn,
         ..CpConfig::default()
     };
     gnb_cu_cp::spawn(Uuid::new_v4(), cp_config, MockUeStore::new(), logger)

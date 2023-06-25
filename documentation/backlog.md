@@ -1,5 +1,4 @@
 # Single process GNB-CU
-- Retry AMF
 
 # NEXT UP
 - Session deletion (including on different worker)
@@ -88,6 +87,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Retry connection to AMF
+- Single process GNB-CU with configurable MCC / MNC
 - SDAP / PDCP should be added/stripped
 - local-ip arg for mock-5gc and amf-ip arg for gnb-cu-cp
 - mock_amf becomes mock_5gc
