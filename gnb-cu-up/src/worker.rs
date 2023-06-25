@@ -17,7 +17,7 @@ use dashmap::DashMap;
 use e1ap::GnbCuUpUeE1apId;
 use futures::{pin_mut, select, FutureExt};
 use net::{SctpTransportProvider, ShutdownHandle, Stack};
-use slog::{info, warn, Logger};
+use slog::{debug, info, warn, Logger};
 use stop_token::{StopSource, StopToken};
 use xxap::GtpTeid;
 
@@ -79,7 +79,7 @@ impl Worker {
                 .await
             {
                 Ok(_) => {
-                    info!(logger, "Startup complete - wait for instructions from CP");
+                    debug!(logger, "Startup complete - wait for instructions from CP");
 
                     // We now stay here for the lifetime of the GNB-CU-UP worker (until SIGINT)
                     // All the action happens in other tasks triggered by the E1apHandler.
