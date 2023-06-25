@@ -131,7 +131,7 @@ impl TestContext {
         };
 
         // Start CU-CP workers
-        info!(self.logger, "Spawn {} worker(s)", builder.worker_count);
+        debug!(self.logger, "Spawn {} worker(s)", builder.worker_count);
         for worker_index in 0..builder.worker_count {
             self.start_worker_on_random_ip(&datastore).await;
             self.get_worker_to_stage(worker_index as usize, &builder.stage, worker_index == 0)
@@ -139,7 +139,6 @@ impl TestContext {
         }
 
         // Start a CU-UP pointing at the first worker.
-        info!(self.logger, "Spawn CU-UP");
         let first_worker_ip = self.workers[0].config.ip_addr;
         self.cu_ups
             .push(start_cu_up_on_random_ip(first_worker_ip, &self.logger).await?);
@@ -352,7 +351,7 @@ impl TestContext {
     }
 
     pub async fn terminate(self) {
-        info!(self.logger, "Terminate worker(s)");
+        info!(self.logger, "Terminate GNB-CU");
         future::timeout(Duration::from_secs(10), self.graceful_terminate())
             .await
             .expect("Graceful shutdown took more than 10 seconds");
@@ -394,7 +393,7 @@ async fn start_cu_up_on_random_ip(
     cp_ip_address: IpAddr,
     logger: &Logger,
 ) -> Result<ShutdownHandle> {
-    info!(logger, "Spawn CU-UP");
+    debug!(logger, "Spawn CU-UP");
     for _ in 0..IP_OR_PORT_RETRIES {
         let ip_address: IpAddr = random_local_ip().parse()?;
 

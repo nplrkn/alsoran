@@ -22,7 +22,15 @@ impl<G: GnbCuUp> E1apHandler<G> {
 #[async_trait]
 impl<G: GnbCuUp> EventHandler for E1apHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
-        info!(logger, "E1AP TNLA {tnla_id} {event:?}")
+        match event {
+            TnlaEvent::Established(addr) => {
+                info!(
+                    logger,
+                    "E1AP TNLA {} established with CU-CP {}", tnla_id, addr
+                )
+            }
+            TnlaEvent::Terminated => info!(logger, "E1AP TNLA {} closed", tnla_id),
+        };
     }
 }
 

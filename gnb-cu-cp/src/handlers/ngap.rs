@@ -27,7 +27,10 @@ impl<G: GnbCuCp> EventHandler for NgapHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {
-                info!(logger, "NGAP TNLA {} established to {}", tnla_id, addr);
+                info!(
+                    logger,
+                    "NGAP TNLA {} established with AMF {}", tnla_id, addr
+                );
             }
             TnlaEvent::Terminated => info!(logger, "NGAP TNLA {} closed", tnla_id),
         };

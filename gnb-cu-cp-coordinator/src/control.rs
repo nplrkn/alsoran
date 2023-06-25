@@ -298,7 +298,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         logger: &Logger,
         setup: bool,
     ) -> Result<()> {
-        info!(
+        debug!(
             logger,
             "{:x} to {} NG interface",
             worker_id,

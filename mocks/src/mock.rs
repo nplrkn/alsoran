@@ -112,7 +112,7 @@ impl<P: Pdu> Mock<P> {
         match self.receiver.recv().await.expect("Failed mock recv") {
             MockEvent::Pdu(x) => panic!("Expected connection, got {:?}", x.pdu),
             MockEvent::Connection => {
-                info!(
+                debug!(
                     self.logger,
                     "Association list is now {:?}",
                     self.transport.remote_tnla_addresses().await
@@ -157,14 +157,13 @@ impl<P: Pdu> Mock<P> {
 #[async_trait]
 impl<P: Pdu> TnlaEventHandler for Handler<P> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
-        info!(logger, "TNLA {} {:?}", tnla_id, event);
-
-        // Notify the mock if this is an establish event.  Ignore termination events.
-        if let TnlaEvent::Established(_) = event {
-            self.0
+        match event {
+            TnlaEvent::Established(_addr) => self
+                .0
                 .send(MockEvent::Connection)
                 .await
-                .expect("Channel closed");
+                .expect("Channel closed"),
+            TnlaEvent::Terminated => info!(logger, "TNLA {} closed", tnla_id),
         }
     }
 

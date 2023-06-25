@@ -93,7 +93,7 @@ impl<G: GnbCuCp> EventHandler for F1apHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {
-                info!(logger, "F1AP TNLA {} established from {}", tnla_id, addr)
+                info!(logger, "F1AP TNLA {} established with DU {}", tnla_id, addr)
             }
             TnlaEvent::Terminated => info!(logger, "F1AP TNLA {} closed", tnla_id),
         };
