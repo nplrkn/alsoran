@@ -1,7 +1,7 @@
 //! main - starts a single-instance combined CU-CP and CU-UP
 
 #![allow(unused_parens)]
-use anyhow::Result;
+use anyhow::{bail, ensure, Result};
 use clap::Parser;
 use common::{logging, panic, signal, ShutdownHandle};
 use gnb_cu_cp::{Config as CpConfig, MockUeStore};
@@ -50,40 +50,7 @@ async fn main() -> Result<()> {
 }
 
 fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
-    if args.mcc.len() != 3 {
-        panic!("MCC must be three decimal digits");
-    }
-
-    let mut plmn_digits = [0u8; 6];
-    let mut plmn = [0u8; 3];
-    for (n, c) in args.mcc.chars().enumerate() {
-        let Some(digit) = c.to_digit(10) else {
-            panic!("MCC must be three decimal digits");
-        };
-        plmn_digits[n] = digit as u8;
-    }
-    let offset = match args.mnc.len() {
-        2 => {
-            plmn_digits[3] = 0x0f;
-            4
-        }
-        3 => 3,
-        _ => panic!("MNC must be two or three digits"),
-    };
-    for (n, c) in args.mnc.chars().enumerate() {
-        let Some(digit) = c.to_digit(10) else {
-            panic!("MNC must be two or three digits")
-        };
-        plmn_digits[n + offset] = digit as u8;
-    }
-    for (n, digit) in plmn_digits.iter().enumerate() {
-        let index = n / 2;
-        plmn[index] = if (n % 2) == 0 {
-            *digit
-        } else {
-            plmn[index] | (digit << 4)
-        };
-    }
+    let plmn = convert_mcc_mnc_to_plmn_array(&args.mcc, &args.mnc).unwrap();
 
     let cp_config = CpConfig {
         ip_addr: args.local_ip,
@@ -112,4 +79,40 @@ fn spawn_up(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
     };
 
     gnb_cu_up::spawn(up_config, logger)
+}
+
+fn convert_mcc_mnc_to_plmn_array(mcc: &str, mnc: &str) -> Result<[u8; 3]> {
+    ensure!(mcc.len() == 3, "MCC must be three decimal digits");
+
+    let mut plmn_digits = [0u8; 6];
+    let mut plmn = [0u8; 3];
+    for (n, c) in mcc.chars().enumerate() {
+        let Some(digit) = c.to_digit(10) else {
+            bail!("MCC must be three decimal digits");
+        };
+        plmn_digits[n] = digit as u8;
+    }
+    let offset = match mnc.len() {
+        2 => {
+            plmn_digits[3] = 0x0f;
+            4
+        }
+        3 => 3,
+        _ => bail!("MNC must be two or three digits"),
+    };
+    for (n, c) in mnc.chars().enumerate() {
+        let Some(digit) = c.to_digit(10) else {
+            bail!("MNC must be two or three digits")
+        };
+        plmn_digits[n + offset] = digit as u8;
+    }
+    for (n, digit) in plmn_digits.iter().enumerate() {
+        let index = n / 2;
+        plmn[index] = if (n % 2) == 0 {
+            *digit
+        } else {
+            plmn[index] | (digit << 4)
+        };
+    }
+    Ok(plmn)
 }
