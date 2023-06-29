@@ -13,6 +13,7 @@ members = [
     "xxap",
     "rrc",
     "pdcp",
+    "gnb-cu",
     "gnb-cu-cp",
     "gnb-cu-up",
     "connection-api",

@@ -11,6 +11,7 @@ use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
 use crate::{GnbCuCp, WorkerConnectionManagementConfig};
 use anyhow::Result;
 use async_channel::Sender;
+use async_std::future;
 use async_std::sync::Mutex;
 use async_trait::async_trait;
 use coordination_api::models::{ConnectionState, RefreshWorker, WorkerInfo};
@@ -28,6 +29,7 @@ use slog::{debug, info, warn, Logger};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
+use std::time::Duration;
 use stop_token::{StopSource, StopToken};
 use swagger::{ApiError, AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
@@ -78,6 +80,7 @@ pub fn spawn<U: UeStateStore>(
     let stop_token = stop_source.token();
 
     info!(&logger, "Starting gNB-CU-CP worker {}", worker_id);
+    info!(&logger, "PLMN is {:02x?}", config.plmn);
 
     let handle = match config.connection_style {
         // Run a combined worker and coordinator.
@@ -165,7 +168,8 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
         // Connect to the coordinator.  It will bring this worker into service by making calls to the
         // connection API.
-        self.connect_to_coordinator().await;
+        self.send_periodic_refreshes_to_coordinator(stop_token.clone())
+            .await;
 
         stop_token.await;
 
@@ -178,11 +182,24 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         Ok(())
     }
 
-    async fn connect_to_coordinator(&self) {
-        // // TODO here we just send a single refresh.  This will need to be updated to send one on a timer.
-        if let Err(e) = self.send_refresh_worker().await {
-            warn!(self.logger, "Failed initial refresh worker- {}", e);
-        }
+    async fn send_periodic_refreshes_to_coordinator(&self, stop_token: StopToken) {
+        let clone = self.clone();
+        async_std::task::spawn(async move {
+            let interval_secs = 10; // TODO - make configurable
+
+            loop {
+                let stop_token_clone = stop_token.clone();
+                if let Err(e) = clone.send_refresh_worker().await {
+                    warn!(clone.logger, "Failed refresh worker - {}", e);
+                }
+                if future::timeout(Duration::from_secs(interval_secs), stop_token_clone)
+                    .await
+                    .is_ok()
+                {
+                    break;
+                }
+            }
+        });
     }
 
     async fn send_refresh_worker(&self) -> Result<RefreshWorkerResponse, ApiError> {

@@ -100,11 +100,7 @@ where
         } {
             Ok(()) => Ok(AddConnectionResponse::Success),
             Err(e) => {
-                warn!(
-                    self.logger,
-                    "Error trying to add connection - {}",
-                    e.to_string()
-                );
+                warn!(self.logger, "{}", e.to_string());
                 Ok(AddConnectionResponse::Failure(e.to_string()))
             }
         }

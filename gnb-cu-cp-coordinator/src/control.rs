@@ -374,7 +374,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
     ) -> Result<()> {
         let id = added_worker_id;
         if self.recently_attempted(connection_state.last_attempt) {
-            info!(logger, "Skip {} for {:x} - recently attempted", op, id);
+            debug!(logger, "Skip {} for {:x} - recently attempted", op, id);
             return Ok(());
         }
 
@@ -401,7 +401,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 // TODO: store the revision number so that this doesn't get overwritten by an
                 // out of date refresh.
             }
-            Ok(r) => warn!(logger, "Failure of {} for {:x} - {:?}", op, id, r),
+            Ok(r) => debug!(logger, "Failure of {} for {:x} - {:?}", op, id, r),
             Err(e) => warn!(logger, "API error in {} for {:x} - {}", op, id, e),
         }
 

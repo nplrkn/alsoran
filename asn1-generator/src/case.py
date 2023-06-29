@@ -80,7 +80,7 @@ class TestCase(unittest.TestCase):
         self.assertEqual(pascal_case(
             "e-UTRAN-BearerContextSetupRequest"), "EutranBearerContextSetupRequest")
 
-    def test_pmlns(self):
+    def test_plmns(self):
         self.assertEqual(pascal_case(
             "SupportedPLMNs-List"), "SupportedPlmnsList")
 

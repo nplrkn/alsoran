@@ -1051,6 +1051,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "gnb-cu"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "clap",
+ "common",
+ "gnb-cu-cp",
+ "gnb-cu-up",
+ "slog",
+ "stop-token",
+ "uuid 1.3.0",
+]
+
+[[package]]
 name = "gnb-cu-cp"
 version = "0.1.0"
 dependencies = [

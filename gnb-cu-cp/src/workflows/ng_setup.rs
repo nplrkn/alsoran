@@ -1,7 +1,7 @@
 //! ng_setup - the initial handshake that establishes an instance of the NG reference point between GNB and AMF
 
 use super::{GnbCuCp, Workflow};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use asn1_per::*;
 use ngap::*;
 use slog::info;
@@ -14,7 +14,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // 3.    Ngap NgSetupResponse <<
     pub async fn ng_setup(&self, amf_ip_address: &str) -> Result<()> {
         // Connect to the AMF
-        self.gnb_cu_cp.ngap_connect(amf_ip_address).await?;
+        self.gnb_cu_cp
+            .ngap_connect(amf_ip_address)
+            .await
+            .map_err(|_e| anyhow!("Failed to connect to AMF {} (will retry)", amf_ip_address))?;
 
         // This uses the default expected values of free5GC.
         let ng_setup_request = NgSetupRequest {
@@ -24,9 +27,17 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 tac: Tac([0, 0, 1]),
                 broadcast_plmn_list: BroadcastPlmnList(nonempty![BroadcastPlmnItem {
                     plmn_identity: PlmnIdentity(self.config().plmn.clone()),
-                    tai_slice_support_list: SliceSupportList(nonempty![SliceSupportItem {
-                        snssai: Snssai(1, Some([1, 2, 3])).into(),
-                    }]),
+                    tai_slice_support_list: SliceSupportList(nonempty![
+                        SliceSupportItem {
+                            snssai: Snssai(1, None).into(),
+                        },
+                        SliceSupportItem {
+                            snssai: Snssai(1, Some([0, 0, 0])).into(),
+                        },
+                        SliceSupportItem {
+                            snssai: Snssai(1, Some([0, 0, 1])).into(),
+                        }
+                    ]),
                     npn_support: None,
                     extended_tai_slice_support_list: None,
                 }]),
