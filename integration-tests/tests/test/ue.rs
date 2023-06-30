@@ -145,4 +145,25 @@ impl UeWithSession {
         tc.amf.send_data_packet(&self.ngc_session).await?;
         tc.du.recv_data_packet(&self.du_ue_context).await
     }
+    pub async fn release_pdu_session(self, tc: &TestContext) -> Result<RegisteredUe> {
+        let UeWithSession {
+            ue_id,
+            du_ue_context,
+            amf_ue_context,
+            ngc_session,
+        } = self;
+
+        tc.amf
+            .send_pdu_session_resource_release(&amf_ue_context, &ngc_session)
+            .await?;
+        tc.amf
+            .receive_pdu_session_resource_release_response(&amf_ue_context)
+            .await?;
+
+        Ok(RegisteredUe {
+            ue_id,
+            du_ue_context,
+            amf_ue_context,
+        })
+    }
 }

@@ -25,11 +25,16 @@ pub struct UeContext {
     ran_ue_ngap_id: RanUeNgapId,
     pub binding: Binding,
 }
+impl UeContext {
+    pub fn amf_ue_ngap_id(&self) -> AmfUeNgapId {
+        AmfUeNgapId(self.ue_id as u64)
+    }
+}
 
 pub struct Session {
     remote_tunnel_info: GtpTunnel,
     local_gtp_teid: GtpTeid,
-    _id: PduSessionId,
+    session_id: PduSessionId,
 }
 
 impl Deref for Mock5gc {
@@ -395,7 +400,7 @@ impl Mock5gc {
 
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceSetupRequest(
             PduSessionResourceSetupRequest {
-                amf_ue_ngap_id: AmfUeNgapId(ue_context.ue_id.into()),
+                amf_ue_ngap_id: ue_context.amf_ue_ngap_id(),
                 ran_ue_ngap_id: ue_context.ran_ue_ngap_id,
                 ran_paging_priority: None,
                 nas_pdu: None,
@@ -443,7 +448,7 @@ impl Mock5gc {
                     Session {
                         remote_tunnel_info,
                         local_gtp_teid,
-                        _id: setup.pdu_session_id,
+                        session_id: setup.pdu_session_id,
                     }
                 } else {
                     panic!("Expected pdu_session_resource_setup_list_su_res on PduSessionResourceSetupResponse")
@@ -454,6 +459,55 @@ impl Mock5gc {
                 "Expecting PduSessionResourceSetupResponse, got unexpected message {:?}",
                 x
             ),
+        }
+    }
+
+    pub async fn send_pdu_session_resource_release(
+        &self,
+        ue_context: &UeContext,
+        session: &Session,
+    ) -> Result<()> {
+        info!(&self.logger, "<< PduSessionResourceReleaseCommand");
+
+        let transfer = PduSessionResourceReleaseCommandTransfer {
+            cause: Cause::Nas(CauseNas::NormalRelease),
+        };
+
+        let dummy_nas_pdu = vec![0, 0, 0, 0];
+
+        let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceReleaseCommand(
+            PduSessionResourceReleaseCommand {
+                amf_ue_ngap_id: ue_context.amf_ue_ngap_id(),
+                ran_ue_ngap_id: ue_context.ran_ue_ngap_id,
+                ran_paging_priority: None,
+                nas_pdu: Some(NasPdu(dummy_nas_pdu)),
+                pdu_session_resource_to_release_list_rel_cmd: PduSessionResourceToReleaseListRelCmd(
+                    nonempty![PduSessionResourceToReleaseItemRelCmd {
+                        pdu_session_id: session.session_id,
+                        pdu_session_resource_release_command_transfer: transfer.into_bytes()?
+                    }],
+                ),
+            },
+        ));
+
+        self.send(pdu, Some(ue_context.binding.assoc_id)).await;
+        Ok(())
+    }
+
+    pub async fn receive_pdu_session_resource_release_response(
+        &self,
+        _ue_context: &UeContext,
+    ) -> Result<()> {
+        match self.receive_pdu().await.unwrap() {
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceReleaseResponse(
+                PduSessionResourceReleaseResponse { .. },
+            )) => {
+                info!(&self.logger, ">> PduSessionResourceSetupResponse");
+                Ok(())
+            }
+            m => {
+                bail!("Unexpected message {:?}", m);
+            }
         }
     }
 
