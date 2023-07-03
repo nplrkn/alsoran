@@ -5,6 +5,7 @@
 - RRC connection release
 - UE context release
 - Paging
+- RRC transaction IDs
 
 # TECH DEBT
 ## CU-UP and O-RAN O-DU interop

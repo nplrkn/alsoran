@@ -15,6 +15,7 @@ mod gnb_du_configuration_update;
 mod initial_access;
 mod initial_context_setup;
 mod ng_setup;
+mod pdu_session_resource_release;
 mod pdu_session_resource_setup;
 mod ran_configuration_update;
 mod uplink_nas;

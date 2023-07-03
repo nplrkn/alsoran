@@ -94,3 +94,19 @@ impl<G: GnbCuCp> RequestProvider<PduSessionResourceSetupProcedure> for NgapHandl
         ))
     }
 }
+
+#[async_trait]
+impl<G: GnbCuCp> RequestProvider<PduSessionResourceReleaseProcedure> for NgapHandler<G> {
+    async fn request(
+        &self,
+        r: PduSessionResourceReleaseCommand,
+        logger: &Logger,
+    ) -> Result<ResponseAction<PduSessionResourceReleaseResponse>, RequestError<()>> {
+        Ok((
+            Workflow::new(&self.gnb_cu_cp, logger)
+                .pdu_session_resource_release(r)
+                .await,
+            None,
+        ))
+    }
+}

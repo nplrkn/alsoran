@@ -60,14 +60,14 @@ pub fn build_rrc_security_mode_command(
 
 pub fn build_rrc_dl_information_transfer(
     rrc_transaction_identifier: u8,
-    dedicated_nas_message: Option<DedicatedNasMessage>,
+    dedicated_nas_message: DedicatedNasMessage,
 ) -> Result<f1ap::RrcContainer> {
     make_pdcp_encapsulated_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
             rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
             critical_extensions: CriticalExtensions4::DlInformationTransfer(
                 DlInformationTransferIEs {
-                    dedicated_nas_message,
+                    dedicated_nas_message: Some(dedicated_nas_message),
                     late_non_critical_extension: None,
                     non_critical_extension: None,
                 },
