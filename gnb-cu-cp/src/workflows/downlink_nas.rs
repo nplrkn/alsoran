@@ -45,7 +45,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     }
 
     pub async fn send_nas_to_ue(&self, ue: &UeState, nas: DedicatedNasMessage) -> Result<()> {
-        let rrc_container = super::build_rrc::build_rrc_dl_information_transfer(2, Some(nas))?;
+        let rrc_container = super::build_rrc::build_rrc_dl_information_transfer(2, nas)?;
 
         self.log_message("<< DlInformationTransfer(Nas)");
         self.send_rrc_to_ue(ue, SrbId(1), rrc_container, self.logger)
