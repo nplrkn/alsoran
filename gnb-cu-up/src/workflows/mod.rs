@@ -1,6 +1,7 @@
 use crate::GnbCuUp;
 use slog::{debug, Logger};
 mod bearer_context_modification;
+mod bearer_context_release;
 mod bearer_context_setup;
 mod gnb_cu_cp_configuration_update;
 mod gnb_cu_up_e1_setup;

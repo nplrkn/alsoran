@@ -17,6 +17,7 @@ pub trait GnbCuUp: Send + Sync + Clone + 'static {
     fn create_downlink_teid(&self, ue_id: u32, session_id: u8) -> GtpTeid;
     fn new_ue_ap_id(&self) -> GnbCuUpUeE1apId;
     fn bearer_context_exists(&self, ue_id: u32) -> bool;
+    async fn delete_bearer_context(&self, ue_id: u32);
     async fn e1ap_connect(&self, cp_address: &IpAddr) -> Result<()>;
     async fn e1ap_request<P: Procedure>(
         &self,

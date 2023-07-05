@@ -33,49 +33,68 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     pub async fn pdu_session_resource_release(
         &self,
         r: PduSessionResourceReleaseCommand,
-    ) -> Result<PduSessionResourceReleaseResponse> {
+    ) -> PduSessionResourceReleaseResponse {
         debug!(self.logger, "PduSessionResourceReleaseCommand(Nas) << ");
         let amf_ue_ngap_id = r.amf_ue_ngap_id;
         let ran_ue_ngap_id = r.ran_ue_ngap_id;
+        let pdu_session_to_release = r
+            .pdu_session_resource_to_release_list_rel_cmd
+            .0
+            .first()
+            .pdu_session_id;
 
-        // Load UE.
-        debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
-        let mut ue = self.retrieve(&r.ran_ue_ngap_id.0).await?;
-        let Some(gnb_cu_up_ue_e1ap_id) = ue.gnb_cu_up_ue_e1ap_id else {
-            bail!("UE has no E1 context");
-        };
-
-        // TODO - cope with >1 PDU session being released at a time
-        let to_release_item = r.pdu_session_resource_to_release_list_rel_cmd.0.first();
-        let e1 = self.perform_e1_bearer_release(&ue, gnb_cu_up_ue_e1ap_id);
-        let f1 = self.perform_f1_context_release(&ue, r.nas_pdu);
-
-        let results = futures_lite::future::zip(e1, f1).await;
-
-        // Wait for both.
-
-        // Update and write back UE.
-        ue.gnb_cu_up_ue_e1ap_id = None;
-        debug!(self.logger, "Store UE {:#010x}", ue.key);
-        self.store(ue.key, ue, self.config().ue_ttl_secs).await?;
+        if let Err(e) = self
+            .pdu_session_resource_release_inner(ran_ue_ngap_id.0, r.nas_pdu)
+            .await
+        {
+            warn!(self.logger, "Error during session release {e}")
+        }
 
         debug!(self.logger, "PduSessionResourceReleaseResponse >> ");
-        Ok(PduSessionResourceReleaseResponse {
+        PduSessionResourceReleaseResponse {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
             criticality_diagnostics: None,
             pdu_session_resource_released_list_rel_res: PduSessionResourceReleasedListRelRes(
                 nonempty![PduSessionResourceReleasedItemRelRes {
-                    pdu_session_id: to_release_item.pdu_session_id,
+                    pdu_session_id: pdu_session_to_release,
                     pdu_session_resource_release_response_transfer:
                         PduSessionResourceReleaseResponseTransfer {
                             secondary_rat_usage_information: None,
                         }
-                        .into_bytes()?
+                        .into_bytes()
+                        .unwrap_or(vec![])
                 }],
             ),
             user_location_information: None,
-        })
+        }
+    }
+
+    pub async fn pdu_session_resource_release_inner(
+        &self,
+        ue_id: u32,
+        nas_pdu: Option<NasPdu>,
+    ) -> Result<()> {
+        // Load UE.
+        debug!(self.logger, "Retrieve UE {:#010x}", ue_id);
+        let mut ue = self.retrieve(&ue_id).await?;
+        let Some(gnb_cu_up_ue_e1ap_id) = ue.gnb_cu_up_ue_e1ap_id else {
+            bail!("UE has no E1 context");
+        };
+
+        // TODO - cope with >1 PDU session being released at a time
+
+        // Simultaneously send E1 and F1 releases.
+        let e1 = self.perform_e1_bearer_release(&ue, gnb_cu_up_ue_e1ap_id);
+        let f1 = self.perform_f1_context_release(&ue, nas_pdu);
+
+        // Wait for both to complete.
+        futures_lite::future::zip(e1, f1).await;
+
+        // Update and write back UE.
+        ue.gnb_cu_up_ue_e1ap_id = None;
+        debug!(self.logger, "Store UE {:#010x}", ue.key);
+        self.store(ue.key, ue, self.config().ue_ttl_secs).await
     }
 
     async fn perform_e1_bearer_release(&self, ue: &UeState, gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId) {
@@ -101,19 +120,14 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         }
     }
 
-    async fn perform_f1_context_release(
-        &self,
-        ue: &UeState,
-        nas_pdu: Option<NasPdu>,
-    ) -> Result<()> {
-        let rrc_container = if let Some(x) = nas_pdu {
-            Some(super::build_rrc::build_rrc_dl_information_transfer(
+    async fn perform_f1_context_release(&self, ue: &UeState, nas_pdu: Option<NasPdu>) {
+        let rrc_container = nas_pdu.and_then(|p| {
+            super::build_rrc::build_rrc_dl_information_transfer(
                 3, // TODO
-                DedicatedNasMessage(x.0),
-            )?)
-        } else {
-            None
-        };
+                DedicatedNasMessage(p.0),
+            )
+            .ok()
+        });
 
         let ue_context_release_command = UeContextReleaseCommand {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
@@ -138,7 +152,5 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 "Error during F1 Ue Context Release procedure - {e}"
             ),
         }
-
-        Ok(())
     }
 }

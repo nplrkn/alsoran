@@ -31,6 +31,7 @@ where
 impl<T> Application for E1apUp<T> where
     T: RequestProvider<BearerContextSetupProcedure>
         + RequestProvider<BearerContextModificationProcedure>
+        + RequestProvider<BearerContextReleaseProcedure>
         + RequestProvider<GnbCuCpConfigurationUpdateProcedure>
         + EventHandler
         + Clone
@@ -45,7 +46,9 @@ where
         + EventHandler
         + RequestProvider<GnbCuCpConfigurationUpdateProcedure>
         + RequestProvider<BearerContextSetupProcedure>
-        + RequestProvider<BearerContextModificationProcedure>, // Todo - add all other procedures
+        + RequestProvider<BearerContextModificationProcedure>
+        + RequestProvider<BearerContextReleaseProcedure>,
+    // Todo - add all other procedures
 {
     type TopPdu = E1apPdu;
     async fn route_request(&self, p: E1apPdu, logger: &Logger) -> Option<ResponseAction<E1apPdu>> {
@@ -65,6 +68,9 @@ where
             }
             InitiatingMessage::GnbCuCpConfigurationUpdate(req) => {
                 GnbCuCpConfigurationUpdateProcedure::call_provider(&self.0, req, logger).await
+            }
+            InitiatingMessage::BearerContextReleaseCommand(req) => {
+                BearerContextReleaseProcedure::call_provider(&self.0, req, logger).await
             }
             e => panic!("Missing implementation for {:?}", e),
         }

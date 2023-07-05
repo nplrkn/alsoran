@@ -2,10 +2,10 @@
 
 # NEXT UP
 - Session deletion (including on different worker)
+- RRC transaction IDs
 - RRC connection release
 - UE context release
 - Paging
-- RRC transaction IDs
 
 # TECH DEBT
 ## CU-UP and O-RAN O-DU interop

@@ -120,6 +120,10 @@ impl GnbCuUp for Worker {
         self.ues.contains_key(&ue_id)
     }
 
+    async fn delete_bearer_context(&self, _ue_id: u32) {
+        todo!()
+    }
+
     fn new_ue_ap_id(&self) -> GnbCuUpUeE1apId {
         let ue_id = GnbCuUpUeE1apId(self.ue_ap_id_generator.fetch_add(1, Ordering::Relaxed));
         self.ues.insert(ue_id.0, ());
