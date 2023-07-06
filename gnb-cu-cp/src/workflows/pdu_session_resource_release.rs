@@ -122,11 +122,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
     async fn perform_f1_context_release(&self, ue: &UeState, nas_pdu: Option<NasPdu>) {
         let rrc_container = nas_pdu.and_then(|p| {
-            super::build_rrc::build_rrc_dl_information_transfer(
-                3, // TODO
-                DedicatedNasMessage(p.0),
-            )
-            .ok()
+            super::build_rrc::build_rrc_dl_information_transfer(0, DedicatedNasMessage(p.0)).ok()
         });
 
         let ue_context_release_command = UeContextReleaseCommand {

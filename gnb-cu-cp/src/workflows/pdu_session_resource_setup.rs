@@ -306,7 +306,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
         let nas_messages = NonEmpty::from_vec(nas_messages);
         let rrc_container =
-            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config.0)?;
+            super::build_rrc::build_rrc_reconfiguration(0, nas_messages, cell_group_config.0)?;
         self.log_message("<< RrcReconfiguration");
         self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;

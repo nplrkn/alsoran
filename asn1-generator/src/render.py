@@ -169,7 +169,7 @@ encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.code}, fa
                 Ok({data}.append_aligned(ie))"""
     if type_info.typ == "OctetString":
         if type_info.rust_type[0:3] == "Vec":
-            format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
+            format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, {{value}}, false)"
         else:
             assert (type_info.rust_type[0:3] == "[u8")
             format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &({{copy_type_deref}}{{value}}).into(), false)"

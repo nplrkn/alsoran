@@ -41,7 +41,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
     async fn perform_rrc_setup_procedure(&self, ue: &UeState) -> Result<RrcSetupCompleteIEs> {
         let rrc_transaction = self.gnb_cu_cp.new_rrc_transaction(ue).await;
-        let rrc_setup = super::build_rrc::build_rrc_setup(1)?;
+        let rrc_setup = super::build_rrc::build_rrc_setup(0)?;
 
         self.log_message("<< RrcSetup");
         self.send_rrc_to_ue(ue, SrbId(0), rrc_setup, self.logger)

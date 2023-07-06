@@ -31,7 +31,7 @@ impl Stack {
     pub fn new(transport_provider: SctpTransportProvider) -> Self {
         Self {
             transport_provider,
-            pending_requests: Arc::new(Mutex::new(Box::new(Vec::new()))),
+            pending_requests: Arc::new(Mutex::new(Box::default())),
         }
     }
 

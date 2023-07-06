@@ -509,7 +509,7 @@ impl MockDu {
         let rrc_reconfiguration_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcReconfigurationComplete(
                 RrcReconfigurationComplete {
-                    rrc_transaction_identifier: RrcTransactionIdentifier(1),
+                    rrc_transaction_identifier: RrcTransactionIdentifier(0),
                     critical_extensions: CriticalExtensions16::RrcReconfigurationComplete(
                         RrcReconfigurationCompleteIEs {
                             late_non_critical_extension: None,

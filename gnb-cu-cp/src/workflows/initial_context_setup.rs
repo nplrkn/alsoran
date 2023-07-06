@@ -39,7 +39,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Build Security Mode command and wrap it in an RrcContainer.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
-        let rrc_container = super::build_rrc::build_rrc_security_mode_command(2)
+        let rrc_container = super::build_rrc::build_rrc_security_mode_command(0)
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
 
         if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {

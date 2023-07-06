@@ -1,13 +1,25 @@
-#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, non_camel_case_types)]
+#![allow(
+    missing_docs,
+    trivial_casts,
+    unused_variables,
+    unused_mut,
+    unused_imports,
+    unused_extern_crates,
+    non_camel_case_types
+)]
 #![allow(unused_imports, unused_attributes)]
-#![allow(clippy::derive_partial_eq_without_eq, clippy::blacklisted_name)]
+#![allow(
+    clippy::derive_partial_eq_without_eq,
+    clippy::disallowed_names,
+    clippy::needless_borrow
+)]
 
 use async_trait::async_trait;
 use futures::Stream;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::task::{Poll, Context};
+use std::task::{Context, Poll};
 use swagger::{ApiError, ContextWrapper};
-use serde::{Serialize, Deserialize};
 
 type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 
@@ -18,18 +30,19 @@ pub const API_VERSION: &str = "1.0.0";
 #[must_use]
 pub enum RefreshWorkerResponse {
     /// Successful refresh
-    SuccessfulRefresh
-    ,
+    SuccessfulRefresh,
     /// Failed refresh
-    FailedRefresh
-    (String)
+    FailedRefresh(String),
 }
 
 /// API
 #[async_trait]
 #[allow(clippy::too_many_arguments, clippy::ptr_arg)]
 pub trait Api<C: Send + Sync> {
-    fn poll_ready(&self, _cx: &mut Context) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>> {
+    fn poll_ready(
+        &self,
+        _cx: &mut Context,
+    ) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>> {
         Poll::Ready(Ok(()))
     }
 
@@ -37,16 +50,18 @@ pub trait Api<C: Send + Sync> {
     async fn refresh_worker(
         &self,
         refresh_worker: models::RefreshWorker,
-        context: &C) -> Result<RefreshWorkerResponse, ApiError>;
-
+        context: &C,
+    ) -> Result<RefreshWorkerResponse, ApiError>;
 }
 
 /// API where `Context` isn't passed on every API call
 #[async_trait]
 #[allow(clippy::too_many_arguments, clippy::ptr_arg)]
 pub trait ApiNoContext<C: Send + Sync> {
-
-    fn poll_ready(&self, _cx: &mut Context) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>>;
+    fn poll_ready(
+        &self,
+        _cx: &mut Context,
+    ) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>>;
 
     fn context(&self) -> &C;
 
@@ -54,12 +69,13 @@ pub trait ApiNoContext<C: Send + Sync> {
     async fn refresh_worker(
         &self,
         refresh_worker: models::RefreshWorker,
-        ) -> Result<RefreshWorkerResponse, ApiError>;
-
+    ) -> Result<RefreshWorkerResponse, ApiError>;
 }
 
 /// Trait to extend an API to make it easy to bind it to a context.
-pub trait ContextWrapperExt<C: Send + Sync> where Self: Sized
+pub trait ContextWrapperExt<C: Send + Sync>
+where
+    Self: Sized,
 {
     /// Binds this API to a context.
     fn with_context(self, context: C) -> ContextWrapper<Self, C>;
@@ -67,7 +83,7 @@ pub trait ContextWrapperExt<C: Send + Sync> where Self: Sized
 
 impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ContextWrapperExt<C> for T {
     fn with_context(self: T, context: C) -> ContextWrapper<T, C> {
-         ContextWrapper::<T, C>::new(self, context)
+        ContextWrapper::<T, C>::new(self, context)
     }
 }
 
@@ -85,14 +101,11 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     async fn refresh_worker(
         &self,
         refresh_worker: models::RefreshWorker,
-        ) -> Result<RefreshWorkerResponse, ApiError>
-    {
+    ) -> Result<RefreshWorkerResponse, ApiError> {
         let context = self.context().clone();
         self.api().refresh_worker(refresh_worker, &context).await
     }
-
 }
-
 
 #[cfg(feature = "client")]
 pub mod client;
