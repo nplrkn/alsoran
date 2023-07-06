@@ -156,9 +156,13 @@ impl UeWithSession {
         tc.amf
             .send_pdu_session_resource_release(&amf_ue_context, &ngc_session)
             .await?;
+        tc.du.handle_ue_context_release(&du_ue_context).await?;
         tc.amf
             .receive_pdu_session_resource_release_response(&amf_ue_context)
             .await?;
+
+        // To be more realistic, there should be an Uplink NAS transport carrying the Nas PDU Session Release Ack
+        // at this point.  See TS 23.502, figure 4.3.4.2-1, step 9.
 
         Ok(RegisteredUe {
             ue_id,

@@ -427,6 +427,32 @@ impl MockDu {
         ))
     }
 
+    pub async fn handle_ue_context_release(&self, ue_context: &UeContext) -> Result<()> {
+        // Receive release command
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
+        let F1apPdu::InitiatingMessage(InitiatingMessage::UeContextReleaseCommand(r)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
+        info!(&self.logger, "UeContextReleaseCommand <<");
+
+        ensure!(ue_context.ue_id == r.gnb_du_ue_f1ap_id.0);
+
+        // Send release complete
+        let ue_context_release_complete = F1apPdu::SuccessfulOutcome(
+            SuccessfulOutcome::UeContextReleaseComplete(UeContextReleaseComplete {
+                gnb_cu_ue_f1ap_id: r.gnb_cu_ue_f1ap_id,
+                gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
+                criticality_diagnostics: None,
+            }),
+        );
+
+        info!(&self.logger, "UeContextReleaseComplete >>");
+        self.send(ue_context_release_complete, Some(assoc_id)).await;
+
+        Ok(())
+    }
+
     pub async fn send_security_mode_complete(
         &self,
         ue_context: &UeContext,

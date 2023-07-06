@@ -110,9 +110,15 @@ impl GnbCuUp for Worker {
         &self.config
     }
 
-    async fn install_forwarding_rule(&self, gtp_teid: GtpTeid, action: ForwardingAction) {
+    async fn set_uplink_forwarding_action(&self, gtp_teid: GtpTeid, action: ForwardingAction) {
         self.packet_processor
-            .set_forwarding_action(gtp_teid, action, &self.logger)
+            .set_uplink_forwarding_action(gtp_teid, action, &self.logger)
+            .await
+    }
+
+    async fn set_downlink_forwarding_action(&self, gtp_teid: GtpTeid, action: ForwardingAction) {
+        self.packet_processor
+            .set_downlink_forwarding_action(gtp_teid, action, &self.logger)
             .await
     }
 
@@ -120,8 +126,15 @@ impl GnbCuUp for Worker {
         self.ues.contains_key(&ue_id)
     }
 
-    async fn delete_bearer_context(&self, _ue_id: u32) {
-        todo!()
+    async fn delete_bearer_context(&self, ue_id: u32) {
+        // Determine all the sessions for this UE and remove all the
+        // forwarding actions
+
+        // TODO: cope with > 1 session
+        let uplink_teid_session_1 = self.create_uplink_teid(ue_id, 1);
+        self.packet_processor
+            .clear_forwarding_actions(uplink_teid_session_1)
+            .await;
     }
 
     fn new_ue_ap_id(&self) -> GnbCuUpUeE1apId {

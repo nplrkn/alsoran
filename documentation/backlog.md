@@ -1,8 +1,8 @@
 # Single process GNB-CU
 
 # NEXT UP
-- Session deletion (including on different worker)
 - RRC transaction IDs
+- Session deletion on different worker
 - RRC connection release
 - UE context release
 - Paging
@@ -91,6 +91,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- PDU session deletion
 - Retry connection to AMF
 - Single process GNB-CU with configurable MCC / MNC
 - SDAP / PDCP should be added/stripped

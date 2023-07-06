@@ -12,6 +12,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
 
         self.delete_bearer_context(r.gnb_cu_up_ue_e1ap_id.0).await;
 
+        self.log_message(">> BearerContextReleaseComplete");
         BearerContextReleaseComplete {
             gnb_cu_cp_ue_e1ap_id: r.gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id: r.gnb_cu_up_ue_e1ap_id,
