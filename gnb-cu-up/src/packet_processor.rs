@@ -62,7 +62,7 @@ impl PacketProcessor {
         })
     }
 
-    pub async fn set_forwarding_action(
+    pub async fn set_uplink_forwarding_action(
         &self,
         gtp_teid: GtpTeid,
         action: ForwardingAction,
@@ -70,32 +70,46 @@ impl PacketProcessor {
     ) {
         let gtp_teid_u32 = u32::from_be_bytes(gtp_teid.0);
         let key = ((gtp_teid_u32 >> 1) & CAPACITY_MASK) as usize;
+        debug!(
+            logger,
+            "Install uplink forwarding action {:?}->{}/{:?}",
+            gtp_teid.0,
+            action
+                .remote_tunnel_info
+                .transport_layer_address
+                .to_string(),
+            action.remote_tunnel_info.gtp_teid.0
+        );
+        self.forwarding_table.lock().await.0[key].session_1_uplink = Some(action);
+    }
+
+    pub async fn set_downlink_forwarding_action(
+        &self,
+        gtp_teid: GtpTeid,
+        action: ForwardingAction,
+        logger: &Logger,
+    ) {
+        let gtp_teid_u32 = u32::from_be_bytes(gtp_teid.0);
+        let key = ((gtp_teid_u32 >> 1) & CAPACITY_MASK) as usize;
+        debug!(
+            logger,
+            "Install downlink forwarding action {:?}->{}/{:?}",
+            gtp_teid.0,
+            action
+                .remote_tunnel_info
+                .transport_layer_address
+                .to_string(),
+            action.remote_tunnel_info.gtp_teid.0
+        );
+        self.forwarding_table.lock().await.0[key].session_1_downlink = Some(action);
+    }
+
+    pub async fn clear_forwarding_actions(&self, gtp_teid: GtpTeid) {
+        let gtp_teid_u32 = u32::from_be_bytes(gtp_teid.0);
+        let key = ((gtp_teid_u32 >> 1) & CAPACITY_MASK) as usize;
         let context = &mut self.forwarding_table.lock().await.0[key];
-        if (gtp_teid_u32 & 1) == 1 {
-            debug!(
-                logger,
-                "Install downlink forwarding action {:?}->{}/{:?}",
-                gtp_teid.0,
-                action
-                    .remote_tunnel_info
-                    .transport_layer_address
-                    .to_string(),
-                action.remote_tunnel_info.gtp_teid.0
-            );
-            context.session_1_downlink = Some(action);
-        } else {
-            debug!(
-                logger,
-                "Install uplink forwarding action {:?}->{}/{:?}",
-                gtp_teid.0,
-                action
-                    .remote_tunnel_info
-                    .transport_layer_address
-                    .to_string(),
-                action.remote_tunnel_info.gtp_teid.0
-            );
-            context.session_1_uplink = Some(action);
-        }
+        context.session_1_downlink = None;
+        context.session_1_uplink = None;
     }
 }
 

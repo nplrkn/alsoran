@@ -64,7 +64,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         let forwarding_action = create_forwarding_action(setup_item);
 
         // Install it in the packet processor.
-        self.install_forwarding_rule(session_1_uplink_gtp_teid.clone(), forwarding_action)
+        self.set_uplink_forwarding_action(session_1_uplink_gtp_teid.clone(), forwarding_action)
             .await;
 
         // We also need to supply our downlink TEID now, even though we program a rule for this

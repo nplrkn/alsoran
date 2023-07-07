@@ -81,7 +81,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         };
 
         // Install it in the packet processor.
-        self.install_forwarding_rule(session_1_downlink_gtp_teid, forwarding_action).await;
+        self.set_downlink_forwarding_action(session_1_downlink_gtp_teid, forwarding_action).await;
 
         Ok(PduSessionResourceModifiedItem {
             pdu_session_id: PduSessionId(1), // TODO

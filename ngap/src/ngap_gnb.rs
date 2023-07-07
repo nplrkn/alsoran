@@ -19,7 +19,7 @@ impl<T> NgapGnb<T> {
 #[async_trait]
 impl<T> EventHandler for NgapGnb<T>
 where
-    T: RequestProvider<NgSetupProcedure> + EventHandler,
+    T: EventHandler,
 {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         self.0.handle_event(event, tnla_id, logger).await;
@@ -34,6 +34,7 @@ impl<T> Application for NgapGnb<T> where
         + RequestProvider<InitialContextSetupProcedure>
         + IndicationHandler<AmfStatusIndicationProcedure>
         + RequestProvider<PduSessionResourceSetupProcedure>
+        + RequestProvider<PduSessionResourceReleaseProcedure>
 {
 }
 
@@ -46,7 +47,8 @@ where
         + IndicationHandler<DownlinkNasTransportProcedure>
         + RequestProvider<InitialContextSetupProcedure>
         + IndicationHandler<AmfStatusIndicationProcedure>
-        + RequestProvider<PduSessionResourceSetupProcedure>,
+        + RequestProvider<PduSessionResourceSetupProcedure>
+        + RequestProvider<PduSessionResourceReleaseProcedure>,
 {
     type TopPdu = NgapPdu;
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<ResponseAction<NgapPdu>> {
@@ -74,6 +76,9 @@ where
             }
             InitiatingMessage::PduSessionResourceSetupRequest(req) => {
                 PduSessionResourceSetupProcedure::call_provider(&self.0, req, logger).await
+            }
+            InitiatingMessage::PduSessionResourceReleaseCommand(req) => {
+                PduSessionResourceReleaseProcedure::call_provider(&self.0, req, logger).await
             }
             _ => todo!(),
         }

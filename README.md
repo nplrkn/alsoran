@@ -8,7 +8,7 @@ This project is currently a proof of concept and not yet a fully functional gNB-
 
 ## Current support
 - UE registration demo against free5GC.
-- PDU session setup (TS 23.502, figure 4.3.2.2.1-1).
+- PDU session setup and release (TS 23.502, figures 4.3.2.2.1-1 and 4.3.4.2-1).
 - Relay of userplane packets between GNB-DU and UPF.
 - Separate CU-CP and CU-UP communicating using E1.
 - Scale-out of GNB-CU-CP workers using multiple TNLAs.
@@ -31,6 +31,7 @@ Generally only the success cases are covered, and there are a lot of 'To Dos'.
 -  Downlink NAS
 -  Initial Context Setup
 -  Pdu Session Resource Setup
+-  Pdu Session Resource Release
 -  AMF Status Indication
 -  GNB CU Configuration Update
 -  GNB DU Configuration Update
@@ -39,6 +40,7 @@ Generally only the success cases are covered, and there are a lot of 'To Dos'.
 -  E1 Setup
 -  Bearer Context Setup
 -  Bearer Context Modification
+-  Bearer Context Release
 -  GNB CU CP Configuration Update
 -  Downlink user data
 -  Uplink user data

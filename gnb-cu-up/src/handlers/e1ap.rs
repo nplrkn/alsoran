@@ -88,6 +88,22 @@ impl<G: GnbCuUp> RequestProvider<BearerContextModificationProcedure> for E1apHan
 }
 
 #[async_trait]
+impl<G: GnbCuUp> RequestProvider<BearerContextReleaseProcedure> for E1apHandler<G> {
+    async fn request(
+        &self,
+        r: BearerContextReleaseCommand,
+        logger: &Logger,
+    ) -> Result<ResponseAction<BearerContextReleaseComplete>, RequestError<()>> {
+        Ok((
+            Workflow::new(&self.gnb_cu_up, logger)
+                .bearer_context_release(&r)
+                .await,
+            None,
+        ))
+    }
+}
+
+#[async_trait]
 impl<G: GnbCuUp> RequestProvider<GnbCuCpConfigurationUpdateProcedure> for E1apHandler<G> {
     async fn request(
         &self,
