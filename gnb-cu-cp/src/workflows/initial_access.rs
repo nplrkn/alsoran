@@ -41,7 +41,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
     async fn perform_rrc_setup_procedure(&self, ue: &UeState) -> Result<RrcSetupCompleteIEs> {
         let rrc_transaction = self.gnb_cu_cp.new_rrc_transaction(ue).await;
-        let rrc_setup = super::build_rrc::build_rrc_setup(1)?;
+        let rrc_setup = super::build_rrc::build_rrc_setup(0)?;
 
         self.log_message("<< RrcSetup");
         self.send_rrc_to_ue(ue, SrbId(0), rrc_setup, self.logger)
@@ -66,7 +66,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk transmogrify ideally.)
         let nr_cgi = ngap::NrCgi {
-            plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn.clone()),
+            plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn),
             nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         };
 
@@ -78,7 +78,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 UserLocationInformationNr {
                     nr_cgi,
                     tai: Tai {
-                        plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn.clone()),
+                        plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn),
                         tac: Tac([0, 0, 1]),
                     },
                     time_stamp: None,

@@ -1,10 +1,9 @@
 # Single process GNB-CU
 
 # NEXT UP
-- RRC transaction IDs
-- Session deletion on different worker
 - RRC connection release
 - UE context release
+- Testing of Session/context releases on different worker
 - Paging
 
 # TECH DEBT

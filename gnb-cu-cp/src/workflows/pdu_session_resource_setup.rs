@@ -103,12 +103,12 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         let sessions = self
             .e1_context_setup(&mut ue, r.pdu_session_resource_setup_list_su_req.0)
             .await?;
-        let (sessions, cell_group_config) = self.f1_context_setup(&mut ue, sessions).await?;
-        let sessions = self.e1_context_modify(&mut ue, sessions).await?;
+        let (sessions, cell_group_config) = self.f1_context_setup(&ue, sessions).await?;
+        let sessions = self.e1_context_modify(&ue, sessions).await?;
         let sessions = self
-            .rrc_reconfiguration(&mut ue, sessions, cell_group_config)
+            .rrc_reconfiguration(&ue, sessions, cell_group_config)
             .await?;
-        let sessions = self.ngap_responses(&mut ue, sessions).await?;
+        let sessions = self.ngap_responses(&ue, sessions).await?;
 
         // Write back UE.
         debug!(self.logger, "Store UE {:#010x}", ue.key);
@@ -177,7 +177,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     ) -> Result<(NonEmpty<DrbsSetupItem>, CellGroupConfig)> {
         let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
             self.gnb_cu_cp,
-            &ue,
+            ue,
             Some(DrbsToBeSetupList(items)),
             None,
         )?;
@@ -214,11 +214,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         items: NonEmpty<PduSessionResourceToSetupItem>,
     ) -> Result<NonEmpty<PduSessionResourceSetupItem>> {
         // Send BearerContextSetup to CU-UP.
-        let bearer_context_setup = build_e1ap::build_bearer_context_setup(
-            &ue,
-            PlmnIdentity(self.config().plmn.clone()),
-            items,
-        );
+        let bearer_context_setup =
+            build_e1ap::build_bearer_context_setup(ue, PlmnIdentity(self.config().plmn), items);
 
         debug!(self.logger, "<< BearerContextSetupRequest");
         match self
@@ -265,7 +262,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         };
 
         let bearer_context_modification =
-            build_e1ap::build_bearer_context_modification(&ue, gnb_cu_up_ue_e1ap_id, items);
+            build_e1ap::build_bearer_context_modification(ue, gnb_cu_up_ue_e1ap_id, items);
         debug!(self.logger, "<< BearerContextSetupRequest");
         let resource_modify_items = match self
                 .e1ap_request::<BearerContextModificationProcedure>(
@@ -303,12 +300,12 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         cell_group_config: f1ap::CellGroupConfig,
     ) -> Result<rrc::UlDcchMessage> {
         // Perform Rrc Reconfiguration including the Nas messages from earlier and the cell group config received from the DU.
-        let rrc_transaction = self.new_rrc_transaction(&ue).await;
+        let rrc_transaction = self.new_rrc_transaction(ue).await;
         let nas_messages = NonEmpty::from_vec(nas_messages);
         let rrc_container =
-            super::build_rrc::build_rrc_reconfiguration(3, nas_messages, cell_group_config.0)?;
+            super::build_rrc::build_rrc_reconfiguration(0, nas_messages, cell_group_config.0)?;
         self.log_message("<< RrcReconfiguration");
-        self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
+        self.send_rrc_to_ue(ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;
         let rrc_reconfiguration_complete = rrc_transaction.recv().await?;
         self.log_message(">> RrcReconfigurationComplete");
@@ -438,7 +435,7 @@ fn build_drbs_to_be_setup_items(
         let snssai: xxap::Snssai = snssai.clone().into();
         match super::build_f1ap::build_drb_to_be_setup_item(
             f1ap::DrbId(pdu_session_id.0),
-            snssai.into(),
+            snssai,
             gtp_tunnel.clone(),
         ) {
             Ok(item) => items.push(item),
@@ -457,7 +454,7 @@ fn build_e1_setup_items(
     let items: Vec<PduSessionResourceToSetupItem> = sessions
         .iter()
         .flat_map(|x| {
-            build_e1ap::build_e1_setup_item(&ue, &x, logger).map_err(|e| {
+            build_e1ap::build_e1_setup_item(ue, x, logger).map_err(|e| {
                 warn!(logger, "Build E1 setup item failed {:?}", e);
                 e
             })

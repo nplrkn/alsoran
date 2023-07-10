@@ -44,7 +44,6 @@ pub trait GnbCuCp: Send + Sync + Clone + 'static + UeStateStore {
     async fn e1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger);
 
     // TODO - make RRC request and indication similar to the above?
-    // See "This was an idea for a more elegant model" in initial_access.rs.
 
     /// Start a new RRC transaction.
     async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction;

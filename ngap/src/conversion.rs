@@ -4,7 +4,7 @@ impl From<xxap::Snssai> for Snssai {
     fn from(x: xxap::Snssai) -> Self {
         Snssai {
             sst: Sst([x.0]),
-            sd: x.1.map(|x| Sd(x)),
+            sd: x.1.map(Sd),
         }
     }
 }

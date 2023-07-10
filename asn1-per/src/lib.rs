@@ -20,7 +20,7 @@ pub trait SerDes: Sized {
 
 impl<T: PerCodec> SerDes for T {
     fn into_bytes(self) -> Result<Vec<u8>, PerCodecError> {
-        let mut d = T::Allocator::new();
+        let mut d = T::Allocator::new_codec_data();
         self.encode(&mut d)?;
         Ok(d.into_bytes())
     }
@@ -32,7 +32,7 @@ impl<T: PerCodec> SerDes for T {
 }
 
 pub trait CodecDataAllocator {
-    fn new() -> PerCodecData;
+    fn new_codec_data() -> PerCodecData;
     fn from_slice(bytes: &[u8]) -> PerCodecData;
 }
 
@@ -41,7 +41,7 @@ pub mod aper {
     pub use asn1_codecs::aper::{decode, encode};
     pub struct Allocator;
     impl CodecDataAllocator for Allocator {
-        fn new() -> PerCodecData {
+        fn new_codec_data() -> PerCodecData {
             PerCodecData::new_aper()
         }
         fn from_slice(bytes: &[u8]) -> PerCodecData {
@@ -56,7 +56,7 @@ pub mod uper {
 
     pub struct Allocator;
     impl CodecDataAllocator for Allocator {
-        fn new() -> PerCodecData {
+        fn new_codec_data() -> PerCodecData {
             PerCodecData::new_uper()
         }
         fn from_slice(bytes: &[u8]) -> PerCodecData {

@@ -216,7 +216,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             if let Some(connected_worker) = workers.values().find(|x| x.e1.up) {
                 let _ = self
                     .add_e1ap(
-                        &connected_worker,
+                        connected_worker,
                         &worker_id,
                         &mut this_worker,
                         &context,
@@ -252,7 +252,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 // Tell it to add this worker.
                 let _ = self
                     .add_f1ap(
-                        &connected_worker,
+                        connected_worker,
                         &worker_id,
                         &mut this_worker,
                         &context,
@@ -306,7 +306,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         );
         self.add_connection(
             &worker.info.connection_api_url,
-            &worker_id,
+            worker_id,
             &self.config.amf_address,
             &mut worker.ng,
             if setup {
@@ -362,6 +362,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn add_connection(
         &self,
         url: &str,

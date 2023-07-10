@@ -117,6 +117,6 @@ impl<G: GnbCuUp> RequestProvider<GnbCuCpConfigurationUpdateProcedure> for E1apHa
             .gnb_cu_cp_configuration_update(r)
             .await
             .map(|ok_response| (ok_response, None))
-            .map_err(|failure_response| RequestError::UnsuccessfulOutcome(failure_response))
+            .map_err(RequestError::UnsuccessfulOutcome)
     }
 }

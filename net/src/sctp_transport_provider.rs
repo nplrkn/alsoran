@@ -31,6 +31,12 @@ impl SctpTransportProvider {
     }
 }
 
+impl Default for SctpTransportProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 async fn resolve_and_connect(
     connect_addr_string: &str,
     bind_addr_string: &str,
@@ -68,7 +74,7 @@ impl TransportProvider for SctpTransportProvider {
     where
         H: TnlaEventHandler,
     {
-        let connect_addr_string = connect_addr_string.clone();
+        //let connect_addr_string = connect_addr_string.clone();
         let assoc =
             resolve_and_connect(connect_addr_string, bind_addr_string, ppid, &logger).await?;
         //let logger = logger.new(o!("connection" => assoc_id));
@@ -125,7 +131,7 @@ impl TransportProvider for SctpTransportProvider {
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
         let stream = sctp::new_listen(addr, ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
-        let stream = stream.take_until(stop_token.clone());
+        let stream = stream.take_until(stop_token);
 
         let join_handle = task::spawn(async move {
             pin_mut!(stream);
