@@ -2193,7 +2193,7 @@ impl InitiatingMessage {
             Self::AmfConfigurationUpdate(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2207,7 +2207,7 @@ impl InitiatingMessage {
             Self::AmfcpRelocationIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 64, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2221,7 +2221,7 @@ impl InitiatingMessage {
             Self::AmfStatusIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2235,7 +2235,7 @@ impl InitiatingMessage {
             Self::CellTrafficTrace(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 2, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2249,7 +2249,7 @@ impl InitiatingMessage {
             Self::ConnectionEstablishmentIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 65, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2263,7 +2263,7 @@ impl InitiatingMessage {
             Self::DeactivateTrace(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2277,7 +2277,7 @@ impl InitiatingMessage {
             Self::DownlinkNasTransport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2291,7 +2291,7 @@ impl InitiatingMessage {
             Self::DownlinkNonUeAssociatedNrPPaTransport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2305,7 +2305,7 @@ impl InitiatingMessage {
             Self::DownlinkRanConfigurationTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2319,7 +2319,7 @@ impl InitiatingMessage {
             Self::DownlinkRanEarlyStatusTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 63, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2333,7 +2333,7 @@ impl InitiatingMessage {
             Self::DownlinkRanStatusTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2347,7 +2347,7 @@ impl InitiatingMessage {
             Self::DownlinkUeAssociatedNrPPaTransport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2361,7 +2361,7 @@ impl InitiatingMessage {
             Self::ErrorIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2375,7 +2375,7 @@ impl InitiatingMessage {
             Self::HandoverCancel(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2389,7 +2389,7 @@ impl InitiatingMessage {
             Self::HandoverNotify(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2403,7 +2403,7 @@ impl InitiatingMessage {
             Self::HandoverRequired(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2417,7 +2417,7 @@ impl InitiatingMessage {
             Self::HandoverRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2431,7 +2431,7 @@ impl InitiatingMessage {
             Self::HandoverSuccess(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 61, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2445,7 +2445,7 @@ impl InitiatingMessage {
             Self::InitialContextSetupRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 14, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2459,7 +2459,7 @@ impl InitiatingMessage {
             Self::InitialUeMessage(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 15, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2473,7 +2473,7 @@ impl InitiatingMessage {
             Self::LocationReport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 18, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2487,7 +2487,7 @@ impl InitiatingMessage {
             Self::LocationReportingControl(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 16, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2501,7 +2501,7 @@ impl InitiatingMessage {
             Self::LocationReportingFailureIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 17, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2515,7 +2515,7 @@ impl InitiatingMessage {
             Self::NasNonDeliveryIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 19, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2529,7 +2529,7 @@ impl InitiatingMessage {
             Self::NgReset(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 20, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2543,7 +2543,7 @@ impl InitiatingMessage {
             Self::NgSetupRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2557,7 +2557,7 @@ impl InitiatingMessage {
             Self::OverloadStart(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2571,7 +2571,7 @@ impl InitiatingMessage {
             Self::OverloadStop(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 23, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2585,7 +2585,7 @@ impl InitiatingMessage {
             Self::Paging(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2599,7 +2599,7 @@ impl InitiatingMessage {
             Self::PathSwitchRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 25, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2613,7 +2613,7 @@ impl InitiatingMessage {
             Self::PduSessionResourceModifyRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2627,7 +2627,7 @@ impl InitiatingMessage {
             Self::PduSessionResourceModifyIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 27, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2641,7 +2641,7 @@ impl InitiatingMessage {
             Self::PduSessionResourceNotify(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 30, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2655,7 +2655,7 @@ impl InitiatingMessage {
             Self::PduSessionResourceReleaseCommand(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 28, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2669,7 +2669,7 @@ impl InitiatingMessage {
             Self::PduSessionResourceSetupRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 29, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2683,7 +2683,7 @@ impl InitiatingMessage {
             Self::PwsCancelRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 32, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2697,7 +2697,7 @@ impl InitiatingMessage {
             Self::PwsFailureIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 33, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2711,7 +2711,7 @@ impl InitiatingMessage {
             Self::PwsRestartIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 34, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2725,7 +2725,7 @@ impl InitiatingMessage {
             Self::RanConfigurationUpdate(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 35, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2739,7 +2739,7 @@ impl InitiatingMessage {
             Self::RancpRelocationIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 57, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2753,7 +2753,7 @@ impl InitiatingMessage {
             Self::RerouteNasRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 36, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2767,7 +2767,7 @@ impl InitiatingMessage {
             Self::RetrieveUeInformation(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 55, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2781,7 +2781,7 @@ impl InitiatingMessage {
             Self::RrcInactiveTransitionReport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 37, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2795,7 +2795,7 @@ impl InitiatingMessage {
             Self::SecondaryRatDataUsageReport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 52, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2809,7 +2809,7 @@ impl InitiatingMessage {
             Self::TraceFailureIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 38, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2823,7 +2823,7 @@ impl InitiatingMessage {
             Self::TraceStart(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 39, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2837,7 +2837,7 @@ impl InitiatingMessage {
             Self::UeContextModificationRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 40, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2851,7 +2851,7 @@ impl InitiatingMessage {
             Self::UeContextReleaseCommand(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 41, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2865,7 +2865,7 @@ impl InitiatingMessage {
             Self::UeContextReleaseRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 42, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2879,7 +2879,7 @@ impl InitiatingMessage {
             Self::UeContextResumeRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 58, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2893,7 +2893,7 @@ impl InitiatingMessage {
             Self::UeContextSuspendRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 59, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2907,7 +2907,7 @@ impl InitiatingMessage {
             Self::UeInformationTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 56, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2921,7 +2921,7 @@ impl InitiatingMessage {
             Self::UeRadioCapabilityCheckRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 43, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2935,7 +2935,7 @@ impl InitiatingMessage {
             Self::UeRadioCapabilityIdMappingRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 60, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2949,7 +2949,7 @@ impl InitiatingMessage {
             Self::UeRadioCapabilityInfoIndication(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 44, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2963,7 +2963,7 @@ impl InitiatingMessage {
             Self::UeTnlaBindingReleaseRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 45, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2977,7 +2977,7 @@ impl InitiatingMessage {
             Self::UplinkNasTransport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 46, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -2991,7 +2991,7 @@ impl InitiatingMessage {
             Self::UplinkNonUeAssociatedNrPPaTransport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 47, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3005,7 +3005,7 @@ impl InitiatingMessage {
             Self::UplinkRanConfigurationTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 48, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3019,7 +3019,7 @@ impl InitiatingMessage {
             Self::UplinkRanEarlyStatusTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 62, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3033,7 +3033,7 @@ impl InitiatingMessage {
             Self::UplinkRanStatusTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 49, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3047,7 +3047,7 @@ impl InitiatingMessage {
             Self::UplinkUeAssociatedNrPPaTransport(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 50, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3061,7 +3061,7 @@ impl InitiatingMessage {
             Self::WriteReplaceWarningRequest(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 51, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3075,7 +3075,7 @@ impl InitiatingMessage {
             Self::UplinkRimInformationTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 53, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3089,7 +3089,7 @@ impl InitiatingMessage {
             Self::DownlinkRimInformationTransfer(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 54, false)?;
                 Criticality::Ignore.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3220,7 +3220,7 @@ impl SuccessfulOutcome {
             Self::AmfConfigurationUpdateAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3234,7 +3234,7 @@ impl SuccessfulOutcome {
             Self::HandoverCancelAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3248,7 +3248,7 @@ impl SuccessfulOutcome {
             Self::HandoverCommand(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3262,7 +3262,7 @@ impl SuccessfulOutcome {
             Self::HandoverRequestAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3276,7 +3276,7 @@ impl SuccessfulOutcome {
             Self::InitialContextSetupResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 14, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3290,7 +3290,7 @@ impl SuccessfulOutcome {
             Self::NgResetAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 20, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3304,7 +3304,7 @@ impl SuccessfulOutcome {
             Self::NgSetupResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3318,7 +3318,7 @@ impl SuccessfulOutcome {
             Self::PathSwitchRequestAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 25, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3332,7 +3332,7 @@ impl SuccessfulOutcome {
             Self::PduSessionResourceModifyResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3346,7 +3346,7 @@ impl SuccessfulOutcome {
             Self::PduSessionResourceModifyConfirm(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 27, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3360,7 +3360,7 @@ impl SuccessfulOutcome {
             Self::PduSessionResourceReleaseResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 28, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3374,7 +3374,7 @@ impl SuccessfulOutcome {
             Self::PduSessionResourceSetupResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 29, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3388,7 +3388,7 @@ impl SuccessfulOutcome {
             Self::PwsCancelResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 32, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3402,7 +3402,7 @@ impl SuccessfulOutcome {
             Self::RanConfigurationUpdateAcknowledge(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 35, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3416,7 +3416,7 @@ impl SuccessfulOutcome {
             Self::UeContextModificationResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 40, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3430,7 +3430,7 @@ impl SuccessfulOutcome {
             Self::UeContextReleaseComplete(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 41, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3444,7 +3444,7 @@ impl SuccessfulOutcome {
             Self::UeContextResumeResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 58, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3458,7 +3458,7 @@ impl SuccessfulOutcome {
             Self::UeContextSuspendResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 59, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3472,7 +3472,7 @@ impl SuccessfulOutcome {
             Self::UeRadioCapabilityCheckResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 43, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3486,7 +3486,7 @@ impl SuccessfulOutcome {
             Self::UeRadioCapabilityIdMappingResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 60, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3500,7 +3500,7 @@ impl SuccessfulOutcome {
             Self::WriteReplaceWarningResponse(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 51, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3591,7 +3591,7 @@ impl UnsuccessfulOutcome {
             Self::AmfConfigurationUpdateFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3605,7 +3605,7 @@ impl UnsuccessfulOutcome {
             Self::HandoverPreparationFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3619,7 +3619,7 @@ impl UnsuccessfulOutcome {
             Self::HandoverFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3633,7 +3633,7 @@ impl UnsuccessfulOutcome {
             Self::InitialContextSetupFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 14, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3647,7 +3647,7 @@ impl UnsuccessfulOutcome {
             Self::NgSetupFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3661,7 +3661,7 @@ impl UnsuccessfulOutcome {
             Self::PathSwitchRequestFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 25, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3675,7 +3675,7 @@ impl UnsuccessfulOutcome {
             Self::RanConfigurationUpdateFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 35, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3689,7 +3689,7 @@ impl UnsuccessfulOutcome {
             Self::UeContextModificationFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 40, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3703,7 +3703,7 @@ impl UnsuccessfulOutcome {
             Self::UeContextResumeFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 58, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,
@@ -3717,7 +3717,7 @@ impl UnsuccessfulOutcome {
             Self::UeContextSuspendFailure(x) => {
                 encode::encode_integer(data, Some(0), Some(255), false, 59, false)?;
                 Criticality::Reject.encode(data)?;
-                let container = &mut Allocator::new();
+                let container = &mut Allocator::new_codec_data();
                 x.encode(container)?;
                 encode::encode_length_determinent(
                     data,

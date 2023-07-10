@@ -41,7 +41,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Todo - should be from Ue context
         let nr_cgi = ngap::NrCgi {
-            plmn_identity: ngap::PlmnIdentity(self.config().plmn.clone()),
+            plmn_identity: ngap::PlmnIdentity(self.config().plmn),
             nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         };
 
@@ -53,7 +53,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 UserLocationInformationNr {
                     nr_cgi,
                     tai: Tai {
-                        plmn_identity: ngap::PlmnIdentity(self.config().plmn.clone()),
+                        plmn_identity: ngap::PlmnIdentity(self.config().plmn),
                         tac: Tac([0, 0, 1]),
                     },
                     time_stamp: None,

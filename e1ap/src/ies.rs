@@ -1149,7 +1149,7 @@ impl CpTnlInformation {
                 encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 74, false)?;
                 Criticality::Reject.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))

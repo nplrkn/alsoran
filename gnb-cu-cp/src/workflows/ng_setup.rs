@@ -26,7 +26,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             supported_ta_list: SupportedTaList(nonempty![SupportedTaItem {
                 tac: Tac([0, 0, 1]),
                 broadcast_plmn_list: BroadcastPlmnList(nonempty![BroadcastPlmnItem {
-                    plmn_identity: PlmnIdentity(self.config().plmn.clone()),
+                    plmn_identity: PlmnIdentity(self.config().plmn),
                     tai_slice_support_list: SliceSupportList(nonempty![
                         SliceSupportItem {
                             snssai: Snssai(1, None).into(),

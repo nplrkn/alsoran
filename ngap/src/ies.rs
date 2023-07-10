@@ -5784,7 +5784,7 @@ impl CpTransportLayerInformation {
                 encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 169, false)?;
                 Criticality::Reject.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -11285,7 +11285,7 @@ impl GlobalRanNodeId {
                 encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 240, false)?;
                 Criticality::Reject.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -11294,7 +11294,7 @@ impl GlobalRanNodeId {
                 encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 241, false)?;
                 Criticality::Reject.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -11303,7 +11303,7 @@ impl GlobalRanNodeId {
                 encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 242, false)?;
                 Criticality::Reject.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -21473,10 +21473,10 @@ impl PduSessionResourceModifyRequestTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut Allocator::new();
+        let ies = &mut Allocator::new_codec_data();
 
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
@@ -21486,7 +21486,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.ul_ngu_up_tnl_modify_list {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 140, false)?;
             Criticality::Reject.encode(ies)?;
@@ -21496,7 +21496,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.network_instance {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
@@ -21506,7 +21506,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.qos_flow_add_or_modify_request_list {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 135, false)?;
             Criticality::Reject.encode(ies)?;
@@ -21516,7 +21516,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.qos_flow_to_release_list {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 137, false)?;
             Criticality::Reject.encode(ies)?;
@@ -21526,7 +21526,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
@@ -21536,7 +21536,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.common_network_instance {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -21546,7 +21546,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -21556,7 +21556,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_common_network_instance {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -21566,7 +21566,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -21576,7 +21576,7 @@ impl PduSessionResourceModifyRequestTransfer {
         }
 
         if let Some(x) = &self.security_indication {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -24135,10 +24135,10 @@ impl PduSessionResourceSetupRequestTransfer {
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut Allocator::new();
+        let ies = &mut Allocator::new_codec_data();
 
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
@@ -24147,7 +24147,7 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut Allocator::new();
+        let ie = &mut Allocator::new_codec_data();
         self.ul_ngu_up_tnl_information.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 139, false)?;
         Criticality::Reject.encode(ies)?;
@@ -24156,7 +24156,7 @@ impl PduSessionResourceSetupRequestTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
@@ -24166,7 +24166,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.data_forwarding_not_possible {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 127, false)?;
             Criticality::Reject.encode(ies)?;
@@ -24175,7 +24175,7 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut Allocator::new();
+        let ie = &mut Allocator::new_codec_data();
         self.pdu_session_type.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 134, false)?;
         Criticality::Reject.encode(ies)?;
@@ -24184,7 +24184,7 @@ impl PduSessionResourceSetupRequestTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.security_indication {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Reject.encode(ies)?;
@@ -24194,7 +24194,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.network_instance {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
@@ -24203,7 +24203,7 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut Allocator::new();
+        let ie = &mut Allocator::new_codec_data();
         self.qos_flow_setup_request_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 136, false)?;
         Criticality::Reject.encode(ies)?;
@@ -24212,7 +24212,7 @@ impl PduSessionResourceSetupRequestTransfer {
         num_ies += 1;
 
         if let Some(x) = &self.common_network_instance {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -24222,7 +24222,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.direct_forwarding_path_availability {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 22, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -24232,7 +24232,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -24242,7 +24242,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -24252,7 +24252,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_common_network_instance {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -24262,7 +24262,7 @@ impl PduSessionResourceSetupRequestTransfer {
         }
 
         if let Some(x) = &self.redundant_pdu_session_information {
-            let ie = &mut Allocator::new();
+            let ie = &mut Allocator::new_codec_data();
             x.encode(ie)?;
             encode::encode_integer(ies, Some(0), Some(65535), false, 197, false)?;
             Criticality::Ignore.encode(ies)?;
@@ -30470,7 +30470,7 @@ impl SonInformation {
                 encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 252, false)?;
                 Criticality::Ignore.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -32177,7 +32177,7 @@ impl TargetId {
                 encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 178, false)?;
                 Criticality::Reject.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -35870,7 +35870,7 @@ impl UserLocationInformation {
                 encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 244, false)?;
                 Criticality::Ignore.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -35879,7 +35879,7 @@ impl UserLocationInformation {
                 encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 248, false)?;
                 Criticality::Ignore.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -35888,7 +35888,7 @@ impl UserLocationInformation {
                 encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 243, false)?;
                 Criticality::Ignore.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))
@@ -36226,7 +36226,7 @@ impl UserLocationInformationWAgf {
                 encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
                 encode::encode_integer(data, Some(0), Some(65535), false, 275, false)?;
                 Criticality::Ignore.encode(data)?;
-                let ie = &mut Allocator::new();
+                let ie = &mut Allocator::new_codec_data();
                 x.encode(ie)?;
                 encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
                 Ok(data.append_aligned(ie))

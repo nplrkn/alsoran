@@ -59,7 +59,7 @@ impl Mock5gc {
             mock: Mock::new(logger.new(o!("amf" => 1))).await,
             ips: vec![],
             userplane: MockUserplane::new(
-                userplane_ip.clone(),
+                userplane_ip,
                 logger.new(o!("upf" => userplane_ip.to_string())),
             )
             .await?,
@@ -343,7 +343,7 @@ impl Mock5gc {
     pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<GtpTeid> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
 
-        let transport_layer_address = self.userplane.local_ip().clone().into();
+        let transport_layer_address = (*self.userplane.local_ip()).into();
         let gtp_teid = GtpTeid([1, 2, 3, 4]);
 
         let pdu_session_resource_setup_request_transfer = PduSessionResourceSetupRequestTransfer {

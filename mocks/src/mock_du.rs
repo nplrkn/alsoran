@@ -333,7 +333,7 @@ impl MockDu {
         ue_context.drb = Some(Drb {
             drb_id: first_drb.drb_id,
             remote_tunnel_info: remote_tunnel_info.clone(),
-            local_teid: GtpTeid(rand::thread_rng().gen::<[u8; 4]>().into()),
+            local_teid: GtpTeid(rand::thread_rng().gen::<[u8; 4]>()),
         });
 
         let ue_context_setup_response = self.build_ue_context_setup_response(ue_context)?;

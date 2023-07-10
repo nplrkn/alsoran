@@ -1,9 +1,9 @@
-use std::time::Duration;
-
+#![allow(clippy::unusual_byte_groupings)]
 use anyhow::Result;
 use async_net::{IpAddr, SocketAddr, UdpSocket};
 use async_std::future;
 use slog::{debug, info, Logger};
+use std::time::Duration;
 use xxap::GtpTeid;
 
 const GTPU_PORT: u16 = 2152; // TS29.281

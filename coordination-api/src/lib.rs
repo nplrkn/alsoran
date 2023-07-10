@@ -11,7 +11,8 @@
 #![allow(
     clippy::derive_partial_eq_without_eq,
     clippy::disallowed_names,
-    clippy::needless_borrow
+    clippy::needless_borrow,
+    clippy::explicit_auto_deref
 )]
 
 use async_trait::async_trait;

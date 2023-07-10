@@ -1,3 +1,4 @@
+#![allow(clippy::unusual_byte_groupings)]
 use std::sync::Arc;
 
 use anyhow::Result;

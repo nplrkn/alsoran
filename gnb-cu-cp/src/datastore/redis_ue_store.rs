@@ -32,8 +32,7 @@ impl StateStore<UeState> for RedisUeStore {
             .get(k)
             .await
             .with_context(|| format!("Failed Redis get on UE {:#010x}?", k))?;
-        let v = UeState::from_bytes(&v)?;
-        Ok(v.into())
+        Ok(UeState::from_bytes(&v)?)
     }
     async fn delete(&self, k: &u32) -> Result<()> {
         let mut conn = self.client.get_async_connection().await?;

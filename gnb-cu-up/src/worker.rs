@@ -56,7 +56,7 @@ pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
 
 impl Worker {
     async fn new(config: Config, logger: Logger) -> Result<Worker> {
-        let userplane_ip_address = config.userplane_ip_address.clone();
+        let userplane_ip_address = config.userplane_ip_address;
         Ok(Worker {
             config,
             e1ap: Stack::new(SctpTransportProvider::new()),
@@ -100,7 +100,7 @@ impl Worker {
             }
         }
         self.e1ap.graceful_shutdown().await;
-        return Ok(());
+        Ok(())
     }
 }
 

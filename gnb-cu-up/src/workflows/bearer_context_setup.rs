@@ -33,7 +33,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
 
         for to_setup_item in &pdu_session_resource_to_setup_list.0 {
             let setup_item = self
-                .setup_session(gnb_cu_up_ue_e1ap_id, &to_setup_item)
+                .setup_session(gnb_cu_up_ue_e1ap_id, to_setup_item)
                 .await?;
             setup_items.push(setup_item);
         }
@@ -74,8 +74,7 @@ impl<'a, G: GnbCuUp> Workflow<'a, G> {
         // Form response
 
         // The CU-UP just supports a single IP address, so the uplink and downlink IPs are the same.
-        let my_n3_address: TransportLayerAddress =
-            self.config().userplane_ip_address.clone().into();
+        let my_n3_address: TransportLayerAddress = self.config().userplane_ip_address.into();
         let my_f1u_address = my_n3_address.clone();
 
         Ok(PduSessionResourceSetupItem {

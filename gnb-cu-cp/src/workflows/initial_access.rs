@@ -66,7 +66,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk transmogrify ideally.)
         let nr_cgi = ngap::NrCgi {
-            plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn.clone()),
+            plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn),
             nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         };
 
@@ -78,7 +78,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 UserLocationInformationNr {
                     nr_cgi,
                     tai: Tai {
-                        plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn.clone()),
+                        plmn_identity: ngap::PlmnIdentity(self.gnb_cu_cp.config().plmn),
                         tac: Tac([0, 0, 1]),
                     },
                     time_stamp: None,

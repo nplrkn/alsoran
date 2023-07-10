@@ -1,6 +1,5 @@
 //! ue - a simulated UE that talks Nas and implements a pre-canned setup sequence
 
-use hex;
 use mocks::{DuUeContext, MockDu};
 use slog::{debug, Logger};
 use std::{
@@ -44,7 +43,7 @@ impl Ue {
             }
             s.push(buf[0] as char);
         }
-        hex::decode(s.clone()).expect(&format!("String '{}' didn't decode to hex", s))
+        hex::decode(s.clone()).unwrap_or_else(|_| panic!("String '{}' didn't decode to hex", s))
     }
 
     pub fn handle_nas(&mut self, nas_bytes: Vec<u8>, logger: &Logger) {
