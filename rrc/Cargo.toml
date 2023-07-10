@@ -8,7 +8,7 @@ doctest = false
 
 [dependencies]
 asn1-per = { path = "../asn1-per"}
-num_enum = "0.5.11"
+num_enum = "0.6.1"
 async-trait = "0.1.68"
 net = { path = "../net" }
 slog = "2.7.0"
