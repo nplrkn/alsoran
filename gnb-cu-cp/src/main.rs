@@ -40,7 +40,8 @@ async fn main() -> Result<()> {
         config,
         RedisUeStore::new(6379).unwrap(),
         root_logger.clone(),
-    )?;
+    )
+    .await?;
     let s = signal::wait_for_signal().await?;
     info!(root_logger, "Caught signal {} - terminate", s);
     shutdown_handle.graceful_shutdown().await;

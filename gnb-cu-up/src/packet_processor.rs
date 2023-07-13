@@ -2,12 +2,14 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use async_net::{IpAddr, SocketAddr, UdpSocket};
+use async_net::{IpAddr, UdpSocket};
 use async_std::{
     sync::Mutex,
     task::{self, JoinHandle},
 };
 use slog::{debug, Logger};
+use socket2::{Domain, Protocol, Socket, Type};
+use std::net::SocketAddr;
 use xxap::{GtpTeid, GtpTunnel};
 
 const GTPU_PORT: u16 = 2152; // TS29.281
@@ -41,10 +43,13 @@ const CAPACITY: usize = 1 << CAPACITY_BITS;
 const CAPACITY_MASK: u32 = 0xff;
 
 impl PacketProcessor {
-    pub async fn new(local_ip: IpAddr, logger: Logger) -> Result<Self> {
+    pub async fn new(local_ip: std::net::IpAddr, logger: Logger) -> Result<Self> {
         let transport_address = SocketAddr::new(local_ip, GTPU_PORT);
-        let gtpu_socket = UdpSocket::bind(transport_address).await?;
-        // See set_reuse_address in socket2 create.  May be necessary for HA.
+        let gtpu_socket = Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::UDP))?;
+        gtpu_socket.set_reuse_port(true)?;
+        gtpu_socket.bind(&transport_address.into())?;
+        let gtpu_socket: std::net::UdpSocket = gtpu_socket.into();
+        let gtpu_socket = UdpSocket::try_from(gtpu_socket)?;
 
         let forwarding_table = Arc::new(Mutex::new(ForwardingTable(vec![
             ForwardingContext {

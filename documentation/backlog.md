@@ -1,6 +1,9 @@
 # Single process GNB-CU
+- single executable with coordinator, and fallback to standalone mode
 
 # NEXT UP
+- userplane HA (two E1AP connections and userplane replication)
+- warn! consistently on error in workflow
 - RRC connection release
 - UE context release
 - Testing of Session/context releases on different worker
@@ -41,7 +44,6 @@
 ## FUNCTION
 - Proper graceful shutdown (waiting for / sending responses to pending requests)
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
-- Generate RRC transaction IDs properly
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID

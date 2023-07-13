@@ -4,10 +4,11 @@
 use anyhow::{bail, ensure, Result};
 use clap::Parser;
 use common::{logging, panic, signal, ShutdownHandle};
-use gnb_cu_cp::{Config as CpConfig, MockUeStore};
+use coordinator::Config as CoordinatorConfig;
+use gnb_cu_cp::{Config as CpConfig, MockUeStore, WorkerConnectionManagementConfig};
 use gnb_cu_cp::{ConnectionControlConfig, ConnectionStyle};
 use gnb_cu_up::Config as UpConfig;
-use slog::{info, o, Logger};
+use slog::{info, o, warn, Logger};
 use std::net::{IpAddr, Ipv4Addr};
 use std::time::Duration;
 use uuid::Uuid;
@@ -31,12 +32,29 @@ struct Args {
     mnc: String,
 }
 
+const CONNECTION_API_PORT: u16 = 50312;
+const COORDINATION_API_PORT: u16 = 65232;
+
 #[async_std::main]
 async fn main() -> Result<()> {
     panic::exit_on_panic();
     let args = Args::parse();
     let root_logger = logging::init();
-    let cp_shutdown_handle = spawn_cp(&args, root_logger.new(o!("cu-cp" => 1)))?;
+
+    // Attempt to bind a new coordinator to 0.0.0.0:65232.
+    let maybe_coordinator = coordinator::spawn(
+        CoordinatorConfig {
+            bind_port: COORDINATION_API_PORT,
+            connection_control_config: ConnectionControlConfig {
+                amf_address: args.amf_ip.to_string(),
+                worker_refresh_interval_secs: 10,
+                fast_start: true,
+            },
+        },
+        root_logger.new(o!("coord" => 1)),
+    );
+
+    let cp_shutdown_handle = spawn_cp(&args, root_logger.new(o!("cu-cp" => 1))).await?;
 
     // Wait a couple of seconds for the CP to bind its E1AP socket to avoid a retry and warning.
     async_std::task::sleep(Duration::from_secs(2)).await;
@@ -46,23 +64,55 @@ async fn main() -> Result<()> {
     info!(root_logger, "Caught signal {} - terminate", s);
     cp_shutdown_handle.graceful_shutdown().await;
     cu_shutdown_handle.graceful_shutdown().await;
+    if let Ok(handle) = maybe_coordinator {
+        handle.graceful_shutdown().await;
+    }
+
     Ok(())
 }
 
-fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
+async fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
     let plmn = convert_mcc_mnc_to_plmn_array(&args.mcc, &args.mnc).unwrap();
 
-    let cp_config = CpConfig {
-        ip_addr: args.local_ip,
-        connection_style: ConnectionStyle::Autonomous(ConnectionControlConfig {
-            fast_start: true,
-            amf_address: args.amf_ip.to_string(),
-            worker_refresh_interval_secs: 10,
-        }),
-        plmn,
-        ..CpConfig::default()
-    };
-    gnb_cu_cp::spawn(Uuid::new_v4(), cp_config, MockUeStore::new(), logger)
+    // If no local address is specified on the command line, we search for one, starting at 127.0.0.1.
+    // For each address we will try to bind the SCTP ports.
+    for attempt in 1..10 {
+        let ip_addr = if args.local_ip.is_unspecified() {
+            IpAddr::from(Ipv4Addr::new(127, 0, 0, attempt))
+        } else {
+            args.local_ip
+        };
+        let cp_config = CpConfig {
+            ip_addr,
+            connection_style: ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
+                connection_api_bind_port: CONNECTION_API_PORT, // TODO - make configurable
+                connection_api_base_path: format!("http://{ip_addr}:{CONNECTION_API_PORT}"),
+                coordinator_base_path: format!("http://127.0.0.1:{COORDINATION_API_PORT}"),
+            }),
+            plmn,
+            ..CpConfig::default()
+        };
+        match gnb_cu_cp::spawn(
+            Uuid::new_v4(),
+            cp_config,
+            MockUeStore::new(),
+            logger.clone(),
+        )
+        .await
+        {
+            Ok(x) => return Ok(x),
+            Err(e) => {
+                if !args.local_ip.is_unspecified() {
+                    return Err(e);
+                }
+                warn!(
+                    logger,
+                    "Local address {ip_addr} already in use, presumably by another worker - retry with the next one"
+                )
+            }
+        }
+    }
+    bail!("Failed to bind after multiple attempts")
 }
 
 fn spawn_up(args: &Args, logger: Logger) -> Result<ShutdownHandle> {

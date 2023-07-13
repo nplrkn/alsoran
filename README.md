@@ -6,6 +6,17 @@ The gNodeB is the component that manages the radio access of 5G User Equipment (
 
 This project is currently a proof of concept and not yet a fully functional gNB-CU.
 
+## Quickstart
+```
+cargo build
+./target/debug/gnb-cu --mcc 111 --mnc 11 --amf-ip 5.5.5.5 &
+./target/debug/gnb-cu --mcc 111 --mnc 11 --amf-ip 5.5.5.5
+```
+
+This uses the simplified startup model for running on a single host.  The first instance
+binds to 127.0.0.1.  The second binds to 127.0.0.2.
+
+
 ## Current support
 - UE registration demo against free5GC.
 - PDU session setup and release (TS 23.502, figures 4.3.2.2.1-1 and 4.3.4.2-1).

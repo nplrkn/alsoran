@@ -91,7 +91,7 @@ impl<C> Server<C> {
 }
 
 pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
-    info!(logger, "Started");
+    debug!(logger, "Started");
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 

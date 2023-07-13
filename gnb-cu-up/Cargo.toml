@@ -21,3 +21,4 @@ asn1-per = { path = "../asn1-per" }
 async-net = "1.6.1"
 dashmap = "5.4.0"
 rand = "0.8.5"
+socket2 = { version = "0.5.3", features = ["all"] }

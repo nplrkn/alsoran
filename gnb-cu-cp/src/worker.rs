@@ -70,7 +70,7 @@ const F1AP_BIND_PORT: u16 = 38472;
 const E1AP_SCTP_PPID: u32 = 64;
 const E1AP_BIND_PORT: u16 = 38462;
 
-pub fn spawn<U: UeStateStore>(
+pub async fn spawn<U: UeStateStore>(
     worker_id: Uuid,
     config: Config,
     ue_store: U,
@@ -81,6 +81,7 @@ pub fn spawn<U: UeStateStore>(
 
     info!(&logger, "Starting gNB-CU-CP worker {}", worker_id);
     info!(&logger, "PLMN is {:02x?}", config.plmn);
+    debug!(&logger, "Config: {:?}", config);
 
     let handle = match config.connection_style {
         // Run a combined worker and coordinator.
@@ -115,11 +116,9 @@ pub fn spawn<U: UeStateStore>(
             )
             .unwrap();
             let worker = Worker::new(config, ue_store, worker_id, logger, coordinator);
+            worker.start_servers().await?;
             async_std::task::spawn(async move {
-                worker
-                    .serve(stop_token)
-                    .await
-                    .expect("Worker startup failure");
+                worker.run(stop_token).await;
             })
         }
     };
@@ -150,7 +149,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         }
     }
 
-    async fn serve(self, stop_token: StopToken) -> Result<()> {
+    async fn start_servers(&self) -> Result<()> {
         let f1ap_handle = self.serve_f1ap().await?;
         self.add_shutdown_handle(f1ap_handle).await;
 
@@ -165,7 +164,10 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             let connection_api_handle = self.serve_connection_api(connection_api_bind_port).await?;
             self.add_shutdown_handle(connection_api_handle).await;
         };
+        Ok(())
+    }
 
+    async fn run(self, stop_token: StopToken) {
         // Connect to the coordinator.  It will bring this worker into service by making calls to the
         // connection API.
         self.send_periodic_refreshes_to_coordinator(stop_token.clone())
@@ -178,7 +180,11 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         }
 
         self.ngap.graceful_shutdown().await;
+    }
 
+    async fn serve(self, stop_token: StopToken) -> Result<()> {
+        self.start_servers().await?;
+        self.run(stop_token).await;
         Ok(())
     }
 
