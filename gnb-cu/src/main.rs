@@ -53,13 +53,20 @@ async fn main() -> Result<()> {
         },
         root_logger.new(o!("coord" => 1)),
     );
+    match maybe_coordinator {
+        Ok(_) => info!(root_logger, "This instance is acting as coordinator"),
+        Err(_) => info!(
+            root_logger,
+            "Another instance is already acting as coordinator"
+        ),
+    };
 
-    let cp_shutdown_handle = spawn_cp(&args, root_logger.new(o!("cu-cp" => 1))).await?;
+    let (cp_shutdown_handle, local_ip) = spawn_cp(&args, root_logger.new(o!("cu-cp" => 1))).await?;
 
     // Wait a couple of seconds for the CP to bind its E1AP socket to avoid a retry and warning.
     async_std::task::sleep(Duration::from_secs(2)).await;
 
-    let cu_shutdown_handle = spawn_up(&args, root_logger.new(o!("cu-up" => 1)))?;
+    let cu_shutdown_handle = spawn_up(local_ip, root_logger.new(o!("cu-up" => 1))).await?;
     let s = signal::wait_for_signal().await?;
     info!(root_logger, "Caught signal {} - terminate", s);
     cp_shutdown_handle.graceful_shutdown().await;
@@ -71,7 +78,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
+async fn spawn_cp(args: &Args, logger: Logger) -> Result<(ShutdownHandle, IpAddr)> {
     let plmn = convert_mcc_mnc_to_plmn_array(&args.mcc, &args.mnc).unwrap();
 
     // If no local address is specified on the command line, we search for one, starting at 127.0.0.1.
@@ -100,7 +107,7 @@ async fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
         )
         .await
         {
-            Ok(x) => return Ok(x),
+            Ok(x) => return Ok((x, ip_addr)),
             Err(e) => {
                 if !args.local_ip.is_unspecified() {
                     return Err(e);
@@ -115,20 +122,15 @@ async fn spawn_cp(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
     bail!("Failed to bind after multiple attempts")
 }
 
-fn spawn_up(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
-    let cp_ip_address = if args.local_ip.is_unspecified() {
-        IpAddr::V4(Ipv4Addr::LOCALHOST)
-    } else {
-        args.local_ip
-    };
+async fn spawn_up(local_ip: IpAddr, logger: Logger) -> Result<ShutdownHandle> {
     let up_config = UpConfig {
-        local_ip_address: args.local_ip,
-        userplane_ip_address: args.local_ip,
-        cp_ip_address,
+        local_ip_address: local_ip,
+        userplane_ip_address: local_ip,
+        cp_ip_address: local_ip,
         name: None,
     };
 
-    gnb_cu_up::spawn(up_config, logger)
+    gnb_cu_up::spawn(up_config, logger).await
 }
 
 fn convert_mcc_mnc_to_plmn_array(mcc: &str, mnc: &str) -> Result<[u8; 3]> {

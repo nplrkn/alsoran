@@ -409,7 +409,7 @@ async fn start_cu_up_on_random_ip(
         };
         let logger = logger.new(o!("cu-up"=> ip_address.to_string()));
 
-        if let Ok(cu_up) = gnb_cu_up::spawn(config, logger) {
+        if let Ok(cu_up) = gnb_cu_up::spawn(config, logger).await {
             return Ok(cu_up);
         }
     }

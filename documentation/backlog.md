@@ -1,5 +1,13 @@
 # Single process GNB-CU
-- single executable with coordinator, and fallback to standalone mode
+- single executable with coordinator
+- session setup with mock 5gc and mock du
+- fallback to standalone mode
+- should not have to specify arguments on 2nd worker?
+- Ctrl-C is not reliably terminating
+- in RequestProvider, pass a transaction context instead of a logger
+  - transaciton context provides logger
+  - transaciotn context also provides "response action" to simplify?
+  - also provides TNLA ID and remote IP address - can use this to remove double info! logging of TNLA setup
 
 # NEXT UP
 - userplane HA (two E1AP connections and userplane replication)

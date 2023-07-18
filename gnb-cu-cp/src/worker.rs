@@ -289,7 +289,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         let connection_api_listen_address = self.worker_listen_address(port);
         info!(
             &self.logger,
-            "Serve connection API on {}", connection_api_listen_address
+            "Serve connection API on {connection_api_listen_address}",
         );
         let addr = connection_api_listen_address.parse()?;
         crate::handlers::connection_api::serve(addr, self.clone(), self.logger.clone()).await

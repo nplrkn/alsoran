@@ -9,7 +9,7 @@ async fn main() -> Result<()> {
 
     let root_logger = logging::init();
     let config = Config::default();
-    let shutdown_handle = gnb_cu_up::spawn(config, root_logger.clone())?;
+    let shutdown_handle = gnb_cu_up::spawn(config, root_logger.clone()).await?;
     let s = signal::wait_for_signal().await?;
     info!(root_logger, "Caught signal {} - terminate", s);
     shutdown_handle.graceful_shutdown().await;

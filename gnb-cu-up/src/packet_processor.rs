@@ -1,13 +1,13 @@
 #![allow(clippy::unusual_byte_groupings)]
 use std::sync::Arc;
 
-use anyhow::Result;
+use anyhow::{ensure, Context, Result};
 use async_net::{IpAddr, UdpSocket};
 use async_std::{
     sync::Mutex,
     task::{self, JoinHandle},
 };
-use slog::{debug, Logger};
+use slog::{debug, info, Logger};
 use socket2::{Domain, Protocol, Socket, Type};
 use std::net::SocketAddr;
 use xxap::{GtpTeid, GtpTunnel};
@@ -43,11 +43,19 @@ const CAPACITY: usize = 1 << CAPACITY_BITS;
 const CAPACITY_MASK: u32 = 0xff;
 
 impl PacketProcessor {
-    pub async fn new(local_ip: std::net::IpAddr, logger: Logger) -> Result<Self> {
+    pub async fn new(local_ip: IpAddr, logger: Logger) -> Result<Self> {
         let transport_address = SocketAddr::new(local_ip, GTPU_PORT);
-        let gtpu_socket = Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::UDP))?;
+        let domain = match local_ip {
+            IpAddr::V4(_) => Domain::IPV4,
+            IpAddr::V6(_) => Domain::IPV6,
+        };
+        ensure!(matches!(local_ip, IpAddr::V4(_)));
+        let gtpu_socket = Socket::new(domain, Type::DGRAM, Some(Protocol::UDP))?;
         gtpu_socket.set_reuse_port(true)?;
-        gtpu_socket.bind(&transport_address.into())?;
+        info!(logger, "Serving GTP-U on {transport_address}");
+        gtpu_socket
+            .bind(&transport_address.into())
+            .context(format!("Failed to bind {}", transport_address))?;
         let gtpu_socket: std::net::UdpSocket = gtpu_socket.into();
         let gtpu_socket = UdpSocket::try_from(gtpu_socket)?;
 
