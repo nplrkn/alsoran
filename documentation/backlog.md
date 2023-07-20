@@ -1,21 +1,20 @@
-# Single process GNB-CU
-- single executable with coordinator
-- session setup with mock 5gc and mock du
-- fallback to standalone mode
-- should not have to specify arguments on 2nd worker?
+# NEXT UP
+- useless error : 
+Jul 19 06:38:12.966 WARN Failing all requests because of TNLA 17 termination. Note that current blanket implementation may drop requests on other TNLAs that could have survived, cu-cp: 1
+Jul 19 06:38:12.966 INFO NGAP TNLA 17 closed, cu-cp: 1
+Jul 19 06:38:12.966 WARN Channel recv error: RecvError, cu-cp: 1
 - Ctrl-C is not reliably terminating
 - in RequestProvider, pass a transaction context instead of a logger
   - transaciton context provides logger
   - transaciotn context also provides "response action" to simplify?
   - also provides TNLA ID and remote IP address - can use this to remove double info! logging of TNLA setup
-
-# NEXT UP
 - userplane HA (two E1AP connections and userplane replication)
 - warn! consistently on error in workflow
 - RRC connection release
 - UE context release
 - Testing of Session/context releases on different worker
 - Paging
+- promotion of coordinator in single executable mode
 
 # TECH DEBT
 ## CU-UP and O-RAN O-DU interop
@@ -100,6 +99,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Add coordinator to single process GNB-CU
 - PDU session deletion
 - Retry connection to AMF
 - Single process GNB-CU with configurable MCC / MNC

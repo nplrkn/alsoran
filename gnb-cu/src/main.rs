@@ -16,7 +16,7 @@ use uuid::Uuid;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Local IP address to bind server ports to
+    /// Local IP address of GNB-CU, both for control plane (F1AP, E1AP, NGAP) and userplane protocols (GTP-U).
     #[arg(long, default_value_t = IpAddr::V4(Ipv4Addr::UNSPECIFIED))]
     local_ip: IpAddr,
 
@@ -24,10 +24,13 @@ struct Args {
     #[arg(long, default_value_t = IpAddr::V4(Ipv4Addr::LOCALHOST))]
     amf_ip: IpAddr,
 
-    /// PLMN ID.
+    /// Mobile Country Code part of the PLMN ID (Public Land Mobile Network ID).  
+    /// A string of three digits.
     #[arg(long)]
     mcc: String,
 
+    /// Mobile Network Code part of the PLMN ID (Public Land Mobile Network ID).  
+    /// A string of two or three digits.
     #[arg(long)]
     mnc: String,
 }
@@ -42,24 +45,7 @@ async fn main() -> Result<()> {
     let root_logger = logging::init();
 
     // Attempt to bind a new coordinator to 0.0.0.0:65232.
-    let maybe_coordinator = coordinator::spawn(
-        CoordinatorConfig {
-            bind_port: COORDINATION_API_PORT,
-            connection_control_config: ConnectionControlConfig {
-                amf_address: args.amf_ip.to_string(),
-                worker_refresh_interval_secs: 10,
-                fast_start: true,
-            },
-        },
-        root_logger.new(o!("coord" => 1)),
-    );
-    match maybe_coordinator {
-        Ok(_) => info!(root_logger, "This instance is acting as coordinator"),
-        Err(_) => info!(
-            root_logger,
-            "Another instance is already acting as coordinator"
-        ),
-    };
+    let maybe_coordinator = spawn_coordinator(&args, root_logger.new(o!("coord" => 1))).await;
 
     let (cp_shutdown_handle, local_ip) = spawn_cp(&args, root_logger.new(o!("cu-cp" => 1))).await?;
 
@@ -78,48 +64,46 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+async fn spawn_coordinator(args: &Args, logger: Logger) -> Result<ShutdownHandle> {
+    let maybe_coordinator = coordinator::spawn(
+        CoordinatorConfig {
+            bind_port: COORDINATION_API_PORT,
+            connection_control_config: ConnectionControlConfig {
+                amf_address: args.amf_ip.to_string(),
+                worker_refresh_interval_secs: 10,
+                fast_start: true,
+            },
+        },
+        logger.clone(),
+    );
+    match maybe_coordinator {
+        Ok(_) => info!(logger, "This instance is acting as coordinator"),
+        Err(_) => info!(logger, "Another instance is already acting as coordinator"),
+    };
+    maybe_coordinator
+}
+
 async fn spawn_cp(args: &Args, logger: Logger) -> Result<(ShutdownHandle, IpAddr)> {
     let plmn = convert_mcc_mnc_to_plmn_array(&args.mcc, &args.mnc).unwrap();
-
-    // If no local address is specified on the command line, we search for one, starting at 127.0.0.1.
-    // For each address we will try to bind the SCTP ports.
-    for attempt in 1..10 {
-        let ip_addr = if args.local_ip.is_unspecified() {
-            IpAddr::from(Ipv4Addr::new(127, 0, 0, attempt))
-        } else {
-            args.local_ip
-        };
-        let cp_config = CpConfig {
-            ip_addr,
-            connection_style: ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
-                connection_api_bind_port: CONNECTION_API_PORT, // TODO - make configurable
-                connection_api_base_path: format!("http://{ip_addr}:{CONNECTION_API_PORT}"),
-                coordinator_base_path: format!("http://127.0.0.1:{COORDINATION_API_PORT}"),
-            }),
-            plmn,
-            ..CpConfig::default()
-        };
-        match gnb_cu_cp::spawn(
-            Uuid::new_v4(),
-            cp_config,
-            MockUeStore::new(),
-            logger.clone(),
-        )
-        .await
-        {
-            Ok(x) => return Ok((x, ip_addr)),
-            Err(e) => {
-                if !args.local_ip.is_unspecified() {
-                    return Err(e);
-                }
-                warn!(
-                    logger,
-                    "Local address {ip_addr} already in use, presumably by another worker - retry with the next one"
-                )
-            }
-        }
-    }
-    bail!("Failed to bind after multiple attempts")
+    let ip_addr = args.local_ip;
+    let cp_config = CpConfig {
+        ip_addr,
+        connection_style: ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
+            connection_api_bind_port: CONNECTION_API_PORT, // TODO - make configurable
+            connection_api_base_path: format!("http://{ip_addr}:{CONNECTION_API_PORT}"),
+            coordinator_base_path: format!("http://127.0.0.1:{COORDINATION_API_PORT}"),
+        }),
+        plmn,
+        ..CpConfig::default()
+    };
+    gnb_cu_cp::spawn(
+        Uuid::new_v4(),
+        cp_config,
+        MockUeStore::new(),
+        logger.clone(),
+    )
+    .await
+    .map(|h| (h, ip_addr))
 }
 
 async fn spawn_up(local_ip: IpAddr, logger: Logger) -> Result<ShutdownHandle> {
@@ -167,4 +151,52 @@ fn convert_mcc_mnc_to_plmn_array(mcc: &str, mnc: &str) -> Result<[u8; 3]> {
         };
     }
     Ok(plmn)
+}
+
+// This code is currently unused but provides a convenient way to run multiple local GNB-CUs
+// without needing to specify IP addresses.  This is only useful if
+// both 5GC and GNB-DU are running in the same network namespace as the GNB-CUs
+// (and hence can contact localhost addresses).
+#[allow(dead_code)]
+async fn spawn_cp_on_random_local_addr(
+    args: &Args,
+    logger: Logger,
+) -> Result<(ShutdownHandle, IpAddr)> {
+    let plmn = convert_mcc_mnc_to_plmn_array(&args.mcc, &args.mnc).unwrap();
+
+    // If no local address is specified on the command line, we search for one, starting at 127.0.0.1.
+    // For each address we will try to bind the SCTP ports.
+    for attempt in 1..10 {
+        let ip_addr = IpAddr::from(Ipv4Addr::new(127, 0, 0, attempt));
+        let cp_config = CpConfig {
+            ip_addr,
+            connection_style: ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
+                connection_api_bind_port: CONNECTION_API_PORT, // TODO - make configurable
+                connection_api_base_path: format!("http://{ip_addr}:{CONNECTION_API_PORT}"),
+                coordinator_base_path: format!("http://127.0.0.1:{COORDINATION_API_PORT}"),
+            }),
+            plmn,
+            ..CpConfig::default()
+        };
+        match gnb_cu_cp::spawn(
+            Uuid::new_v4(),
+            cp_config,
+            MockUeStore::new(),
+            logger.clone(),
+        )
+        .await
+        {
+            Ok(x) => return Ok((x, ip_addr)),
+            Err(e) => {
+                if !args.local_ip.is_unspecified() {
+                    return Err(e);
+                }
+                warn!(
+                    logger,
+                    "Local address {ip_addr} already in use, presumably by another worker - retry with the next one"
+                )
+            }
+        }
+    }
+    bail!("Failed to bind after multiple attempts")
 }
