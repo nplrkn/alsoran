@@ -1,5 +1,31 @@
 # NEXT UP
 - Open Air Interface interop
+- intermittent CI failure in two_workers_f1_before_e1 
+   Jul 21 06:48:34.444 INFO f705b4a4-de48-4a18-81a4-7287bf2974b7 to get added to F1 interface
+amf: 1
+ Jul 21 06:48:34.446 INFO End listen 127.148.206.99:38412
+ Jul 21 06:48:34.446 INFO TNLA 24 closed
+cu-up: 127.86.101.151
+ Jul 21 06:48:34.447 INFO E1AP TNLA 22 closed
+amf: 1
+ Jul 21 06:48:34.447 INFO TNLA 31 closed
+cu-cp-w: f705b4a4-de48-4a18-81a4-7287bf2974b7
+ Jul 21 06:48:34.447 INFO End listen 127.0.25.178:38462
+cu-up: 127.86.101.151
+ Jul 21 06:48:34.447 INFO E1AP TNLA 40 closed
+Error: Unexpected F1ap message InitiatingMessage(GnbCuConfigurationUpdate(GnbCuConfigurationUpdate { transaction_id: TransactionId(1), cells_to_be_activated_list: None, cells_to_be_deactivated_list: None, gnb_cu_tnl_association_to_add_list: Some(GnbCuTnlAssociationToAddList(NonEmpty { head: GnbCuTnlAssociationToAddItem { tnl_association_transport_layer_address: EndpointIpAddress(TransportLayerAddress(BitVec<u8, bitvec::order::Msb0> { addr: 0x7f6f3000a060, head: 000, bits: 32, capacity: 64 } [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0])), tnl_association_usage: Both }, tail: [] })), gnb_cu_tnl_association_to_remove_list: None, gnb_cu_tnl_association_to_update_list: None, cells_to_be_barred_list: None, protected_eutra_resources_list: None, neighbour_cell_information_list: None, transport_layer_address_info: None, ul_bh_non_up_traffic_mapping: None, bap_address: None }))
+cu-cp-w: f705b4a4-de48-4a18-81a4-7287bf2974b7
+ Jul 21 06:48:34.447 INFO E1AP TNLA 41 closed
+cu-cp-w: 5508deba-7ca5-461d-b452-b4d0db412937
+ Jul 21 06:48:34.448 WARN Failed refresh worker ApiError("No response received: connection closed before message completed")
+cu-cp-w: f705b4a4-de48-4a18-81a4-7287bf2974b7
+ Jul 21 06:48:34.448 INFO End listen 127.0.25.178:38472
+cu-cp-w: 5508deba-7ca5-461d-b452-b4d0db412937
+ Jul 21 06:48:34.448 INFO NGAP TNLA 23 closed
+cu-cp-w: f705b4a4-de48-4a18-81a4-7287bf2974b7
+ Jul 21 06:48:34.448 INFO NGAP TNLA 30 closed
+thread 'async-std/runtime' panicked at 'called `Result::unwrap()` on an `Err` value: SendError(..)', 
+
 - RRC connection release
 - UE context release
 - userplane HA (two E1AP connections and userplane replication)
