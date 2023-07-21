@@ -102,9 +102,9 @@ where
             Err(e) => {
                 warn!(
                     self.logger,
-                    "Error during {} {}",
-                    connection_info.operation_type,
-                    e.to_string()
+                    "{} when attempting {}",
+                    e.to_string(),
+                    connection_info.operation_type
                 );
                 Ok(AddConnectionResponse::Failure(e.to_string()))
             }
