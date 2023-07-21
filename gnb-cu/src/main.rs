@@ -107,10 +107,15 @@ async fn spawn_cp(args: &Args, logger: Logger) -> Result<(ShutdownHandle, IpAddr
 }
 
 async fn spawn_up(local_ip: IpAddr, logger: Logger) -> Result<ShutdownHandle> {
+    let cp_ip_address = if local_ip.is_unspecified() {
+        IpAddr::V4(Ipv4Addr::LOCALHOST)
+    } else {
+        local_ip
+    };
     let up_config = UpConfig {
         local_ip_address: local_ip,
         userplane_ip_address: local_ip,
-        cp_ip_address: local_ip,
+        cp_ip_address,
         name: None,
     };
 

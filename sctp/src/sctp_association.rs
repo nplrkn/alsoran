@@ -63,7 +63,7 @@ impl SctpAssociation {
         let rc = unsafe { connect(fd, addr.as_ptr(), addr.len()) };
         let errno = errno::errno();
         if (rc < 0) && (errno.0 != libc::EINPROGRESS) && (errno.0 != libc::EWOULDBLOCK) {
-            return Err(anyhow!("Error connecting {:?}", errno));
+            return Err(anyhow!("connect() {:?}", errno));
         }
         async_fd
             .writable()

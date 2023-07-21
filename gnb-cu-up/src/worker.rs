@@ -85,7 +85,10 @@ impl Worker {
 
                     break;
                 }
-                Err(e) => warn!(logger, "Connection to GNB-CU-CP failed - {}", e),
+                Err(e) => warn!(
+                    logger,
+                    "Failed to connect to GNB-CU-CP {} - {}", &self.config.cp_ip_address, e
+                ),
             }
 
             info!(logger, "Pausing for {}s before retry", RETRY_SECS);
