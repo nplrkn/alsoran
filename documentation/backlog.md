@@ -1,26 +1,18 @@
 # NEXT UP
-- useless error : 
-Jul 19 06:38:12.966 WARN Failing all requests because of TNLA 17 termination. Note that current blanket implementation may drop requests on other TNLAs that could have survived, cu-cp: 1
-Jul 19 06:38:12.966 INFO NGAP TNLA 17 closed, cu-cp: 1
-Jul 19 06:38:12.966 WARN Channel recv error: RecvError, cu-cp: 1
-- Ctrl-C is not reliably terminating
-- in RequestProvider, pass a transaction context instead of a logger
-  - transaciton context provides logger
-  - transaciotn context also provides "response action" to simplify?
-  - also provides TNLA ID and remote IP address - can use this to remove double info! logging of TNLA setup
-- userplane HA (two E1AP connections and userplane replication)
-- warn! consistently on error in workflow
+- Open Air Interface interop
 - RRC connection release
 - UE context release
+- userplane HA (two E1AP connections and userplane replication)
 - Testing of Session/context releases on different worker
 - Paging
-- promotion of coordinator in single executable mode
+- Promotion of coordinator in single executable mode
 
 # TECH DEBT
+
+## BUGS
+- Ctrl-C is not reliably terminating
+
 ## CU-UP and O-RAN O-DU interop
-- With O-RAN-SC ODU
-- multiple TNLAs on CU-UP?
-- >1 CU-UP?
 - avoid need for recompile of ODU by enabling O1 (but we need to recompile it anyway to set ratio = 20)
 - document a method that other people could use to test ODU
 - don't set up SRB + 2 DRBs if all we need is one session = one DRB
@@ -58,7 +50,11 @@ Jul 19 06:38:12.966 WARN Channel recv error: RecvError, cu-cp: 1
 ## MAINTAINABILITY + DIAGNOSTICS
 - standardize handler->workflow result handling and logging (who logs message, who forms failure) across CU-CP and CU-UP
 - Rather than saying "WARN Unsupported UlDcchMessage C1(RrcReconfigurationComplete" we should report that the messsage does not match a transaction.
-- Remove slog from workflow module and use log methods on Workflow instead
+- in RequestProvider, pass a transaction context instead of a logger
+  - transaction context provides logger
+  - transaction context also provides "response action" to simplify?
+  - also provides TNLA ID and remote IP address - can use this to remove double info! logging of TNLA setup
+- Remove slog from workflow module and access above transaction context via Workflow instead
 - Errors are too easy to miss - log_ue_error()? to optionally warn! on failure
   - e.g. "Inital access procedure failed - Connection refused (os error 111)" at debug
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.

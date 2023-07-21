@@ -9,13 +9,8 @@ This project is currently a proof of concept and not yet a fully functional gNB-
 ## Quickstart
 ```
 cargo build
-./target/debug/gnb-cu --mcc 111 --mnc 11 --amf-ip 5.5.5.5 &
 ./target/debug/gnb-cu --mcc 111 --mnc 11 --amf-ip 5.5.5.5
 ```
-
-This uses the simplified startup model for running on a single host.  The first instance
-binds to 127.0.0.1.  The second binds to 127.0.0.2.
-
 
 ## Current support
 - UE registration demo against free5GC.
