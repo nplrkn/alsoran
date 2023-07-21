@@ -6,14 +6,17 @@ use super::try_io::try_io;
 use super::Message;
 use anyhow::{anyhow, Result};
 use async_io::Async;
+use async_io::Timer;
 use async_stream::try_stream;
 use futures_core::stream::Stream;
+use futures_lite::future::FutureExt;
 use io::Error;
 use libc::bind;
 use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
 use std::net::SocketAddr;
+use std::time::Duration;
 use std::{io, mem};
 
 /// An SCTP assocation.
@@ -62,7 +65,13 @@ impl SctpAssociation {
         if (rc < 0) && (errno.0 != libc::EINPROGRESS) && (errno.0 != libc::EWOULDBLOCK) {
             return Err(anyhow!("Error connecting {:?}", errno));
         }
-        async_fd.writable().await?;
+        async_fd
+            .writable()
+            .or(async {
+                Timer::after(Duration::from_secs(5)).await;
+                Err(std::io::ErrorKind::TimedOut.into())
+            })
+            .await?;
         let mut address = unsafe { std::mem::zeroed::<libc::sockaddr>() };
         let mut address_len = std::mem::size_of::<libc::sockaddr>() as socklen_t;
         let rc = unsafe { getpeername(fd, &mut address as _, &mut address_len as *mut _ as _) };

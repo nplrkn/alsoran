@@ -36,15 +36,13 @@ pub struct Worker {
 const E1AP_SCTP_PPID: u32 = 64;
 const E1AP_BIND_PORT: u16 = 38462;
 
-pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
+pub async fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
     info!(&logger, "Starting gNB-CU-UP worker");
-    let handle = async_std::task::spawn(async move {
-        let worker = Worker::new(config, logger.clone())
-            .await
-            .expect("Worker startup failure");
+    let worker = Worker::new(config, logger.clone()).await?;
 
+    let handle = async_std::task::spawn(async move {
         worker
             .run(stop_token)
             .await

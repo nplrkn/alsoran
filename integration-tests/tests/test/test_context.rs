@@ -208,14 +208,18 @@ impl TestContext {
             let worker_id = Uuid::new_v4();
             let worker_logger = self.logger.new(o!("cu-cp-w"=> worker_id.to_string()));
             match match datastore {
-                WorkerDatastoreSetup::RedisPort(port) => gnb_cu_cp::spawn(
-                    worker_id,
-                    config.clone(),
-                    RedisUeStore::new(*port).unwrap(),
-                    worker_logger,
-                ),
+                WorkerDatastoreSetup::RedisPort(port) => {
+                    gnb_cu_cp::spawn(
+                        worker_id,
+                        config.clone(),
+                        RedisUeStore::new(*port).unwrap(),
+                        worker_logger,
+                    )
+                    .await
+                }
                 WorkerDatastoreSetup::MockUeStore(ue_store) => {
                     gnb_cu_cp::spawn(worker_id, config.clone(), ue_store.clone(), worker_logger)
+                        .await
                 }
             } {
                 Ok(shutdown_handle) => {
@@ -405,7 +409,7 @@ async fn start_cu_up_on_random_ip(
         };
         let logger = logger.new(o!("cu-up"=> ip_address.to_string()));
 
-        if let Ok(cu_up) = gnb_cu_up::spawn(config, logger) {
+        if let Ok(cu_up) = gnb_cu_up::spawn(config, logger).await {
             return Ok(cu_up);
         }
     }

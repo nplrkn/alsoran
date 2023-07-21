@@ -1,10 +1,20 @@
-# Single process GNB-CU
-
 # NEXT UP
+- useless error : 
+Jul 19 06:38:12.966 WARN Failing all requests because of TNLA 17 termination. Note that current blanket implementation may drop requests on other TNLAs that could have survived, cu-cp: 1
+Jul 19 06:38:12.966 INFO NGAP TNLA 17 closed, cu-cp: 1
+Jul 19 06:38:12.966 WARN Channel recv error: RecvError, cu-cp: 1
+- Ctrl-C is not reliably terminating
+- in RequestProvider, pass a transaction context instead of a logger
+  - transaciton context provides logger
+  - transaciotn context also provides "response action" to simplify?
+  - also provides TNLA ID and remote IP address - can use this to remove double info! logging of TNLA setup
+- userplane HA (two E1AP connections and userplane replication)
+- warn! consistently on error in workflow
 - RRC connection release
 - UE context release
 - Testing of Session/context releases on different worker
 - Paging
+- promotion of coordinator in single executable mode
 
 # TECH DEBT
 ## CU-UP and O-RAN O-DU interop
@@ -41,7 +51,6 @@
 ## FUNCTION
 - Proper graceful shutdown (waiting for / sending responses to pending requests)
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
-- Generate RRC transaction IDs properly
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
@@ -90,6 +99,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Add coordinator to single process GNB-CU
 - PDU session deletion
 - Retry connection to AMF
 - Single process GNB-CU with configurable MCC / MNC
