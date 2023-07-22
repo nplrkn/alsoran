@@ -5,7 +5,7 @@ use crate::common::Criticality;
 use anyhow::Result;
 use asn1_per::{aper::*, *};
 use async_trait::async_trait;
-use slog::{error, Logger};
+use slog::Logger;
 
 // E1apPdu
 #[derive(Clone, Debug)]
@@ -278,13 +278,7 @@ impl Procedure for GnbCuCpConfigurationUpdateProcedure {
                 ),
                 f,
             )),
-            Err(_) => {
-                error!(
-                    logger,
-                    "Error path not implemented for GnbCuCpConfigurationUpdateProcedure"
-                );
-                None
-            }
+            Err(_) => todo!(),
         }
     }
 

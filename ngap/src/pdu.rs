@@ -20,7 +20,7 @@ pub struct PduSessionResourceSetupRequest {
 impl PduSessionResourceSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -30,7 +30,7 @@ impl PduSessionResourceSetupRequest {
             None;
         let mut ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -48,6 +48,7 @@ impl PduSessionResourceSetupRequest {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -162,7 +163,7 @@ pub struct PduSessionResourceSetupResponse {
 impl PduSessionResourceSetupResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -173,7 +174,7 @@ impl PduSessionResourceSetupResponse {
         > = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -191,6 +192,7 @@ impl PduSessionResourceSetupResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -291,7 +293,7 @@ pub struct PduSessionResourceReleaseCommand {
 impl PduSessionResourceReleaseCommand {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -301,7 +303,7 @@ impl PduSessionResourceReleaseCommand {
             PduSessionResourceToReleaseListRelCmd,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -316,6 +318,7 @@ impl PduSessionResourceReleaseCommand {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -419,7 +422,7 @@ pub struct PduSessionResourceReleaseResponse {
 impl PduSessionResourceReleaseResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -429,7 +432,7 @@ impl PduSessionResourceReleaseResponse {
         let mut user_location_information: Option<UserLocationInformation> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -444,6 +447,7 @@ impl PduSessionResourceReleaseResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -545,7 +549,7 @@ pub struct PduSessionResourceModifyRequest {
 impl PduSessionResourceModifyRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -554,7 +558,7 @@ impl PduSessionResourceModifyRequest {
             PduSessionResourceModifyListModReq,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -568,6 +572,7 @@ impl PduSessionResourceModifyRequest {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -661,7 +666,7 @@ pub struct PduSessionResourceModifyResponse {
 impl PduSessionResourceModifyResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -674,7 +679,7 @@ impl PduSessionResourceModifyResponse {
         let mut user_location_information: Option<UserLocationInformation> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -693,6 +698,7 @@ impl PduSessionResourceModifyResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -804,7 +810,7 @@ pub struct PduSessionResourceNotify {
 impl PduSessionResourceNotify {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -813,7 +819,7 @@ impl PduSessionResourceNotify {
             None;
         let mut user_location_information: Option<UserLocationInformation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -831,6 +837,7 @@ impl PduSessionResourceNotify {
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -930,7 +937,7 @@ pub struct PduSessionResourceModifyIndication {
 impl PduSessionResourceModifyIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -939,7 +946,7 @@ impl PduSessionResourceModifyIndication {
         > = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -953,6 +960,7 @@ impl PduSessionResourceModifyIndication {
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -1045,7 +1053,7 @@ pub struct PduSessionResourceModifyConfirm {
 impl PduSessionResourceModifyConfirm {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -1057,7 +1065,7 @@ impl PduSessionResourceModifyConfirm {
         > = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -1075,6 +1083,7 @@ impl PduSessionResourceModifyConfirm {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -1208,7 +1217,7 @@ pub struct InitialContextSetupRequest {
 impl InitialContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -1258,7 +1267,7 @@ impl InitialContextSetupRequest {
         let mut management_based_mdt_plmn_list: Option<MdtPlmnList> = None;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -1331,6 +1340,7 @@ impl InitialContextSetupRequest {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -1786,7 +1796,7 @@ pub struct InitialContextSetupResponse {
 impl InitialContextSetupResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -1797,7 +1807,7 @@ impl InitialContextSetupResponse {
         > = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -1815,6 +1825,7 @@ impl InitialContextSetupResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -1916,7 +1927,7 @@ pub struct InitialContextSetupFailure {
 impl InitialContextSetupFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -1926,7 +1937,7 @@ impl InitialContextSetupFailure {
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -1941,6 +1952,7 @@ impl InitialContextSetupFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2039,7 +2051,7 @@ pub struct UeContextReleaseRequest {
 impl UeContextReleaseRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -2047,7 +2059,7 @@ impl UeContextReleaseRequest {
             None;
         let mut cause: Option<Cause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2061,6 +2073,7 @@ impl UeContextReleaseRequest {
                 15 => cause = Some(Cause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2146,12 +2159,12 @@ pub struct UeContextReleaseCommand {
 impl UeContextReleaseCommand {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ue_ngap_i_ds: Option<UeNgapIDs> = None;
         let mut cause: Option<Cause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2160,6 +2173,7 @@ impl UeContextReleaseCommand {
                 15 => cause = Some(Cause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ue_ngap_i_ds = ue_ngap_i_ds.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ue_ngap_i_ds"
@@ -2228,7 +2242,7 @@ pub struct UeContextReleaseComplete {
 impl UeContextReleaseComplete {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -2241,7 +2255,7 @@ impl UeContextReleaseComplete {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2264,6 +2278,7 @@ impl UeContextReleaseComplete {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2391,7 +2406,7 @@ pub struct UeContextResumeRequest {
 impl UeContextResumeRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -2408,7 +2423,7 @@ impl UeContextResumeRequest {
         > = None;
         let mut paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2435,6 +2450,7 @@ impl UeContextResumeRequest {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2573,7 +2589,7 @@ pub struct UeContextResumeResponse {
 impl UeContextResumeResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -2588,7 +2604,7 @@ impl UeContextResumeResponse {
         let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2609,6 +2625,7 @@ impl UeContextResumeResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2741,14 +2758,14 @@ pub struct UeContextResumeFailure {
 impl UeContextResumeFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2759,6 +2776,7 @@ impl UeContextResumeFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2848,7 +2866,7 @@ pub struct UeContextSuspendRequest {
 impl UeContextSuspendRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -2860,7 +2878,7 @@ impl UeContextSuspendRequest {
             PduSessionResourceSuspendListSusReq,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2881,6 +2899,7 @@ impl UeContextSuspendRequest {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2980,14 +2999,14 @@ pub struct UeContextSuspendResponse {
 impl UeContextSuspendResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut security_context: Option<SecurityContext> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2998,6 +3017,7 @@ impl UeContextSuspendResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -3086,14 +3106,14 @@ pub struct UeContextSuspendFailure {
 impl UeContextSuspendFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3104,6 +3124,7 @@ impl UeContextSuspendFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -3210,7 +3231,7 @@ pub struct UeContextModificationRequest {
 impl UeContextModificationRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -3244,7 +3265,7 @@ impl UeContextModificationRequest {
             RgLevelWirelineAccessCharacteristics,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3292,6 +3313,7 @@ impl UeContextModificationRequest {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -3579,7 +3601,7 @@ pub struct UeContextModificationResponse {
 impl UeContextModificationResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -3587,7 +3609,7 @@ impl UeContextModificationResponse {
         let mut user_location_information: Option<UserLocationInformation> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3599,6 +3621,7 @@ impl UeContextModificationResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -3698,14 +3721,14 @@ pub struct UeContextModificationFailure {
 impl UeContextModificationFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3716,6 +3739,7 @@ impl UeContextModificationFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -3803,14 +3827,14 @@ pub struct RrcInactiveTransitionReport {
 impl RrcInactiveTransitionReport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut rrc_state: Option<RrcState> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3821,6 +3845,7 @@ impl RrcInactiveTransitionReport {
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -3908,11 +3933,11 @@ pub struct RetrieveUeInformation {
 impl RetrieveUeInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3920,6 +3945,7 @@ impl RetrieveUeInformation {
                 26 => five_g_s_tmsi = Some(FiveGSTmsi::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let five_g_s_tmsi = five_g_s_tmsi.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE five_g_s_tmsi"
@@ -3974,7 +4000,7 @@ pub struct UeInformationTransfer {
 impl UeInformationTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
         let mut nb_iot_ue_priority: Option<NbIotUePriority> = None;
@@ -3983,7 +4009,7 @@ impl UeInformationTransfer {
         let mut allowed_nssai: Option<AllowedNssai> = None;
         let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -3996,6 +4022,7 @@ impl UeInformationTransfer {
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let five_g_s_tmsi = five_g_s_tmsi.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE five_g_s_tmsi"
@@ -4106,7 +4133,7 @@ pub struct RancpRelocationIndication {
 impl RancpRelocationIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
@@ -4114,7 +4141,7 @@ impl RancpRelocationIndication {
         let mut tai: Option<Tai> = None;
         let mut ul_cp_security_information: Option<UlCpSecurityInformation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -4126,6 +4153,7 @@ impl RancpRelocationIndication {
                 211 => ul_cp_security_information = Some(UlCpSecurityInformation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
@@ -4230,7 +4258,7 @@ pub struct HandoverRequired {
 impl HandoverRequired {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -4243,7 +4271,7 @@ impl HandoverRequired {
         let mut source_to_target_transparent_container: Option<SourceToTargetTransparentContainer> =
             None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -4267,6 +4295,7 @@ impl HandoverRequired {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -4408,7 +4437,7 @@ pub struct HandoverCommand {
 impl HandoverCommand {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -4422,7 +4451,7 @@ impl HandoverCommand {
             None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -4449,6 +4478,7 @@ impl HandoverCommand {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -4586,7 +4616,7 @@ pub struct HandoverPreparationFailure {
 impl HandoverPreparationFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -4596,7 +4626,7 @@ impl HandoverPreparationFailure {
             TargettoSourceFailureTransparentContainer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -4611,6 +4641,7 @@ impl HandoverPreparationFailure {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -4740,7 +4771,7 @@ pub struct HandoverRequest {
 impl HandoverRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut handover_type: Option<HandoverType> = None;
@@ -4786,7 +4817,7 @@ impl HandoverRequest {
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
         let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -4852,6 +4883,7 @@ impl HandoverRequest {
                 206 => extended_connected_time = Some(ExtendedConnectedTime::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -5280,7 +5312,7 @@ pub struct HandoverRequestAcknowledge {
 impl HandoverRequestAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -5292,7 +5324,7 @@ impl HandoverRequestAcknowledge {
             None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -5314,6 +5346,7 @@ impl HandoverRequestAcknowledge {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -5429,7 +5462,7 @@ pub struct HandoverFailure {
 impl HandoverFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -5438,7 +5471,7 @@ impl HandoverFailure {
             TargettoSourceFailureTransparentContainer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -5452,6 +5485,7 @@ impl HandoverFailure {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -5538,14 +5572,14 @@ pub struct HandoverNotify {
 impl HandoverNotify {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
         let mut notify_source_ngran_node: Option<NotifySourceNgranNode> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -5556,6 +5590,7 @@ impl HandoverNotify {
                 269 => notify_source_ngran_node = Some(NotifySourceNgranNode::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -5649,7 +5684,7 @@ pub struct PathSwitchRequest {
 impl PathSwitchRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut source_amf_ue_ngap_id: Option<AmfUeNgapId> = None;
@@ -5663,7 +5698,7 @@ impl PathSwitchRequest {
         > = None;
         let mut rrc_resume_cause: Option<RrcEstablishmentCause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -5683,6 +5718,7 @@ impl PathSwitchRequest {
                 237 => rrc_resume_cause = Some(RrcEstablishmentCause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
@@ -5831,7 +5867,7 @@ pub struct PathSwitchRequestAcknowledge {
 impl PathSwitchRequestAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -5868,7 +5904,7 @@ impl PathSwitchRequestAcknowledge {
         let mut ue_up_c_iot_support: Option<UeUpCIotSupport> = None;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -5920,6 +5956,7 @@ impl PathSwitchRequestAcknowledge {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6243,7 +6280,7 @@ pub struct PathSwitchRequestFailure {
 impl PathSwitchRequestFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -6252,7 +6289,7 @@ impl PathSwitchRequestFailure {
         > = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6266,6 +6303,7 @@ impl PathSwitchRequestFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6355,13 +6393,13 @@ pub struct HandoverCancel {
 impl HandoverCancel {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6371,6 +6409,7 @@ impl HandoverCancel {
                 15 => cause = Some(Cause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6446,13 +6485,13 @@ pub struct HandoverCancelAcknowledge {
 impl HandoverCancelAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6462,6 +6501,7 @@ impl HandoverCancelAcknowledge {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6537,12 +6577,12 @@ pub struct HandoverSuccess {
 impl HandoverSuccess {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6551,6 +6591,7 @@ impl HandoverSuccess {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6616,7 +6657,7 @@ pub struct UplinkRanEarlyStatusTransfer {
 impl UplinkRanEarlyStatusTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -6624,7 +6665,7 @@ impl UplinkRanEarlyStatusTransfer {
             EarlyStatusTransferTransparentContainer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6637,6 +6678,7 @@ impl UplinkRanEarlyStatusTransfer {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6716,7 +6758,7 @@ pub struct DownlinkRanEarlyStatusTransfer {
 impl DownlinkRanEarlyStatusTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -6724,7 +6766,7 @@ impl DownlinkRanEarlyStatusTransfer {
             EarlyStatusTransferTransparentContainer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6737,6 +6779,7 @@ impl DownlinkRanEarlyStatusTransfer {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6816,7 +6859,7 @@ pub struct UplinkRanStatusTransfer {
 impl UplinkRanStatusTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -6824,7 +6867,7 @@ impl UplinkRanStatusTransfer {
             RanStatusTransferTransparentContainer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6837,6 +6880,7 @@ impl UplinkRanStatusTransfer {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -6915,7 +6959,7 @@ pub struct DownlinkRanStatusTransfer {
 impl DownlinkRanStatusTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -6923,7 +6967,7 @@ impl DownlinkRanStatusTransfer {
             RanStatusTransferTransparentContainer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -6936,6 +6980,7 @@ impl DownlinkRanStatusTransfer {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -7024,7 +7069,7 @@ pub struct Paging {
 impl Paging {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ue_paging_identity: Option<UePagingIdentity> = None;
         let mut paging_drx: Option<PagingDrx> = None;
@@ -7040,7 +7085,7 @@ impl Paging {
         let mut paginge_drx_information: Option<PagingeDrxInformation> = None;
         let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -7064,6 +7109,7 @@ impl Paging {
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ue_paging_identity = ue_paging_identity.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ue_paging_identity"
@@ -7263,7 +7309,7 @@ pub struct InitialUeMessage {
 impl InitialUeMessage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut nas_pdu: Option<NasPdu> = None;
@@ -7284,7 +7330,7 @@ impl InitialUeMessage {
         let mut authenticated_indication: Option<AuthenticatedIndication> = None;
         let mut npn_access_information: Option<NpnAccessInformation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -7310,6 +7356,7 @@ impl InitialUeMessage {
                 259 => npn_access_information = Some(NpnAccessInformation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
@@ -7544,7 +7591,7 @@ pub struct DownlinkNasTransport {
 impl DownlinkNasTransport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -7565,7 +7612,7 @@ impl DownlinkNasTransport {
         let mut end_indication: Option<EndIndication> = None;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -7594,6 +7641,7 @@ impl DownlinkNasTransport {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -7838,7 +7886,7 @@ pub struct UplinkNasTransport {
 impl UplinkNasTransport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -7848,7 +7896,7 @@ impl UplinkNasTransport {
         let mut tngf_identity_information: Option<Vec<u8>> = None;
         let mut twif_identity_information: Option<Vec<u8>> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -7871,6 +7919,7 @@ impl UplinkNasTransport {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -7992,14 +8041,14 @@ pub struct NasNonDeliveryIndication {
 impl NasNonDeliveryIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut nas_pdu: Option<NasPdu> = None;
         let mut cause: Option<Cause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8010,6 +8059,7 @@ impl NasNonDeliveryIndication {
                 15 => cause = Some(Cause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -8098,7 +8148,7 @@ pub struct RerouteNasRequest {
 impl RerouteNasRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
@@ -8109,7 +8159,7 @@ impl RerouteNasRequest {
             SourceToTargetAmfInformationReroute,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8125,6 +8175,7 @@ impl RerouteNasRequest {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
@@ -8239,7 +8290,7 @@ pub struct NgSetupRequest {
 impl NgSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
         let mut ran_node_name: Option<RanNodeName> = None;
@@ -8249,7 +8300,7 @@ impl NgSetupRequest {
         let mut nb_iot_default_paging_drx: Option<NbIotDefaultPagingDrx> = None;
         let mut extended_ran_node_name: Option<ExtendedRanNodeName> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8263,6 +8314,7 @@ impl NgSetupRequest {
                 273 => extended_ran_node_name = Some(ExtendedRanNodeName::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let global_ran_node_id = global_ran_node_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE global_ran_node_id"
@@ -8389,7 +8441,7 @@ pub struct NgSetupResponse {
 impl NgSetupResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_name: Option<AmfName> = None;
         let mut served_guami_list: Option<ServedGuamiList> = None;
@@ -8400,7 +8452,7 @@ impl NgSetupResponse {
         let mut iab_supported: Option<IabSupported> = None;
         let mut extended_amf_name: Option<ExtendedAmfName> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8415,6 +8467,7 @@ impl NgSetupResponse {
                 274 => extended_amf_name = Some(ExtendedAmfName::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_name =
             amf_name.ok_or(PerCodecError::new(format!("Missing mandatory IE amf_name")))?;
@@ -8547,13 +8600,13 @@ pub struct NgSetupFailure {
 impl NgSetupFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8563,6 +8616,7 @@ impl NgSetupFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
@@ -8640,7 +8694,7 @@ pub struct RanConfigurationUpdate {
 impl RanConfigurationUpdate {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ran_node_name: Option<RanNodeName> = None;
         let mut supported_ta_list: Option<SupportedTaList> = None;
@@ -8651,7 +8705,7 @@ impl RanConfigurationUpdate {
         let mut nb_iot_default_paging_drx: Option<NbIotDefaultPagingDrx> = None;
         let mut extended_ran_node_name: Option<ExtendedRanNodeName> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8668,6 +8722,7 @@ impl RanConfigurationUpdate {
                 273 => extended_ran_node_name = Some(ExtendedRanNodeName::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             ran_node_name,
@@ -8784,11 +8839,11 @@ pub struct RanConfigurationUpdateAcknowledge {
 impl RanConfigurationUpdateAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8796,6 +8851,7 @@ impl RanConfigurationUpdateAcknowledge {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             criticality_diagnostics,
@@ -8848,13 +8904,13 @@ pub struct RanConfigurationUpdateFailure {
 impl RanConfigurationUpdateFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8864,6 +8920,7 @@ impl RanConfigurationUpdateFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
@@ -8942,7 +8999,7 @@ pub struct AmfConfigurationUpdate {
 impl AmfConfigurationUpdate {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_name: Option<AmfName> = None;
         let mut served_guami_list: Option<ServedGuamiList> = None;
@@ -8953,7 +9010,7 @@ impl AmfConfigurationUpdate {
         let mut amf_tnl_association_to_update_list: Option<AmfTnlAssociationToUpdateList> = None;
         let mut extended_amf_name: Option<ExtendedAmfName> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -8977,6 +9034,7 @@ impl AmfConfigurationUpdate {
                 274 => extended_amf_name = Some(ExtendedAmfName::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             amf_name,
@@ -9106,13 +9164,13 @@ pub struct AmfConfigurationUpdateAcknowledge {
 impl AmfConfigurationUpdateAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_tnl_association_setup_list: Option<AmfTnlAssociationSetupList> = None;
         let mut amf_tnl_association_failed_to_setup_list: Option<TnlAssociationList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9127,6 +9185,7 @@ impl AmfConfigurationUpdateAcknowledge {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             amf_tnl_association_setup_list,
@@ -9201,13 +9260,13 @@ pub struct AmfConfigurationUpdateFailure {
 impl AmfConfigurationUpdateFailure {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9217,6 +9276,7 @@ impl AmfConfigurationUpdateFailure {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
@@ -9288,11 +9348,11 @@ pub struct AmfStatusIndication {
 impl AmfStatusIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut unavailable_guami_list: Option<UnavailableGuamiList> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9300,6 +9360,7 @@ impl AmfStatusIndication {
                 120 => unavailable_guami_list = Some(UnavailableGuamiList::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let unavailable_guami_list = unavailable_guami_list.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE unavailable_guami_list"
@@ -9352,12 +9413,12 @@ pub struct NgReset {
 impl NgReset {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut cause: Option<Cause> = None;
         let mut reset_type: Option<ResetType> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9366,6 +9427,7 @@ impl NgReset {
                 88 => reset_type = Some(ResetType::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
         let reset_type = reset_type.ok_or(PerCodecError::new(format!(
@@ -9425,14 +9487,14 @@ pub struct NgResetAcknowledge {
 impl NgResetAcknowledge {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ue_associated_logical_ng_connection_list: Option<
             UeAssociatedLogicalNgConnectionList,
         > = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9444,6 +9506,7 @@ impl NgResetAcknowledge {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             ue_associated_logical_ng_connection_list,
@@ -9509,7 +9572,7 @@ pub struct ErrorIndication {
 impl ErrorIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -9517,7 +9580,7 @@ impl ErrorIndication {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9529,6 +9592,7 @@ impl ErrorIndication {
                 26 => five_g_s_tmsi = Some(FiveGSTmsi::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             amf_ue_ngap_id,
@@ -9625,14 +9689,14 @@ pub struct OverloadStart {
 impl OverloadStart {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_overload_response: Option<OverloadResponse> = None;
         let mut amf_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication> =
             None;
         let mut overload_start_nssai_list: Option<OverloadStartNssaiList> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9645,6 +9709,7 @@ impl OverloadStart {
                 49 => overload_start_nssai_list = Some(OverloadStartNssaiList::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             amf_overload_response,
@@ -9715,15 +9780,16 @@ pub struct OverloadStop {}
 impl OverloadStop {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {})
     }
@@ -9764,7 +9830,7 @@ pub struct UplinkRanConfigurationTransfer {
 impl UplinkRanConfigurationTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut son_configuration_transfer_ul: Option<SonConfigurationTransfer> = None;
         let mut endc_son_configuration_transfer_ul: Option<EnDcsonConfigurationTransfer> = None;
@@ -9772,7 +9838,7 @@ impl UplinkRanConfigurationTransfer {
             IntersystemSonConfigurationTransfer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9788,6 +9854,7 @@ impl UplinkRanConfigurationTransfer {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             son_configuration_transfer_ul,
@@ -9862,7 +9929,7 @@ pub struct DownlinkRanConfigurationTransfer {
 impl DownlinkRanConfigurationTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut son_configuration_transfer_dl: Option<SonConfigurationTransfer> = None;
         let mut endc_son_configuration_transfer_dl: Option<EnDcsonConfigurationTransfer> = None;
@@ -9870,7 +9937,7 @@ impl DownlinkRanConfigurationTransfer {
             IntersystemSonConfigurationTransfer,
         > = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -9886,6 +9953,7 @@ impl DownlinkRanConfigurationTransfer {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             son_configuration_transfer_dl,
@@ -9968,7 +10036,7 @@ pub struct WriteReplaceWarningRequest {
 impl WriteReplaceWarningRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
@@ -9982,7 +10050,7 @@ impl WriteReplaceWarningRequest {
         let mut concurrent_warning_message_ind: Option<ConcurrentWarningMessageInd> = None;
         let mut warning_area_coordinates: Option<WarningAreaCoordinates> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10006,6 +10074,7 @@ impl WriteReplaceWarningRequest {
                 141 => warning_area_coordinates = Some(WarningAreaCoordinates::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE message_identifier"
@@ -10174,14 +10243,14 @@ pub struct WriteReplaceWarningResponse {
 impl WriteReplaceWarningResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut broadcast_completed_area_list: Option<BroadcastCompletedAreaList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10194,6 +10263,7 @@ impl WriteReplaceWarningResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE message_identifier"
@@ -10282,14 +10352,14 @@ pub struct PwsCancelRequest {
 impl PwsCancelRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut warning_area_list: Option<WarningAreaList> = None;
         let mut cancel_all_warning_messages: Option<CancelAllWarningMessages> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10300,6 +10370,7 @@ impl PwsCancelRequest {
                 14 => cancel_all_warning_messages = Some(CancelAllWarningMessages::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE message_identifier"
@@ -10388,14 +10459,14 @@ pub struct PwsCancelResponse {
 impl PwsCancelResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut broadcast_cancelled_area_list: Option<BroadcastCancelledAreaList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10408,6 +10479,7 @@ impl PwsCancelResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE message_identifier"
@@ -10496,14 +10568,14 @@ pub struct PwsRestartIndication {
 impl PwsRestartIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut cell_id_list_for_restart: Option<CellIdListForRestart> = None;
         let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
         let mut tai_list_for_restart: Option<TaiListForRestart> = None;
         let mut emergency_area_id_list_for_restart: Option<EmergencyAreaIdListForRestart> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10517,6 +10589,7 @@ impl PwsRestartIndication {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let cell_id_list_for_restart = cell_id_list_for_restart.ok_or(PerCodecError::new(
             format!("Missing mandatory IE cell_id_list_for_restart"),
@@ -10604,12 +10677,12 @@ pub struct PwsFailureIndication {
 impl PwsFailureIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut pws_failed_cell_id_list: Option<PwsFailedCellIdList> = None;
         let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10618,6 +10691,7 @@ impl PwsFailureIndication {
                 27 => global_ran_node_id = Some(GlobalRanNodeId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let pws_failed_cell_id_list = pws_failed_cell_id_list.ok_or(PerCodecError::new(
             format!("Missing mandatory IE pws_failed_cell_id_list"),
@@ -10684,14 +10758,14 @@ pub struct DownlinkUeAssociatedNrPPaTransport {
 impl DownlinkUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut routing_id: Option<RoutingId> = None;
         let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10702,6 +10776,7 @@ impl DownlinkUeAssociatedNrPPaTransport {
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -10792,14 +10867,14 @@ pub struct UplinkUeAssociatedNrPPaTransport {
 impl UplinkUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut routing_id: Option<RoutingId> = None;
         let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10810,6 +10885,7 @@ impl UplinkUeAssociatedNrPPaTransport {
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -10898,12 +10974,12 @@ pub struct DownlinkNonUeAssociatedNrPPaTransport {
 impl DownlinkNonUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut routing_id: Option<RoutingId> = None;
         let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10912,6 +10988,7 @@ impl DownlinkNonUeAssociatedNrPPaTransport {
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let routing_id = routing_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE routing_id"
@@ -10976,12 +11053,12 @@ pub struct UplinkNonUeAssociatedNrPPaTransport {
 impl UplinkNonUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut routing_id: Option<RoutingId> = None;
         let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -10990,6 +11067,7 @@ impl UplinkNonUeAssociatedNrPPaTransport {
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let routing_id = routing_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE routing_id"
@@ -11055,13 +11133,13 @@ pub struct TraceStart {
 impl TraceStart {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut trace_activation: Option<TraceActivation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11071,6 +11149,7 @@ impl TraceStart {
                 108 => trace_activation = Some(TraceActivation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11149,14 +11228,14 @@ pub struct TraceFailureIndication {
 impl TraceFailureIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ngran_trace_id: Option<NgranTraceId> = None;
         let mut cause: Option<Cause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11167,6 +11246,7 @@ impl TraceFailureIndication {
                 15 => cause = Some(Cause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11254,13 +11334,13 @@ pub struct DeactivateTrace {
 impl DeactivateTrace {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ngran_trace_id: Option<NgranTraceId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11270,6 +11350,7 @@ impl DeactivateTrace {
                 44 => ngran_trace_id = Some(NgranTraceId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11351,7 +11432,7 @@ pub struct CellTrafficTrace {
 impl CellTrafficTrace {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -11361,7 +11442,7 @@ impl CellTrafficTrace {
         let mut privacy_indicator: Option<PrivacyIndicator> = None;
         let mut trace_collection_entity_uri: Option<UriAddress> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11377,6 +11458,7 @@ impl CellTrafficTrace {
                 257 => trace_collection_entity_uri = Some(UriAddress::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11501,13 +11583,13 @@ pub struct LocationReportingControl {
 impl LocationReportingControl {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11520,6 +11602,7 @@ impl LocationReportingControl {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11598,13 +11681,13 @@ pub struct LocationReportingFailureIndication {
 impl LocationReportingFailureIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11614,6 +11697,7 @@ impl LocationReportingFailureIndication {
                 15 => cause = Some(Cause::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11691,7 +11775,7 @@ pub struct LocationReport {
 impl LocationReport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -11699,7 +11783,7 @@ impl LocationReport {
         let mut ue_presence_in_area_of_interest_list: Option<UePresenceInAreaOfInterestList> = None;
         let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11717,6 +11801,7 @@ impl LocationReport {
                 }
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11817,12 +11902,12 @@ pub struct UeTnlaBindingReleaseRequest {
 impl UeTnlaBindingReleaseRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11831,6 +11916,7 @@ impl UeTnlaBindingReleaseRequest {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -11898,7 +11984,7 @@ pub struct UeRadioCapabilityInfoIndication {
 impl UeRadioCapabilityInfoIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -11906,7 +11992,7 @@ impl UeRadioCapabilityInfoIndication {
         let mut ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging> = None;
         let mut ue_radio_capability_eutra_format: Option<UeRadioCapability> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -11920,6 +12006,7 @@ impl UeRadioCapabilityInfoIndication {
                 265 => ue_radio_capability_eutra_format = Some(UeRadioCapability::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -12020,14 +12107,14 @@ pub struct UeRadioCapabilityCheckRequest {
 impl UeRadioCapabilityCheckRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12038,6 +12125,7 @@ impl UeRadioCapabilityCheckRequest {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -12126,14 +12214,14 @@ pub struct UeRadioCapabilityCheckResponse {
 impl UeRadioCapabilityCheckResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ims_voice_support_indicator: Option<ImsVoiceSupportIndicator> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12144,6 +12232,7 @@ impl UeRadioCapabilityCheckResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -12268,7 +12357,7 @@ pub struct SecondaryRatDataUsageReport {
 impl SecondaryRatDataUsageReport {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -12278,7 +12367,7 @@ impl SecondaryRatDataUsageReport {
         let mut handover_flag: Option<HandoverFlag> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12293,6 +12382,7 @@ impl SecondaryRatDataUsageReport {
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -12392,11 +12482,11 @@ pub struct UplinkRimInformationTransfer {
 impl UplinkRimInformationTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut rim_information_transfer: Option<RimInformationTransfer> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12404,6 +12494,7 @@ impl UplinkRimInformationTransfer {
                 175 => rim_information_transfer = Some(RimInformationTransfer::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             rim_information_transfer,
@@ -12454,11 +12545,11 @@ pub struct DownlinkRimInformationTransfer {
 impl DownlinkRimInformationTransfer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut rim_information_transfer: Option<RimInformationTransfer> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12466,6 +12557,7 @@ impl DownlinkRimInformationTransfer {
                 175 => rim_information_transfer = Some(RimInformationTransfer::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         Ok(Self {
             rim_information_transfer,
@@ -12527,7 +12619,7 @@ pub struct ConnectionEstablishmentIndication {
 impl ConnectionEstablishmentIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
@@ -12542,7 +12634,7 @@ impl ConnectionEstablishmentIndication {
         let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12563,6 +12655,7 @@ impl ConnectionEstablishmentIndication {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -12736,11 +12829,11 @@ pub struct UeRadioCapabilityIdMappingRequest {
 impl UeRadioCapabilityIdMappingRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12748,6 +12841,7 @@ impl UeRadioCapabilityIdMappingRequest {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ue_radio_capability_id = ue_radio_capability_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ue_radio_capability_id"
@@ -12801,13 +12895,13 @@ pub struct UeRadioCapabilityIdMappingResponse {
 impl UeRadioCapabilityIdMappingResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12817,6 +12911,7 @@ impl UeRadioCapabilityIdMappingResponse {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let ue_radio_capability_id = ue_radio_capability_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE ue_radio_capability_id"
@@ -12894,14 +12989,14 @@ pub struct AmfcpRelocationIndication {
 impl AmfcpRelocationIndication {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut snssai: Option<Snssai> = None;
         let mut allowed_nssai: Option<AllowedNssai> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -12912,6 +13007,7 @@ impl AmfcpRelocationIndication {
                 0 => allowed_nssai = Some(AllowedNssai::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"

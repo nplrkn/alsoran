@@ -107,6 +107,7 @@ impl AccessPointPosition {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -277,6 +278,7 @@ impl ActivatedCellsToBeUpdatedListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -350,6 +352,7 @@ impl ActiveUlBwp {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -512,6 +515,7 @@ impl AdditionalPathItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -614,6 +618,7 @@ impl AdditionalPdcpDuplicationTnlItem {
                     280 => bh_info = Some(BhInfo::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -709,6 +714,7 @@ impl AdditionalSibMessageListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { additional_sib })
@@ -833,6 +839,7 @@ impl AggressorCellListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { aggressor_cell_id })
@@ -885,6 +892,7 @@ impl AggressorGnbSetId {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -943,6 +951,7 @@ impl AllocationAndRetentionPriority {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -1064,6 +1073,7 @@ impl AlternativeQosParaSetItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -1146,6 +1156,7 @@ impl AngleMeasurementQuality {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -1283,6 +1294,7 @@ impl AssociatedSCellItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { s_cell_id })
@@ -1374,6 +1386,7 @@ impl AvailablePlmnListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { plmn_identity })
@@ -1467,6 +1480,7 @@ impl AvailableSnpnIdListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -1724,6 +1738,7 @@ impl BaPlayerBhrlCchannelMappingInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -1852,6 +1867,7 @@ impl BaPlayerBhrlCchannelMappingInfoItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -1961,6 +1977,7 @@ impl BapRoutingId {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2128,6 +2145,7 @@ impl BhChannelsFailedToBeModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2193,6 +2211,7 @@ impl BhChannelsFailedToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2258,6 +2277,7 @@ impl BhChannelsFailedToBeSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2317,6 +2337,7 @@ impl BhChannelsModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { bhrlc_channel_id })
@@ -2369,6 +2390,7 @@ impl BhChannelsRequiredToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { bhrlc_channel_id })
@@ -2421,6 +2443,7 @@ impl BhChannelsSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { bhrlc_channel_id })
@@ -2473,6 +2496,7 @@ impl BhChannelsSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { bhrlc_channel_id })
@@ -2545,6 +2569,7 @@ impl BhChannelsToBeModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2616,6 +2641,7 @@ impl BhChannelsToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { bhrlc_channel_id })
@@ -2684,6 +2710,7 @@ impl BhChannelsToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2768,6 +2795,7 @@ impl BhChannelsToBeSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2846,6 +2874,7 @@ impl BhInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -2974,6 +3003,7 @@ impl BhRoutingInformationAddedListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -3030,6 +3060,7 @@ impl BhRoutingInformationRemovedListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { bap_routing_id })
@@ -3147,6 +3178,7 @@ impl BPlmnIdInfoItem {
                     383 => npn_broadcast_information = Some(NpnBroadcastInformation::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -3271,6 +3303,7 @@ impl ServedPlmnsItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -3447,6 +3480,7 @@ impl BroadcastSnpnIdListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -3544,6 +3578,7 @@ impl BroadcastPniNpnIdListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -3696,6 +3731,7 @@ impl CandidateSpCellItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -3756,6 +3792,7 @@ impl CapacityValue {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -4210,6 +4247,7 @@ impl CellMeasurementResultItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -4316,6 +4354,7 @@ impl CellsFailedToBeActivatedListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi, cause })
@@ -4371,6 +4410,7 @@ impl CellsStatusItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -4427,6 +4467,7 @@ impl CellsToBeBroadcastItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi })
@@ -4479,6 +4520,7 @@ impl CellsBroadcastCompletedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi })
@@ -4531,6 +4573,7 @@ impl BroadcastToBeCancelledItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi })
@@ -4585,6 +4628,7 @@ impl CellsBroadcastCancelledItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -4665,6 +4709,7 @@ impl CellsToBeActivatedListItem {
                     386 => available_snpn_id_list = Some(AvailableSnpnIdList::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -4729,6 +4774,7 @@ impl CellsToBeDeactivatedListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi })
@@ -4786,6 +4832,7 @@ impl CellsToBeBarredItem {
                     298 => iab_barred = Some(IabBarred::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -4968,6 +5015,7 @@ impl CellToReportItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -5032,6 +5080,7 @@ impl CellType {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { cell_size })
@@ -5216,6 +5265,7 @@ impl ChildNodeCellsListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -5362,6 +5412,7 @@ impl ChildNodesListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -5555,6 +5606,7 @@ impl CompositeAvailableCapacityGroup {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -5617,6 +5669,7 @@ impl CompositeAvailableCapacity {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -5715,6 +5768,7 @@ impl ConditionalInterDuMobilityInformation {
                     433 => estimated_arrival_probability = Some(ChoProbability::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -5784,6 +5838,7 @@ impl ConditionalIntraDuMobilityInformation {
                     433 => estimated_arrival_probability = Some(ChoProbability::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6029,6 +6084,7 @@ impl CriticalityDiagnostics {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6149,6 +6205,7 @@ impl CriticalityDiagnosticsIeItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6291,6 +6348,7 @@ impl CuDuRimInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6390,6 +6448,7 @@ impl CuToDuRrcInformation {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6500,6 +6559,7 @@ impl DedicatedSiDeliveryNeededUeItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6564,6 +6624,7 @@ impl DlPrs {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6744,6 +6805,7 @@ impl DlprsResourceCoordinates {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6819,6 +6881,7 @@ impl DlprsResourceSetArp {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -6951,6 +7014,7 @@ impl DlprsResourceArp {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7071,6 +7135,7 @@ impl DlUpTnlAddressToUpdateListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7166,6 +7231,7 @@ impl DlUpTnlInformationToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7226,6 +7292,7 @@ impl DrbActivityItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7357,6 +7424,7 @@ impl DrbsFailedToBeModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { drb_id, cause })
@@ -7419,6 +7487,7 @@ impl DrbsFailedToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { drb_id, cause })
@@ -7481,6 +7550,7 @@ impl DrbsFailedToBeSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { drb_id, cause })
@@ -7547,6 +7617,7 @@ impl DrbInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7631,6 +7702,7 @@ impl DrbsModifiedItem {
                     344 => current_qos_para_set_index = Some(QosParaSetIndex::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7704,6 +7776,7 @@ impl DrbsModifiedConfItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7766,6 +7839,7 @@ impl DrbNotifyItem {
                     344 => current_qos_para_set_index = Some(QosParaSetNotifyIndex::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7835,6 +7909,7 @@ impl DrbsRequiredToBeModifiedItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -7893,6 +7968,7 @@ impl DrbsRequiredToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { drb_id })
@@ -7963,6 +8039,7 @@ impl DrbsSetupItem {
                     344 => current_qos_para_set_index = Some(QosParaSetIndex::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -8044,6 +8121,7 @@ impl DrbsSetupModItem {
                     344 => current_qos_para_set_index = Some(QosParaSetIndex::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -8164,6 +8242,7 @@ impl DrbsToBeModifiedItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -8240,6 +8319,7 @@ impl DrbsToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { drb_id })
@@ -8339,6 +8419,7 @@ impl DrbsToBeSetupItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -8462,6 +8543,7 @@ impl DrbsToBeSetupModItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -8550,6 +8632,7 @@ impl DrxCycle {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -8863,6 +8946,7 @@ impl DuCuRimInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -9308,6 +9392,7 @@ impl DuToCuRrcInformation {
                     211 => requested_p_max_fr2 = Some(RequestedPMaxFr2::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -9539,6 +9624,7 @@ impl Dynamic5qiDescriptor {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -9649,6 +9735,7 @@ impl DynamicPqiDescriptor {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -9721,6 +9808,7 @@ impl ECidMeasurementQuantities {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(ECidMeasurementQuantitiesItem::decode(data)?);
+                data.decode_align()?;
             }
             NonEmpty::from_vec(items).unwrap()
         }))
@@ -9776,6 +9864,7 @@ impl ECidMeasurementQuantitiesItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -9876,6 +9965,7 @@ impl ECidMeasurementResult {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -9977,6 +10067,7 @@ impl ECidMeasuredResultsItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10160,6 +10251,7 @@ impl EgressBhrlcchItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10219,6 +10311,7 @@ impl EndpointIpAddressAndPort {
                     230 => port_number = Some(PortNumber::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10313,6 +10406,7 @@ impl ExtendedAvailablePlmnItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { plmn_identity })
@@ -10377,6 +10471,7 @@ impl ExplicitFormat {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10495,6 +10590,7 @@ impl ExtendedServedPlmnsItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10636,6 +10732,7 @@ impl EutraCellsListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10739,6 +10836,7 @@ impl EutraCoexFddInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -10859,6 +10957,7 @@ impl EutraCoexTddInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -11004,6 +11103,7 @@ impl EutraPrachConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -11094,6 +11194,7 @@ impl EutraSpecialSubframeInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -11286,6 +11387,7 @@ impl EutranQos {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -11532,6 +11634,7 @@ impl EutraFddInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -11588,6 +11691,7 @@ impl EutraTddInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { offset_to_point_a })
@@ -11744,6 +11848,7 @@ impl F1cTransferPath {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { f1c_path_nsa })
@@ -11808,6 +11913,7 @@ impl FddInfo {
                     389 => dl_carrier_list = Some(NrCarrierList::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -11921,6 +12027,7 @@ impl FlowsMappedToDrbItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12068,6 +12175,7 @@ impl FreqBandNrItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12309,6 +12417,7 @@ impl FlowsMappedToSlDrbItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12369,6 +12478,7 @@ impl GbrQosInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12453,6 +12563,7 @@ impl GbrQosFlowInformation {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12558,6 +12669,7 @@ impl GeographicalCoordinates {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12689,6 +12801,7 @@ impl GnbCuSystemInformation {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12754,6 +12867,7 @@ impl GnbCuTnlAssociationSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12810,6 +12924,7 @@ impl GnbCuTnlAssociationFailedToSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12868,6 +12983,7 @@ impl GnbCuTnlAssociationToAddItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12931,6 +13047,7 @@ impl GnbCuTnlAssociationToRemoveItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -12992,6 +13109,7 @@ impl GnbCuTnlAssociationToUpdateItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13108,6 +13226,7 @@ impl GnbDuCellResourceConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13329,6 +13448,7 @@ impl ExtendedGnbCuName {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13467,6 +13587,7 @@ impl ExtendedGnbDuName {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13601,6 +13722,7 @@ impl GnbDuServedCellsItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13674,6 +13796,7 @@ impl GnbDuSystemInformation {
                     387 => sib10_message = Some(Sib10Message::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13811,6 +13934,7 @@ impl GnbDuTnlAssociationToRemoveItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -13879,6 +14003,7 @@ impl GnbRxTxTimeDiff {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14104,6 +14229,7 @@ impl GtptlaItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14190,6 +14316,7 @@ impl HardwareLoadIndicator {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14315,6 +14442,7 @@ impl HsnaSlotConfigItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14579,6 +14707,7 @@ impl IabInfoIabDonorCu {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { iab_stc_info })
@@ -14644,6 +14773,7 @@ impl IabInfoIabDu {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14753,6 +14883,7 @@ impl IabMtCellListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14815,6 +14946,7 @@ impl IabStcInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { iab_stc_info_list })
@@ -14914,6 +15046,7 @@ impl IabStcInfoItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -14982,6 +15115,7 @@ impl IabAllocatedTnlAddressItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15109,6 +15243,7 @@ impl IabDuCellResourceConfigurationFddInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15167,6 +15302,7 @@ impl IabDuCellResourceConfigurationTddInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15380,6 +15516,7 @@ impl IabtnlAddressesRequested {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15455,6 +15592,7 @@ impl IabTnlAddressesToRemoveItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { iabtnl_address })
@@ -15544,6 +15682,7 @@ impl IaBv4AddressesRequested {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15598,6 +15737,7 @@ impl ImplicitFormat {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15831,6 +15971,7 @@ impl IntendedTddDlUlConfig {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15903,6 +16044,7 @@ impl IpHeaderInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -15977,6 +16119,7 @@ impl IPtolayer2TrafficMappingInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16082,6 +16225,7 @@ impl IPtolayer2TrafficMappingInfoItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16146,6 +16290,7 @@ impl L139Info {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16207,6 +16352,7 @@ impl L839Info {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16304,6 +16450,7 @@ impl LcsToGcsTranslationAoA {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { alpha, beta, gamma })
@@ -16419,6 +16566,7 @@ impl LcStoGcsTranslation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16560,6 +16708,7 @@ impl LocationUncertainty {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16738,6 +16887,7 @@ impl LteUeSidelinkAggregateMaximumBitrate {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -16803,6 +16953,7 @@ impl Ltev2xServicesAuthorized {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -17193,6 +17344,7 @@ impl MeasurementBeamInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -17321,6 +17473,7 @@ impl MultiplexingInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { iab_mt_cell_list })
@@ -17410,6 +17563,7 @@ impl M5Configuration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -17544,6 +17698,7 @@ impl M6Configuration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -17686,6 +17841,7 @@ impl M7Configuration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -17869,6 +18025,7 @@ impl MdtConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18128,6 +18285,7 @@ impl NeighbourCellInformationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18191,6 +18349,7 @@ impl NgranAllocationAndRetentionPriority {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18271,6 +18430,7 @@ impl NgranHighAccuracyAccessPointPosition {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18437,6 +18597,7 @@ impl NrCgiListForRestartItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi })
@@ -18495,6 +18656,7 @@ impl NrPrsBeamInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18595,6 +18757,7 @@ impl NrPrsBeamInformationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18681,6 +18844,7 @@ impl NonDynamic5qiDescriptor {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -18770,6 +18934,7 @@ impl NonDynamicPqiDescriptor {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19011,6 +19176,7 @@ impl NotificationInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19129,6 +19295,7 @@ impl NpnBroadcastInformationSnpn {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19183,6 +19350,7 @@ impl NpnBroadcastInformationPniNpn {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19332,6 +19500,7 @@ impl NrCarrierItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19422,6 +19591,7 @@ impl NrFreqInfo {
                     356 => frequency_shift7p5khz = Some(FrequencyShift7p5khz::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19503,6 +19673,7 @@ impl NrCgi {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19627,6 +19798,7 @@ impl NrPrachConfig {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -19868,6 +20040,7 @@ impl NrPrachConfigItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -20113,6 +20286,7 @@ impl NumDlUlSymbols {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -20193,6 +20367,7 @@ impl NrV2xServicesAuthorized {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -20255,6 +20430,7 @@ impl NrUeSidelinkAggregateMaximumBitrate {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -20401,6 +20577,7 @@ impl PacketErrorRate {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -20517,6 +20694,7 @@ impl PagingCellItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_cgi })
@@ -20838,6 +21016,7 @@ impl PathlossReferenceInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -21044,6 +21223,7 @@ impl Pc5QosParameters {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -21105,6 +21285,7 @@ impl Pc5FlowBitRates {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -21413,6 +21594,7 @@ impl PeriodicityListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { periodicity_srs })
@@ -21844,6 +22026,7 @@ impl PosMeasurementQuantitiesItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -21956,6 +22139,7 @@ impl PosMeasurementResultItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22066,6 +22250,7 @@ impl PosMeasurementResultListItem {
                     111 => nr_cgi = Some(NrCgi::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22261,6 +22446,7 @@ impl PosResourceSetTypePr {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { posperiodic_set })
@@ -22313,6 +22499,7 @@ impl PosResourceSetTypeSp {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22368,6 +22555,7 @@ impl PosResourceSetTypeAp {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22490,6 +22678,7 @@ impl PosSrsResourceItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22630,6 +22819,7 @@ impl PosSrsResourceSetItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22902,6 +23092,7 @@ impl ProtectedEutraResourcesItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -22958,6 +23149,7 @@ impl PrsConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23021,6 +23213,7 @@ impl PrsInformationPos {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23096,6 +23289,7 @@ impl PotentialSpCellItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23195,6 +23389,7 @@ impl PrsAngleItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23285,6 +23480,7 @@ impl PrsMuting {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23343,6 +23539,7 @@ impl PrsMutingOption1 {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23399,6 +23596,7 @@ impl PrsMutingOption2 {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { muting_pattern })
@@ -23536,6 +23734,7 @@ impl PrsResourceItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23688,6 +23887,7 @@ impl PrsResourceQclSourceSsb {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { pci_nr, ssb_index })
@@ -23750,6 +23950,7 @@ impl PrsResourceQclSourcePrs {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -23912,6 +24113,7 @@ impl PrsResourceSetItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -24034,6 +24236,7 @@ impl PwsFailedNrCgiItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -24100,6 +24303,7 @@ impl PwsSystemInformation {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -24336,6 +24540,7 @@ impl QosFlowLevelQosParameters {
                     257 => qos_monitoring_request = Some(QosMonitoringRequest::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -24730,6 +24935,7 @@ impl RachReportInformationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -24789,6 +24995,7 @@ impl RadioResourceStatus {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -24965,6 +25172,7 @@ impl RanUePagingIdentity {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { irnti })
@@ -25322,6 +25530,7 @@ impl RelativeCartesianLocation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -25416,6 +25625,7 @@ impl RelativeGeodeticLocation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -25773,6 +25983,7 @@ impl RequestedSrsTransmissionCharacteristics {
                     431 => srs_frequency = Some(SrsFrequency::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -25890,6 +26101,7 @@ impl ResourceCoordinationEutraCellInfo {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -25953,6 +26165,7 @@ impl ResourceCoordinationTransferInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26108,6 +26321,7 @@ impl ResourceSetTypePeriodic {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { periodic_set })
@@ -26160,6 +26374,7 @@ impl ResourceSetTypeSemiPersistent {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26217,6 +26432,7 @@ impl ResourceSetTypeAperiodic {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26323,6 +26539,7 @@ impl ReportingRequestType {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26450,6 +26667,7 @@ impl ResourceTypePeriodic {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26508,6 +26726,7 @@ impl ResourceTypeSemiPersistent {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26564,6 +26783,7 @@ impl ResourceTypeAperiodic {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26686,6 +26906,7 @@ impl ResourceTypePeriodicPos {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26744,6 +26965,7 @@ impl ResourceTypeSemiPersistentPos {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26800,6 +27022,7 @@ impl ResourceTypeAperiodicPos {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { slot_offset })
@@ -26865,6 +27088,7 @@ impl RlcDuplicationInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -26963,6 +27187,7 @@ impl RlcDuplicationStateItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { duplication_state })
@@ -27015,6 +27240,7 @@ impl RlcFailureIndication {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { assocated_lcid })
@@ -27105,6 +27331,7 @@ impl RlcStatus {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -27204,6 +27431,7 @@ impl RlfReportInformationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -27357,6 +27585,7 @@ impl RrcDeliveryStatus {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -27492,6 +27721,7 @@ impl RrcVersion {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -27588,6 +27818,7 @@ impl SCellFailedtoSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { s_cell_id, cause })
@@ -27650,6 +27881,7 @@ impl SCellFailedtoSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { s_cell_id, cause })
@@ -27706,6 +27938,7 @@ impl SCellToBeRemovedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { s_cell_id })
@@ -27769,6 +28002,7 @@ impl SCellToBeSetupItem {
                     182 => serving_cell_mo = Some(ServingCellMo::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -27842,6 +28076,7 @@ impl SCellToBeSetupModItem {
                     182 => serving_cell_mo = Some(ServingCellMo::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -27973,6 +28208,7 @@ impl ScsSpecificCarrier {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -28048,6 +28284,7 @@ impl SearchWindowInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -28383,6 +28620,7 @@ impl ServedCellInformation {
                     429 => sfn_offset = Some(SfnOffset::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -28474,6 +28712,7 @@ impl SfnOffset {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sfn_time_offset })
@@ -28539,6 +28778,7 @@ impl ServedCellsToAddItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -28598,6 +28838,7 @@ impl ServedCellsToDeleteItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { old_nr_cgi })
@@ -28658,6 +28899,7 @@ impl ServedCellsToModifyItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -28721,6 +28963,7 @@ impl ServedEutraCellsInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -28819,6 +29062,7 @@ impl ServiceStatus {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -29207,6 +29451,7 @@ impl SItypeItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { s_itype })
@@ -29266,6 +29511,7 @@ impl SibtypetobeupdatedListItem {
                     240 => area_scope = Some(AreaScope::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -29405,6 +29651,7 @@ impl SlDrbsFailedToBeModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id, cause })
@@ -29467,6 +29714,7 @@ impl SlDrbsFailedToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id, cause })
@@ -29529,6 +29777,7 @@ impl SlDrbsFailedToBeSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id, cause })
@@ -29585,6 +29834,7 @@ impl SlDrbsModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -29637,6 +29887,7 @@ impl SlDrbsModifiedConfItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -29689,6 +29940,7 @@ impl SlDrbsRequiredToBeModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -29741,6 +29993,7 @@ impl SlDrbsRequiredToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -29793,6 +30046,7 @@ impl SlDrbsSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -29845,6 +30099,7 @@ impl SlDrbsSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -29909,6 +30164,7 @@ impl SlDrbsToBeModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -29973,6 +30229,7 @@ impl SlDrbsToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sl_drb_id })
@@ -30029,6 +30286,7 @@ impl SlDrbsToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30095,6 +30353,7 @@ impl SlDrbsToBeSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30212,6 +30471,7 @@ impl SliceAvailableCapacity {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30307,6 +30567,7 @@ impl SliceAvailableCapacityItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30414,6 +30675,7 @@ impl SnssaiAvailableCapacityItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30517,6 +30779,7 @@ impl SliceSupportItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { snssai })
@@ -30610,6 +30873,7 @@ impl SliceToReportItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30735,6 +30999,7 @@ impl SnssaiItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { snssai })
@@ -30828,6 +31093,7 @@ impl SlotConfigurationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -30903,6 +31169,7 @@ impl Snssai {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { sst, sd })
@@ -30959,6 +31226,7 @@ impl SpatialDirectionInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -31013,6 +31281,7 @@ impl SpatialRelationInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -31106,6 +31375,7 @@ impl SpatialRelationforResourceIdItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { reference_signal })
@@ -31282,6 +31552,7 @@ impl SrbsFailedToBeSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id, cause })
@@ -31344,6 +31615,7 @@ impl SrbsFailedToBeSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id, cause })
@@ -31402,6 +31674,7 @@ impl SrbsModifiedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id, lcid })
@@ -31455,6 +31728,7 @@ impl SrbsRequiredToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id })
@@ -31509,6 +31783,7 @@ impl SrbsSetupItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id, lcid })
@@ -31564,6 +31839,7 @@ impl SrbsSetupModItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id, lcid })
@@ -31617,6 +31893,7 @@ impl SrbsToBeReleasedItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srb_id })
@@ -31681,6 +31958,7 @@ impl SrbsToBeSetupItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -31753,6 +32031,7 @@ impl SrbsToBeSetupModItem {
                     }
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -31862,6 +32141,7 @@ impl SrsCarrierListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -31954,6 +32234,7 @@ impl SrsConfig {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -32026,6 +32307,7 @@ impl SrsConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { srs_carrier_list })
@@ -32164,6 +32446,7 @@ impl SrsResource {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -32384,6 +32667,7 @@ impl SrsResourceSet {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -32533,6 +32817,7 @@ impl SrsResourceSetItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -32644,6 +32929,7 @@ impl SrsResourceTrigger {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -32704,6 +32990,7 @@ impl Ssb {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { pci_nr, ssb_index })
@@ -33053,6 +33340,7 @@ impl SsbAreaCapacityValueItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -33192,6 +33480,7 @@ impl SsbAreaRadioResourceStatusItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -33317,6 +33606,7 @@ impl SsbInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -33412,6 +33702,7 @@ impl SsbInformationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -33569,6 +33860,7 @@ impl SsbTfConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -33710,6 +34002,7 @@ impl SsbToReportItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { ssb_index })
@@ -33777,6 +34070,7 @@ impl SulInformation {
                     356 => frequency_shift7p5khz = Some(FrequencyShift7p5khz::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -33950,6 +34244,7 @@ impl SupportedSulFreqBandItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -34241,6 +34536,7 @@ impl TargetCellListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { target_cell })
@@ -34304,6 +34600,7 @@ impl TddInfo {
                     354 => carrier_list = Some(NrCarrierList::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -34397,6 +34694,7 @@ impl TimeReferenceInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -34500,6 +34798,7 @@ impl TimeStamp {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -34681,6 +34980,7 @@ impl TimingMeasurementQuality {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -34791,6 +35091,7 @@ impl TnlCapacityIndicator {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -34891,6 +35192,7 @@ impl TraceActivation {
                     380 => trace_collection_entity_uri = Some(UriAddress::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -35119,6 +35421,7 @@ impl TransmissionBandwidth {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { nr_scs, nr_nr_b })
@@ -35374,6 +35677,7 @@ impl TransportUpLayerAddressInfoToAddItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -35482,6 +35786,7 @@ impl TransportUpLayerAddressInfoToRemoveItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -35610,6 +35915,7 @@ impl TrpInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -35666,6 +35972,7 @@ impl TrpInformationItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { trp_information })
@@ -35938,6 +36245,7 @@ impl TrpListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { trpid })
@@ -35990,6 +36298,7 @@ impl TrpMeasurementQuality {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36154,6 +36463,7 @@ impl TrpMeasurementRequestItem {
                     111 => nr_cgi = Some(NrCgi::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36272,6 +36582,7 @@ impl TrpPositionDirect {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { accuracy })
@@ -36386,6 +36697,7 @@ impl TrpPositionReferenced {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36551,6 +36863,7 @@ impl TransportLayerAddressInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36622,6 +36935,7 @@ impl TscAssistanceInformation {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36691,6 +37005,7 @@ impl TscTrafficCharacteristics {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36753,6 +37068,7 @@ impl UacAssistanceInfo {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { uac_plmn_list })
@@ -36849,6 +37165,7 @@ impl UacPlmnItem {
                     385 => nid = Some(Nid::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -36947,6 +37264,7 @@ impl UacTypeItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37063,6 +37381,7 @@ impl UacOperatorDefined {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37204,6 +37523,7 @@ impl UeAssociatedLogicalF1ConnectionItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37454,6 +37774,7 @@ impl UlAoA {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37525,6 +37846,7 @@ impl UlBhNonUpTrafficMapping {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37620,6 +37942,7 @@ impl UlBhNonUpTrafficMappingItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37676,6 +37999,7 @@ impl UlConfiguration {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37736,6 +38060,7 @@ impl UlRtoaMeasurement {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -37964,6 +38289,7 @@ impl UlUpTnlInformationToUpdateListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -38027,6 +38353,7 @@ impl UlUpTnlAddressToUpdateListItem {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -38125,6 +38452,7 @@ impl UlUpTnlInformationToBeSetupItem {
                     280 => bh_info = Some(BhInfo::decode(data)?),
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
@@ -38359,6 +38687,7 @@ impl VictimGnbSetId {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self { victim_gnb_set_id })

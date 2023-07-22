@@ -1,3 +1,5 @@
+# OpenAirInterface interop
+
 # NEXT UP
 - Open Air Interface interop
 - intermittent CI failure in two_workers_f1_before_e1 
@@ -121,6 +123,7 @@ thread 'async-std/runtime' panicked at 'called `Result::unwrap()` on an `Err` va
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- APER align after decoding IE
 - Add coordinator to single process GNB-CU
 - PDU session deletion
 - Retry connection to AMF

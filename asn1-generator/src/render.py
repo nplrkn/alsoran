@@ -102,16 +102,23 @@ def decode_expression(tree):
         else:
             items = "items"
 
-        ie_extra_lines = """
+        if type_info.seqof == "ie_container_sequence_of":
+            ie_extra_lines_before = """
                 let _ = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
-                let _ = decode::decode_length_determinent(data, None, None, false)?;""" if type_info.seqof == "ie_container_sequence_of" else ""
+                let _ = decode::decode_length_determinent(data, None, None, false)?;"""
+            ie_extra_lines_after = """
+                data.decode_align()?;"""
+        else:
+            ie_extra_lines_before = ""
+            ie_extra_lines_after = ""
         return f"""{{
             let length = decode::decode_length_determinent(data, {type_info.constraints})?;
             let mut items = vec![];
             for _ in 0..length {{\
-{ie_extra_lines}
-                items.push({(decode_expression(tree.children[2]))});
+{ie_extra_lines_before}
+                items.push({(decode_expression(tree.children[2]))});\
+{ie_extra_lines_after}
             }}
             {items}
         }}"""
@@ -982,10 +989,10 @@ impl {orig_name} {{
         let _ = decode::decode_sequence_header(data, true, 0)?;"""
 
         self.outfile += f"""
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 {fields_from.mut_field_vars}
-        for _ in 0..len {{
+        for _ in 0..num_ies {{
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -993,6 +1000,7 @@ impl {orig_name} {{
 {fields_from.matches}\
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x)))
             }}
+            data.decode_align()?;
         }}
 {fields_from.mandatory}\
         Ok(Self {{
@@ -1099,6 +1107,7 @@ def decode_ies_string(fields_from):
 {fields_from.matches}\
                 _ => data.advance_maybe_err(ie_length, false)?,
             }}
+            data.decode_align()?;
         }}"""
 
 
@@ -1453,6 +1462,7 @@ impl WlanMeasurementConfiguration {
             match id {
                 _ => data.advance_maybe_err(ie_length, false)?,
             }
+            data.decode_align()?;
         }}
         Ok(Self {
             wlan_meas_config,
@@ -1772,12 +1782,12 @@ pub struct PduSessionResourceSetupRequest {
 impl PduSessionResourceSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_paging_priority: Option<[u8; 1]> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -1786,6 +1796,7 @@ impl PduSessionResourceSetupRequest {
                 83 => ran_paging_priority = Some(decode::decode_octetstring(data, Some(1), Some(1), false)?.try_into().unwrap()),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
+            data.decode_align()?;
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
@@ -2087,6 +2098,7 @@ impl DlprsResourceCoordinates {
             match id {
                 _ => data.advance_maybe_err(ie_length, false)?,
             }
+            data.decode_align()?;
         }}
         Ok(Self {
             listof_dl_prs_resource_set_arp,
@@ -2146,6 +2158,7 @@ impl UeAssociatedLogicalF1ConnectionListRes {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
+                data.decode_align()?;
             }
             NonEmpty::from_vec(items).unwrap()
         }))
@@ -2203,11 +2216,11 @@ pub struct BapMappingConfiguration {
 impl BapMappingConfiguration {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut bh_routing_information_added_list: Option<BhRoutingInformationAddedList> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2215,6 +2228,7 @@ impl BapMappingConfiguration {
                 283 => bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
+            data.decode_align()?;
         }
         Ok(Self {
             bh_routing_information_added_list,
@@ -2264,6 +2278,7 @@ impl BhRoutingInformationAddedList {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhRoutingInformationAddedListItem::decode(data)?);
+                data.decode_align()?;
             }
             NonEmpty::from_vec(items).unwrap()
         }))
@@ -2338,6 +2353,7 @@ impl GnbCuSystemInformation {
                 239 => system_information_area_id = Some(SystemInformationAreaId::decode(data)?),
                 _ => data.advance_maybe_err(ie_length, false)?,
             }
+            data.decode_align()?;
         }}
         Ok(Self {
             sibtypetobeupdatedlist,
@@ -2479,16 +2495,17 @@ pub struct OverloadStop {
 impl OverloadStop {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = decode::decode_sequence_header(data, true, 0)?;
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
+            data.decode_align()?;
         }
         Ok(Self {
         })
@@ -2896,11 +2913,11 @@ pub struct EutranBearerContextSetupRequest {
 
 impl EutranBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut subscriber_profile_i_dfor_rfp: Option<u16> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2908,6 +2925,7 @@ impl EutranBearerContextSetupRequest {
                 43 => subscriber_profile_i_dfor_rfp = Some(decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
+            data.decode_align()?;
         }
         Ok(Self {
             subscriber_profile_i_dfor_rfp,
@@ -2950,11 +2968,11 @@ pub struct NgRanBearerContextSetupRequest {
 
 impl NgRanBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut pdu_session_resource_to_setup_list: Option<PduSessionResourceToSetupList> = None;
 
-        for _ in 0..len {
+        for _ in 0..num_ies {
             let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
@@ -2962,6 +2980,7 @@ impl NgRanBearerContextSetupRequest {
                 321 => pdu_session_resource_to_setup_list = Some(PduSessionResourceToSetupList::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
+            data.decode_align()?;
         }
         let pdu_session_resource_to_setup_list = pdu_session_resource_to_setup_list.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE pdu_session_resource_to_setup_list"

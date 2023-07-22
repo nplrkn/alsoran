@@ -128,6 +128,7 @@ impl GtpTunnel {
                 match id {
                     _ => data.advance_maybe_err(ie_length, false)?,
                 }
+                data.decode_align()?;
             }
         }
         Ok(Self {
