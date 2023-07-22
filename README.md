@@ -73,17 +73,17 @@ To run the live Redis test, `cargo test live_redis -- --ignored`.  For this to p
 ## A quick tour
 
 The following test shows the Alsoran CU-CP and CU-UP carrying out UE registration, session establishment and userplane forwarding.
-```
+```sh
 RUST_LOG=info cargo test successful_pdu_session_setup --test pdu_session -- --nocapture
 ```
 
 This test shows two workers starting up, and the Coordinator instructing the workers how to initialize their NGAP, E1AP and F1AP interfaces.
-```
+```sh
 RUST_LOG=info cargo test two_workers_base --test two_workers -- --nocapture
 ```
 
 You can packet capture during these tests by running the following in parallel. 
-```
+```sh
 sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462 or port 38462 or port 2152
 ```
 ...then Ctrl-C at the end of the test and open alsoran.pcap in Wireshark.
