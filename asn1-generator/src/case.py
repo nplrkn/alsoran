@@ -15,12 +15,15 @@ SPECIALS = [(re.compile("^DU"), "DU-"),
             (re.compile(r"([^P])DU"), r"\1-DU-"),
             (re.compile(r"UE(s?)"), r"-ue\1-"),
             (re.compile(r"SRB(s?)"), r"-srb\1-"),
+            (re.compile(r"type(s?)"), r"-type\1-"),
             (re.compile(r"DRB(s?)"), r"-drb\1-"),
             (re.compile(r"E-UTRAN"), r"EUTRAN"),
             (re.compile(r"([^I])DL"), r"\1-DL-"),
             (re.compile(r"([^SN])UL"), r"\1-UL-"),
             (re.compile(r"UPTNL"), r"-UP-TNL-"),
             (re.compile(r"S-NSSAI"), r"SNSSAI"),
+            (re.compile(r"([^i])sib([^l])"), r"\1-sib-\2"),
+            (re.compile(r"tobeupdated"), r"-to-be-updated-"),
             ]
 
 
@@ -95,6 +98,14 @@ class TestCase(unittest.TestCase):
     def test_sul(self):
         self.assertEqual(pascal_case(
             "SULAccessIndication"), "SulAccessIndication")
+        
+    def test_sib(self):
+        self.assertEqual(pascal_case(
+            "SibtypetobeupdatedListItem"), "SibTypeToBeUpdatedListItem")
+        
+    def test_sib2(self):
+        self.assertEqual(pascal_case(
+            "AmfNameVisibleString"), "AmfNameVisibleString")
 
 
 if __name__ == '__main__':

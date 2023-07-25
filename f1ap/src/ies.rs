@@ -12770,18 +12770,18 @@ impl PerCodec for GnbDuMeasurementId {
 // GnbCuSystemInformation
 #[derive(Clone, Debug)]
 pub struct GnbCuSystemInformation {
-    pub sibtypetobeupdatedlist: NonEmpty<SibtypetobeupdatedListItem>,
+    pub sib_type_to_be_updated_list: NonEmpty<SibTypeToBeUpdatedListItem>,
     pub system_information_area_id: Option<SystemInformationAreaId>,
 }
 
 impl GnbCuSystemInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let sibtypetobeupdatedlist = {
+        let sib_type_to_be_updated_list = {
             let length = decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(SibtypetobeupdatedListItem::decode(data)?);
+                items.push(SibTypeToBeUpdatedListItem::decode(data)?);
             }
             NonEmpty::from_vec(items).unwrap()
         };
@@ -12805,7 +12805,7 @@ impl GnbCuSystemInformation {
             }
         }
         Ok(Self {
-            sibtypetobeupdatedlist,
+            sib_type_to_be_updated_list,
             system_information_area_id,
         })
     }
@@ -12819,9 +12819,9 @@ impl GnbCuSystemInformation {
             Some(1),
             Some(32),
             false,
-            self.sibtypetobeupdatedlist.len(),
+            self.sib_type_to_be_updated_list.len(),
         )?;
-        for x in &self.sibtypetobeupdatedlist {
+        for x in &self.sib_type_to_be_updated_list {
             x.encode(data)?;
         }
         Ok(())?;
@@ -24274,7 +24274,7 @@ impl PerCodec for PwsFailedNrCgiItem {
 // PwsSystemInformation
 #[derive(Clone, Debug)]
 pub struct PwsSystemInformation {
-    pub si_btype: SibTypePws,
+    pub sib_type: SibTypePws,
     pub si_bmessage: Vec<u8>,
     pub notification_information: Option<NotificationInformation>,
     pub additional_sib_message_list: Option<AdditionalSibMessageList>,
@@ -24283,7 +24283,7 @@ pub struct PwsSystemInformation {
 impl PwsSystemInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let si_btype = SibTypePws::decode(data)?;
+        let sib_type = SibTypePws::decode(data)?;
         let si_bmessage = decode::decode_octetstring(data, None, None, false)?;
 
         // Process the extension container
@@ -24307,7 +24307,7 @@ impl PwsSystemInformation {
             }
         }
         Ok(Self {
-            si_btype,
+            sib_type,
             si_bmessage,
             notification_information,
             additional_sib_message_list,
@@ -24318,7 +24318,7 @@ impl PwsSystemInformation {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.si_btype.encode(data)?;
+        self.sib_type.encode(data)?;
         encode::encode_octetstring(data, None, None, false, &self.si_bmessage, false)?;
 
         Ok(())
@@ -29360,11 +29360,11 @@ impl PerCodec for Sib14Message {
         })
     }
 }
-// SItype
+// SiType
 #[derive(Clone, Copy, Debug)]
-pub struct SItype(pub u8);
+pub struct SiType(pub u8);
 
-impl SItype {
+impl SiType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(
             decode::decode_integer(data, Some(1), Some(32), true)?.0 as u8,
@@ -29375,32 +29375,32 @@ impl SItype {
     }
 }
 
-impl PerCodec for SItype {
+impl PerCodec for SiType {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SItype::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SItype");
+        SiType::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("SiType");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SItype");
+            e.push_context("SiType");
             e
         })
     }
 }
-// SItypeList
+// SiTypeList
 #[derive(Clone, Debug)]
-pub struct SItypeList(pub NonEmpty<SItypeItem>);
+pub struct SiTypeList(pub NonEmpty<SiTypeItem>);
 
-impl SItypeList {
+impl SiTypeList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(SItypeItem::decode(data)?);
+                items.push(SiTypeItem::decode(data)?);
             }
             NonEmpty::from_vec(items).unwrap()
         }))
@@ -29414,31 +29414,31 @@ impl SItypeList {
     }
 }
 
-impl PerCodec for SItypeList {
+impl PerCodec for SiTypeList {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SItypeList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SItypeList");
+        SiTypeList::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("SiTypeList");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SItypeList");
+            e.push_context("SiTypeList");
             e
         })
     }
 }
-// SItypeItem
+// SiTypeItem
 #[derive(Clone, Debug)]
-pub struct SItypeItem {
-    pub s_itype: SItype,
+pub struct SiTypeItem {
+    pub si_type: SiType,
 }
 
-impl SItypeItem {
+impl SiTypeItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 1)?;
-        let s_itype = SItype::decode(data)?;
+        let si_type = SiType::decode(data)?;
 
         // Process the extension container
 
@@ -29454,47 +29454,47 @@ impl SItypeItem {
                 data.decode_align()?;
             }
         }
-        Ok(Self { s_itype })
+        Ok(Self { si_type })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitString::new();
         optionals.push(false);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.s_itype.encode(data)?;
+        self.si_type.encode(data)?;
 
         Ok(())
     }
 }
 
-impl PerCodec for SItypeItem {
+impl PerCodec for SiTypeItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SItypeItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SItypeItem");
+        SiTypeItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("SiTypeItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SItypeItem");
+            e.push_context("SiTypeItem");
             e
         })
     }
 }
-// SibtypetobeupdatedListItem
+// SibTypeToBeUpdatedListItem
 #[derive(Clone, Debug)]
-pub struct SibtypetobeupdatedListItem {
-    pub si_btype: u8,
+pub struct SibTypeToBeUpdatedListItem {
+    pub sib_type: u8,
     pub si_bmessage: Vec<u8>,
     pub value_tag: u8,
     pub area_scope: Option<AreaScope>,
 }
 
-impl SibtypetobeupdatedListItem {
+impl SibTypeToBeUpdatedListItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let si_btype = decode::decode_integer(data, Some(2), Some(32), true)?.0 as u8;
+        let sib_type = decode::decode_integer(data, Some(2), Some(32), true)?.0 as u8;
         let si_bmessage = decode::decode_octetstring(data, None, None, false)?;
         let value_tag = decode::decode_integer(data, Some(0), Some(31), true)?.0 as u8;
 
@@ -29515,7 +29515,7 @@ impl SibtypetobeupdatedListItem {
             }
         }
         Ok(Self {
-            si_btype,
+            sib_type,
             si_bmessage,
             value_tag,
             area_scope,
@@ -29526,7 +29526,7 @@ impl SibtypetobeupdatedListItem {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        encode::encode_integer(data, Some(2), Some(32), true, self.si_btype as i128, false)?;
+        encode::encode_integer(data, Some(2), Some(32), true, self.sib_type as i128, false)?;
         encode::encode_octetstring(data, None, None, false, &self.si_bmessage, false)?;
         encode::encode_integer(data, Some(0), Some(31), true, self.value_tag as i128, false)?;
 
@@ -29534,17 +29534,17 @@ impl SibtypetobeupdatedListItem {
     }
 }
 
-impl PerCodec for SibtypetobeupdatedListItem {
+impl PerCodec for SibTypeToBeUpdatedListItem {
     type Allocator = Allocator;
     fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SibtypetobeupdatedListItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SibtypetobeupdatedListItem");
+        SibTypeToBeUpdatedListItem::decode_inner(data).map_err(|mut e: PerCodecError| {
+            e.push_context("SibTypeToBeUpdatedListItem");
             e
         })
     }
     fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SibtypetobeupdatedListItem");
+            e.push_context("SibTypeToBeUpdatedListItem");
             e
         })
     }
