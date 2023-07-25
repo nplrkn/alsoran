@@ -58,6 +58,10 @@ fn served_cell_to_activated(served_cell: GnbDuServedCellsItem) -> CellsToBeActiv
         nr_cgi: served_cell_information.nr_cgi.clone(),
         nr_pci: None,
         gnb_cu_system_information: None,
+        // gnb_cu_system_information: Some(GnbCuSystemInformation {
+        //     sibtypetobeupdatedlist: (),
+        //     system_information_area_id: (),
+        // }),
         available_plmn_list: None,
         extended_available_plmn_list: None,
         iab_info_iab_donor_cu: None,

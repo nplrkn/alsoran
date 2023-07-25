@@ -10248,7 +10248,7 @@ impl PerCodec for PrivateMessage {
 pub struct SystemInformationDeliveryCommand {
     pub transaction_id: TransactionId,
     pub nr_cgi: NrCgi,
-    pub s_itype_list: SItypeList,
+    pub si_type_list: SiTypeList,
     pub confirmed_ue_id: GnbDuUeF1apId,
 }
 
@@ -10259,7 +10259,7 @@ impl SystemInformationDeliveryCommand {
 
         let mut transaction_id: Option<TransactionId> = None;
         let mut nr_cgi: Option<NrCgi> = None;
-        let mut s_itype_list: Option<SItypeList> = None;
+        let mut si_type_list: Option<SiTypeList> = None;
         let mut confirmed_ue_id: Option<GnbDuUeF1apId> = None;
 
         for _ in 0..num_ies {
@@ -10269,7 +10269,7 @@ impl SystemInformationDeliveryCommand {
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
                 111 => nr_cgi = Some(NrCgi::decode(data)?),
-                116 => s_itype_list = Some(SItypeList::decode(data)?),
+                116 => si_type_list = Some(SiTypeList::decode(data)?),
                 156 => confirmed_ue_id = Some(GnbDuUeF1apId::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
@@ -10279,8 +10279,8 @@ impl SystemInformationDeliveryCommand {
             "Missing mandatory IE transaction_id"
         )))?;
         let nr_cgi = nr_cgi.ok_or(PerCodecError::new(format!("Missing mandatory IE nr_cgi")))?;
-        let s_itype_list = s_itype_list.ok_or(PerCodecError::new(format!(
-            "Missing mandatory IE s_itype_list"
+        let si_type_list = si_type_list.ok_or(PerCodecError::new(format!(
+            "Missing mandatory IE si_type_list"
         )))?;
         let confirmed_ue_id = confirmed_ue_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE confirmed_ue_id"
@@ -10288,7 +10288,7 @@ impl SystemInformationDeliveryCommand {
         Ok(Self {
             transaction_id,
             nr_cgi,
-            s_itype_list,
+            si_type_list,
             confirmed_ue_id,
         })
     }
@@ -10313,7 +10313,7 @@ impl SystemInformationDeliveryCommand {
         num_ies += 1;
 
         let ie = &mut Allocator::new_codec_data();
-        self.s_itype_list.encode(ie)?;
+        self.si_type_list.encode(ie)?;
         encode::encode_integer(ies, Some(0), Some(65535), false, 116, false)?;
         Criticality::Reject.encode(ies)?;
         encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;

@@ -9789,7 +9789,6 @@ impl OverloadStop {
             match id {
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
             }
-            data.decode_align()?;
         }
         Ok(Self {})
     }

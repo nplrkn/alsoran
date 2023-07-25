@@ -380,7 +380,6 @@ class ChoiceFieldsFrom(Interpreter):
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {{
 """
-
         for ie in tree.children:
             if ie.data != "extension_marker":
                 type_info = type_and_constraints(ie)
@@ -973,6 +972,8 @@ impl {name} {{
         # }
 
         mut = "" if fields.struct_fields == "" else "mut "
+        decode_align = "" if fields_from.matches == "" else """
+            data.decode_align()?;"""
 
         self.outfile += f"""
 // {orig_name}
@@ -999,8 +1000,8 @@ impl {orig_name} {{
             match id {{
 {fields_from.matches}\
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x)))
-            }}
-            data.decode_align()?;
+            }}\
+{decode_align}
         }}
 {fields_from.mandatory}\
         Ok(Self {{
@@ -2324,18 +2325,18 @@ GNB-CUSystemInformation-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
 // GnbCuSystemInformation
 # [derive(Clone, Debug)]
 pub struct GnbCuSystemInformation {
-    pub sibtypetobeupdatedlist: NonEmpty<SibtypetobeupdatedListItem>,
+    pub sib_type_to_be_updated_list: NonEmpty<SibTypeToBeUpdatedListItem>,
     pub system_information_area_id: Option<SystemInformationAreaId>,
 }
 
 impl GnbCuSystemInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
-        let sibtypetobeupdatedlist = {
+        let sib_type_to_be_updated_list = {
             let length = decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(SibtypetobeupdatedListItem::decode(data)?);
+                items.push(SibTypeToBeUpdatedListItem::decode(data)?);
             }
             NonEmpty::from_vec(items).unwrap()
         };
@@ -2356,7 +2357,7 @@ impl GnbCuSystemInformation {
             data.decode_align()?;
         }}
         Ok(Self {
-            sibtypetobeupdatedlist,
+            sib_type_to_be_updated_list,
             system_information_area_id,
         })
     }
@@ -2365,8 +2366,8 @@ impl GnbCuSystemInformation {
         optionals.push(false);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
-        encode::encode_length_determinent(data, Some(1), Some(32), false, self.sibtypetobeupdatedlist.len())?;
-        for x in &self.sibtypetobeupdatedlist {
+        encode::encode_length_determinent(data, Some(1), Some(32), false, self.sib_type_to_be_updated_list.len())?;
+        for x in &self.sib_type_to_be_updated_list {
             x.encode(data)?;
         }
         Ok(())?;
@@ -2505,7 +2506,6 @@ impl OverloadStop {
             match id {
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
-            data.decode_align()?;
         }
         Ok(Self {
         })
