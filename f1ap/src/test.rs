@@ -56,7 +56,6 @@ fn test_f1_response_encode_decode() -> Result<(), PerCodecError> {
     };
 
     let bytes = f1_setup_reponse.into_bytes()?;
-    let f1_setup_response = F1SetupResponse::from_bytes(&bytes)?;
-    println!("{:?}", f1_setup_response);
+    let _f1_setup_response = F1SetupResponse::from_bytes(&bytes)?;
     Ok(())
 }

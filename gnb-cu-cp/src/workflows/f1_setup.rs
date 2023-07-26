@@ -29,11 +29,9 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         let coordinator_notify = self.associate_connection();
 
-        let sib2 = build_sib2().into_bytes()?;
-        println!("Yay!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
         // Activate all served cells in the setup response.
         // TODO: store information about served cells for use later.
+        let sib2 = build_sib2().into_bytes()?;
         let cells_to_be_activated_list = r.gnb_du_served_cells_list.map(|cells| {
             CellsToBeActivatedList(cells.0.map(|x| served_cell_to_activated(x, sib2.clone())))
         });

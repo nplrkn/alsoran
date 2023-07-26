@@ -4,6 +4,7 @@ use super::sctp_bindings::*;
 use super::sock_opt;
 use super::try_io::try_io;
 use super::Message;
+use anyhow::bail;
 use anyhow::{anyhow, Result};
 use async_io::Async;
 use async_io::Timer;
@@ -169,8 +170,7 @@ impl SctpAssociation {
             Ok(())
         } else {
             // TODO Back pressure partial send
-            println!("Partial send {} bytes of {}", bytes_sent, message.len());
-            todo!();
+            bail!("Partial send {} bytes of {}", bytes_sent, message.len());
         }
     }
 }
