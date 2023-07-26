@@ -836,7 +836,7 @@ impl SupportedPlmnsItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())

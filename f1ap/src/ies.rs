@@ -646,7 +646,7 @@ impl AdditionalPdcpDuplicationTnlItem {
         self.additional_pdcp_duplication_up_tnl_information
             .encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -3248,7 +3248,7 @@ impl BPlmnIdInfoItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -3392,7 +3392,7 @@ impl ServedPlmnsItem {
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -4991,7 +4991,7 @@ impl CellsToBeBarredItem {
         self.nr_cgi.encode(data)?;
         self.cell_barred.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -5945,7 +5945,7 @@ impl ConditionalInterDuMobilityInformation {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -6030,7 +6030,7 @@ impl ConditionalIntraDuMobilityInformation {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -6718,7 +6718,7 @@ impl CuToDuRrcInformation {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -7998,7 +7998,7 @@ impl DrbsModifiedItem {
         }
         self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -8080,7 +8080,7 @@ impl DrbsModifiedConfItem {
         self.drb_id.encode(data)?;
         self.ul_up_tnl_information_to_be_setup_list.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -8158,7 +8158,7 @@ impl DrbNotifyItem {
         self.drb_id.encode(data)?;
         self.notification_cause.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -8254,7 +8254,7 @@ impl DrbsRequiredToBeModifiedItem {
         self.drb_id.encode(data)?;
         self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -8414,7 +8414,7 @@ impl DrbsSetupItem {
         }
         self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -8521,7 +8521,7 @@ impl DrbsSetupModItem {
         }
         self.dl_up_tnl_information_to_be_setup_list.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -8760,7 +8760,7 @@ impl DrbsToBeModifiedItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -9002,7 +9002,7 @@ impl DrbsToBeSetupItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -9191,7 +9191,7 @@ impl DrbsToBeSetupModItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -10187,7 +10187,7 @@ impl DuToCuRrcInformation {
             encode::encode_octetstring(data, None, None, false, &x, false)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -10464,7 +10464,7 @@ impl Dynamic5qiDescriptor {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -11133,7 +11133,7 @@ impl EndpointIpAddressAndPort {
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.endpoint_ip_address.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -11443,7 +11443,7 @@ impl ExtendedServedPlmnsItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -12792,7 +12792,7 @@ impl FddInfo {
         self.ul_transmission_bandwidth.encode(data)?;
         self.dl_transmission_bandwidth.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -12927,7 +12927,7 @@ impl FlowsMappedToDrbItem {
         self.qos_flow_identifier.encode(data)?;
         self.qos_flow_level_qos_parameters.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -13491,7 +13491,7 @@ impl GbrQosFlowInformation {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -13738,7 +13738,7 @@ impl GnbCuSystemInformation {
         }
         Ok(())?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -13989,7 +13989,7 @@ impl GnbCuTnlAssociationToRemoveItem {
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.tnl_association_transport_layer_address.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -14788,7 +14788,7 @@ impl GnbDuSystemInformation {
         self.mib_message.encode(data)?;
         self.sib_1_message.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -19872,7 +19872,7 @@ impl NonDynamic5qiDescriptor {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -20642,7 +20642,7 @@ impl NrFreqInfo {
         }
         Ok(())?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -23294,7 +23294,7 @@ impl PosMeasurementResultListItem {
         self.pos_measurement_result.encode(data)?;
         self.trpid.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -25373,7 +25373,7 @@ impl PwsSystemInformation {
         self.sib_type.encode(data)?;
         encode::encode_octetstring(data, None, None, false, &self.sib_message, false)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -25656,7 +25656,7 @@ impl QosFlowLevelQosParameters {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -27117,7 +27117,7 @@ impl RequestedSrsTransmissionCharacteristics {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -27235,7 +27235,7 @@ impl ResourceCoordinationEutraCellInfo {
         self.eutra_mode_info.encode(data)?;
         self.eutra_prach_configuration.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -28875,7 +28875,7 @@ impl RrcVersion {
             false,
         )?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -29171,7 +29171,7 @@ impl SCellToBeSetupItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -29260,7 +29260,7 @@ impl SCellToBeSetupModItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -29958,7 +29958,7 @@ impl ServedCellInformation {
             false,
         )?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -30832,7 +30832,7 @@ impl SibTypeToBeUpdatedListItem {
         encode::encode_octetstring(data, None, None, false, &self.sib_message, false)?;
         encode::encode_integer(data, Some(0), Some(31), true, self.value_tag as i128, false)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -33295,7 +33295,7 @@ impl SrbsToBeSetupItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -33383,7 +33383,7 @@ impl SrbsToBeSetupModItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -35452,7 +35452,7 @@ impl SulInformation {
         )?;
         self.sul_transmission_bandwidth.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -36011,7 +36011,7 @@ impl TddInfo {
         self.nr_freq_info.encode(data)?;
         self.transmission_bandwidth.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -36631,7 +36631,7 @@ impl TraceActivation {
         self.trace_depth.encode(data)?;
         self.trace_collection_entity_ip_address.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -37915,7 +37915,7 @@ impl TrpMeasurementRequestItem {
             x.encode(data)?;
         }
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -38629,7 +38629,7 @@ impl UacPlmnItem {
         self.plmn_identity.encode(data)?;
         self.uac_type_list.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
@@ -39929,7 +39929,7 @@ impl UlUpTnlInformationToBeSetupItem {
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_up_tnl_information.encode(data)?;
         if num_ies != 0 {
-            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
             data.append_aligned(ies);
         }
         Ok(())
