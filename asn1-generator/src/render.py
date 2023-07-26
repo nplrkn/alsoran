@@ -573,6 +573,7 @@ def is_copy_type(t):
 class StructFieldsTo(Interpreter):
     def __init__(self):
         self.fields_to = ""
+        self.extension_ies_fields_to = ""
         self.found_optionals = False
         self.optional_bitfield = """\
         let optionals = BitString::new();
@@ -605,7 +606,24 @@ class StructFieldsTo(Interpreter):
 """
 
     def extension_ies(self, tree):
-        self.add_optional_to_bitfield("false")
+        field_interpreter = IeFields()
+        field_interpreter.visit(tree.children[0])
+        if field_interpreter.fields_to == "":
+            # ASN.1 extension container contains no fields - never add
+            self.add_optional_to_bitfield("false")
+            return
+
+        # Add extension container if any of the fields are present.
+        self.add_optional_to_bitfield("num_ies != 0")
+        self.extension_ies_fields_to += """
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();"""
+        self.extension_ies_fields_to += field_interpreter.fields_to
+        self.fields_to += """\
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }"""
 
     def empty_sequence_field(self, tree):
         self.add_optional_to_bitfield("false")
@@ -1065,7 +1083,8 @@ impl {orig_name} {{
 {fields_from_interpreter.self_fields}\
         }})
     }}
-    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{\
+{fields_to_interpreter.extension_ies_fields_to}
 {fields_to_interpreter.optional_bitfield}
         encode::encode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, &optionals, false)?;
 {fields_to_interpreter.fields_to}
@@ -2362,8 +2381,20 @@ impl GnbCuSystemInformation {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.system_information_area_id {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 239, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         encode::encode_length_determinent(data, Some(1), Some(32), false, self.sib_type_to_be_updated_list.len())?;
@@ -2371,7 +2402,10 @@ impl GnbCuSystemInformation {
             x.encode(data)?;
         }
         Ok(())?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }

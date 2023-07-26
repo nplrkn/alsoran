@@ -3,9 +3,14 @@
 use super::Workflow;
 use crate::gnb_cu_cp::GnbCuCp;
 use anyhow::Result;
+use asn1_per::{nonempty, SerDes};
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{RequestError, ResponseAction};
+use rrc::{
+    CellReselectionInfoCommon, CellReselectionPriority, CellReselectionServingFreqInfo,
+    IntraFreqCellReselectionInfo, QHyst, QRxLevMin,
+};
 use slog::info;
 
 impl<'a, G: GnbCuCp> Workflow<'a, G> {
@@ -24,11 +29,14 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         let coordinator_notify = self.associate_connection();
 
+        let sib2 = build_sib2().into_bytes()?;
+        println!("Yay!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         // Activate all served cells in the setup response.
         // TODO: store information about served cells for use later.
-        let cells_to_be_activated_list = r
-            .gnb_du_served_cells_list
-            .map(|cells| CellsToBeActivatedList(cells.0.map(served_cell_to_activated)));
+        let cells_to_be_activated_list = r.gnb_du_served_cells_list.map(|cells| {
+            CellsToBeActivatedList(cells.0.map(|x| served_cell_to_activated(x, sib2.clone())))
+        });
 
         self.log_message("<< F1SetupResponse");
         Ok((
@@ -51,17 +59,59 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     }
 }
 
-fn served_cell_to_activated(served_cell: GnbDuServedCellsItem) -> CellsToBeActivatedListItem {
+fn build_sib2() -> rrc::Sib2 {
+    rrc::Sib2 {
+        cell_reselection_info_common: CellReselectionInfoCommon {
+            nrof_ss_blocks_to_average: None,
+            abs_thresh_ss_blocks_consolidation: None,
+            range_to_best_cell: None,
+            q_hyst: QHyst::Db1,
+            speed_state_reselection_pars: None,
+        },
+        cell_reselection_serving_freq_info: CellReselectionServingFreqInfo {
+            s_non_intra_search_p: None,
+            s_non_intra_search_q: None,
+            thresh_serving_low_p: rrc::ReselectionThreshold(2),
+            thresh_serving_low_q: None,
+            cell_reselection_priority: CellReselectionPriority(2),
+            cell_reselection_sub_priority: None,
+        },
+        intra_freq_cell_reselection_info: IntraFreqCellReselectionInfo {
+            q_rx_lev_min: QRxLevMin(-50),
+            q_rx_lev_min_sul: None,
+            q_qual_min: None,
+            s_intra_search_p: rrc::ReselectionThreshold(2),
+            s_intra_search_q: None,
+            t_reselection_nr: rrc::TReselection(2),
+            frequency_band_list: None,
+            frequency_band_list_sul: None,
+            p_max: None,
+            smtc: None,
+            ss_rssi_measurement: None,
+            ssb_to_measure: None,
+            derive_ssb_index_from_cell: true,
+        },
+    }
+}
+
+fn served_cell_to_activated(
+    served_cell: GnbDuServedCellsItem,
+    sib_2: Vec<u8>,
+) -> CellsToBeActivatedListItem {
     let served_cell_information = &served_cell.served_cell_information;
 
     CellsToBeActivatedListItem {
         nr_cgi: served_cell_information.nr_cgi.clone(),
-        nr_pci: None,
-        gnb_cu_system_information: None,
-        // gnb_cu_system_information: Some(GnbCuSystemInformation {
-        //     sibtypetobeupdatedlist: (),
-        //     system_information_area_id: (),
-        // }),
+        nr_pci: Some(NrPci(4)),
+        gnb_cu_system_information: Some(GnbCuSystemInformation {
+            sib_type_to_be_updated_list: nonempty![SibTypeToBeUpdatedListItem {
+                sib_type: 2,
+                sib_message: sib_2,
+                value_tag: 0,
+                area_scope: None
+            }],
+            system_information_area_id: None,
+        }),
         available_plmn_list: None,
         extended_available_plmn_list: None,
         iab_info_iab_donor_cu: None,

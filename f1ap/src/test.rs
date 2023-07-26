@@ -1,4 +1,7 @@
-use crate::{F1apPdu, NrModeInfo, ServedCellInformation, ServedPlmnsList};
+use crate::{
+    BapAddress, F1SetupResponse, F1apPdu, NrModeInfo, RrcVersion, ServedCellInformation,
+    ServedPlmnsList,
+};
 use asn1_per::*;
 
 #[test]
@@ -24,18 +27,36 @@ fn test_served_cell_information() -> Result<(), PerCodecError> {
     let bytes = hex::decode(reference).unwrap();
     let mut data = PerCodecData::from_slice_aper(&bytes);
     data.advance_maybe_err(3, false)?;
-
-    let item = ServedCellInformation::decode(&mut data)?;
-    println!("{:?}", item);
+    let _item = ServedCellInformation::decode(&mut data)?;
     Ok(())
 }
 
 #[test]
 fn test_served_plmns_list() -> Result<(), PerCodecError> {
     let reference = "0802f89900000083400400000020";
-
     let bytes = hex::decode(reference).unwrap();
-    let item = ServedPlmnsList::from_bytes(&bytes)?;
-    println!("{:?}", item);
+    let _item = ServedPlmnsList::from_bytes(&bytes)?;
+    Ok(())
+}
+
+#[test]
+fn test_f1_response_encode_decode() -> Result<(), PerCodecError> {
+    let f1_setup_reponse = F1SetupResponse {
+        transaction_id: crate::TransactionId(0),
+        gnb_cu_name: None,
+        cells_to_be_activated_list: None,
+        gnb_cu_rrc_version: RrcVersion {
+            latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
+            latest_rrc_version_enhanced: None,
+        },
+        transport_layer_address_info: None,
+        ul_bh_non_up_traffic_mapping: None,
+        bap_address: Some(BapAddress(bitvec![u8, Msb0;0, 0,0,0,0,0,0,0,0,0])),
+        extended_gnb_du_name: None,
+    };
+
+    let bytes = f1_setup_reponse.into_bytes()?;
+    let f1_setup_response = F1SetupResponse::from_bytes(&bytes)?;
+    println!("{:?}", f1_setup_response);
     Ok(())
 }

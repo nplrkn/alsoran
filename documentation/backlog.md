@@ -1,4 +1,5 @@
 # OpenAirInterface interop
+- F1 Setup Response not matching
 
 # NEXT UP
 - Open Air Interface interop
@@ -123,6 +124,8 @@ thread 'async-std/runtime' panicked at 'called `Result::unwrap()` on an `Err` va
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Pass SIB2 on F1 Setup Reponse
+- Encoding of IE extension container items
 - APER align after decoding IE
 - Add coordinator to single process GNB-CU
 - PDU session deletion

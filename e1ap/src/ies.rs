@@ -800,11 +800,23 @@ impl CellGroupInformationItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.number_of_tunnels {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 127, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.ul_configuration.is_some());
         optionals.push(self.dl_tx_stop.is_some());
         optionals.push(self.rat_type.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cell_group_id.encode(data)?;
@@ -817,7 +829,10 @@ impl CellGroupInformationItem {
         if let Some(x) = &self.rat_type {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -1490,10 +1505,22 @@ impl DataForwardingInformation {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.data_forwardingto_ng_ran_qos_flow_information_list {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 136, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.ul_data_forwarding.is_some());
         optionals.push(self.dl_data_forwarding.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.ul_data_forwarding {
@@ -1502,7 +1529,10 @@ impl DataForwardingInformation {
         if let Some(x) = &self.dl_data_forwarding {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -3512,12 +3542,34 @@ impl DrbModifiedItemNgRan {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.early_forwarding_count_info {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 123, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.old_qos_flow_map_ul_endmarkerexpected {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 71, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.ul_up_transport_parameters.is_some());
         optionals.push(self.pdcp_sn_status_information.is_some());
         optionals.push(self.flow_setup_list.is_some());
         optionals.push(self.flow_failed_list.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
@@ -3533,7 +3585,10 @@ impl DrbModifiedItemNgRan {
         if let Some(x) = &self.flow_failed_list {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -5159,6 +5214,48 @@ impl DrbToModifyItemNgRan {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.old_qos_flow_map_ul_endmarkerexpected {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 71, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_qos {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 72, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.early_forwarding_count_req {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 122, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.early_forwarding_count_info {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 123, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.sdap_configuration.is_some());
         optionals.push(self.pdcp_configuration.is_some());
@@ -5171,7 +5268,7 @@ impl DrbToModifyItemNgRan {
         optionals.push(self.cell_group_to_remove.is_some());
         optionals.push(self.flow_mapping_information.is_some());
         optionals.push(self.drb_inactivity_timer.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
@@ -5208,7 +5305,10 @@ impl DrbToModifyItemNgRan {
         if let Some(x) = &self.drb_inactivity_timer {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -6016,11 +6116,43 @@ impl DrbToSetupItemNgRan {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.drb_qos {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 72, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.daps_request_info {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 120, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.ignore_mapping_rule_indication {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.drb_data_forwarding_information_request.is_some());
         optionals.push(self.drb_inactivity_timer.is_some());
         optionals.push(self.pdcp_sn_status_information.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
@@ -6037,7 +6169,10 @@ impl DrbToSetupItemNgRan {
         if let Some(x) = &self.pdcp_sn_status_information {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -6174,11 +6309,43 @@ impl DrbToSetupModItemNgRan {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.drb_qos {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 72, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.ignore_mapping_rule_indication {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.daps_request_info {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 120, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.drb_data_forwarding_information_request.is_some());
         optionals.push(self.drb_inactivity_timer.is_some());
         optionals.push(self.pdcp_sn_status_information.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
@@ -6195,7 +6362,10 @@ impl DrbToSetupModItemNgRan {
         if let Some(x) = &self.pdcp_sn_status_information {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -6474,12 +6644,44 @@ impl Dynamic5qiDescriptor {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.extended_packet_delay_budget {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 103, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.cn_packet_delay_budget_downlink {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 101, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.cn_packet_delay_budget_uplink {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 102, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.five_qi.is_some());
         optionals.push(self.delay_critical.is_some());
         optionals.push(self.averaging_window.is_some());
         optionals.push(self.max_data_burst_volume.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.qos_priority_level.encode(data)?;
@@ -6497,7 +6699,10 @@ impl Dynamic5qiDescriptor {
         if let Some(x) = &self.max_data_burst_volume {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -6733,12 +6938,27 @@ impl EhcDownlinkParameters {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.max_cidehc_dl {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 137, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.drb_continue_ehc_dl.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -8133,12 +8353,27 @@ impl GnbCuCpTnlaToRemoveItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.tnl_association_transport_layer_address_gnb_cu_up {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 75, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.tnl_association_transport_layer_address.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -8420,10 +8655,22 @@ impl GbrQosFlowInformation {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.alternative_qos_para_set_list {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 124, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.max_packet_loss_rate_downlink.is_some());
         optionals.push(self.max_packet_loss_rate_uplink.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.max_flow_bit_rate_downlink.encode(data)?;
@@ -8436,7 +8683,10 @@ impl GbrQosFlowInformation {
         if let Some(x) = &self.max_packet_loss_rate_uplink {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -10280,11 +10530,33 @@ impl NonDynamic5qiDescriptor {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.cn_packet_delay_budget_downlink {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 101, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.cn_packet_delay_budget_uplink {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 102, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.qos_priority_level.is_some());
         optionals.push(self.averaging_window.is_some());
         optionals.push(self.max_data_burst_volume.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
         encode::encode_integer(data, Some(0), Some(255), true, self.five_qi as i128, false)?;
@@ -10297,7 +10569,10 @@ impl NonDynamic5qiDescriptor {
         if let Some(x) = &self.max_data_burst_volume {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -11106,6 +11381,38 @@ impl PdcpConfiguration {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.pdcp_status_report_indication {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 88, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.additional_pdc_pduplication_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 104, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.ehc_parameters {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 118, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.rohc_parameters.is_some());
         optionals.push(self.t_reordering_timer.is_some());
@@ -11116,7 +11423,7 @@ impl PdcpConfiguration {
         optionals.push(self.pdcp_data_recovery.is_some());
         optionals.push(self.duplication_activation.is_some());
         optionals.push(self.out_of_order_delivery.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdcp_sn_size_ul.encode(data)?;
@@ -11149,7 +11456,10 @@ impl PdcpConfiguration {
         if let Some(x) = &self.out_of_order_delivery {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -12355,6 +12665,18 @@ impl PduSessionResourceModifiedItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.redundant_n_g_dl_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.ng_dl_up_tnl_information.is_some());
         optionals.push(self.security_result.is_some());
@@ -12366,7 +12688,7 @@ impl PduSessionResourceModifiedItem {
         optionals.push(self.drb_failed_list_ng_ran.is_some());
         optionals.push(self.drb_modified_list_ng_ran.is_some());
         optionals.push(self.drb_failed_to_modify_list_ng_ran.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -12391,7 +12713,10 @@ impl PduSessionResourceModifiedItem {
         if let Some(x) = &self.drb_failed_to_modify_list_ng_ran {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -12511,11 +12836,23 @@ impl PduSessionResourceRequiredToModifyItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.redundant_n_g_dl_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.ng_dl_up_tnl_information.is_some());
         optionals.push(self.drb_required_to_modify_list_ng_ran.is_some());
         optionals.push(self.drb_required_to_remove_list_ng_ran.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -12528,7 +12865,10 @@ impl PduSessionResourceRequiredToModifyItem {
         if let Some(x) = &self.drb_required_to_remove_list_ng_ran {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -12667,6 +13007,28 @@ impl PduSessionResourceSetupItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.redundant_n_g_dl_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_pdu_session_information_used {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 106, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.security_result.is_some());
         optionals.push(
@@ -12675,7 +13037,7 @@ impl PduSessionResourceSetupItem {
         );
         optionals.push(self.ng_dl_up_unchanged.is_some());
         optionals.push(self.drb_failed_list_ng_ran.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -12693,7 +13055,10 @@ impl PduSessionResourceSetupItem {
         if let Some(x) = &self.drb_failed_list_ng_ran {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -12815,6 +13180,18 @@ impl PduSessionResourceSetupModItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.redundant_n_g_dl_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.security_result.is_some());
         optionals.push(
@@ -12822,7 +13199,7 @@ impl PduSessionResourceSetupModItem {
                 .is_some(),
         );
         optionals.push(self.drb_failed_mod_list_ng_ran.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -12837,7 +13214,10 @@ impl PduSessionResourceSetupModItem {
         if let Some(x) = &self.drb_failed_mod_list_ng_ran {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -13026,6 +13406,58 @@ impl PduSessionResourceToModifyItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.snssai {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 69, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.common_network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_n_g_ul_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 97, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_common_network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.data_forwardingto_eutran_information_list {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 131, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.security_indication.is_some());
         optionals.push(self.pdu_session_resource_dl_ambr.is_some());
@@ -13040,7 +13472,7 @@ impl PduSessionResourceToModifyItem {
         optionals.push(self.drb_to_setup_list_ng_ran.is_some());
         optionals.push(self.drb_to_modify_list_ng_ran.is_some());
         optionals.push(self.drb_to_remove_list_ng_ran.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -13074,7 +13506,10 @@ impl PduSessionResourceToModifyItem {
         if let Some(x) = &self.drb_to_remove_list_ng_ran {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -13167,12 +13602,27 @@ impl PduSessionResourceToRemoveItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.cause {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -13335,6 +13785,48 @@ impl PduSessionResourceToSetupItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.common_network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_n_g_ul_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 97, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_common_network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_pdu_session_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 105, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.pdu_session_resource_dl_ambr.is_some());
         optionals.push(
@@ -13344,7 +13836,7 @@ impl PduSessionResourceToSetupItem {
         optionals.push(self.pdu_session_inactivity_timer.is_some());
         optionals.push(self.existing_allocated_ng_dl_up_tnl_info.is_some());
         optionals.push(self.network_instance.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -13368,7 +13860,10 @@ impl PduSessionResourceToSetupItem {
             x.encode(data)?;
         }
         self.drb_to_setup_list_ng_ran.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -13514,6 +14009,48 @@ impl PduSessionResourceToSetupModItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 79, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.common_network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_n_g_ul_up_tnl_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 97, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.redundant_common_network_instance {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.pdu_session_resource_ambr.is_some());
         optionals.push(
@@ -13521,7 +14058,7 @@ impl PduSessionResourceToSetupModItem {
                 .is_some(),
         );
         optionals.push(self.pdu_session_inactivity_timer.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
@@ -13539,7 +14076,10 @@ impl PduSessionResourceToSetupModItem {
             x.encode(data)?;
         }
         self.drb_to_setup_mod_list_ng_ran.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -14122,12 +14662,27 @@ impl QosFlowItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.qos_flow_mapping_indication {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 80, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -14581,9 +15136,31 @@ impl QosFlowQosParameterItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.redundant_qos_flow_indicator {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 99, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.tsc_traffic_characteristics {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 100, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.qos_flow_mapping_indication.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
@@ -14591,7 +15168,10 @@ impl QosFlowQosParameterItem {
         if let Some(x) = &self.qos_flow_mapping_indication {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -14701,13 +15281,55 @@ impl QosFlowLevelQosParameters {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.qos_monitoring_request {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 87, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.mcg_offered_gbr_qos_flow_info {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.qos_monitoring_reporting_frequency {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 132, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.qos_monitoring_disabled {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 133, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.gbr_qos_flow_information.is_some());
         optionals.push(self.reflective_qos_attribute.is_some());
         optionals.push(self.additional_qos_information.is_some());
         optionals.push(self.paging_policy_indicator.is_some());
         optionals.push(self.reflective_qos_indicator.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, false, &optionals, false)?;
         self.qos_characteristics.encode(data)?;
@@ -14727,7 +15349,10 @@ impl QosFlowLevelQosParameters {
         if let Some(x) = &self.reflective_qos_indicator {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -16714,15 +17339,40 @@ impl TraceActivation {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.mdt_configuration {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 112, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.trace_collection_entity_uri {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 116, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.trace_id.encode(data)?;
         self.interfaces_to_trace.encode(data)?;
         self.trace_depth.encode(data)?;
         self.trace_collection_entity_ip_address.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
@@ -17642,13 +18292,28 @@ impl UpParametersItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.qos_mapping_information {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 107, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.up_tnl_information.encode(data)?;
         self.cell_group_id.encode(data)?;
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
