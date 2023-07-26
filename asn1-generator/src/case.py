@@ -22,7 +22,7 @@ SPECIALS = [(re.compile("^DU"), "DU-"),
             (re.compile(r"([^SN])UL"), r"\1-UL-"),
             (re.compile(r"UPTNL"), r"-UP-TNL-"),
             (re.compile(r"S-NSSAI"), r"SNSSAI"),
-            (re.compile(r"([^i])sib([^l])"), r"\1-sib-\2"),
+            (re.compile(r"sib([^l])",flags=re.IGNORECASE), r"-sib-\1"),
             (re.compile(r"tobeupdated"), r"-to-be-updated-"),
             ]
 
@@ -106,6 +106,10 @@ class TestCase(unittest.TestCase):
     def test_sib2(self):
         self.assertEqual(pascal_case(
             "AmfNameVisibleString"), "AmfNameVisibleString")
+
+    def test_sib_message(self):
+        self.assertEqual(snake_case(
+            "sIBmessage"), "sib_message")
 
 
 if __name__ == '__main__':

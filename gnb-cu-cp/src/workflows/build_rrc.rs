@@ -129,7 +129,7 @@ pub fn build_rrc_reconfiguration(
                     full_config: None,
                     dedicated_nas_message_list,
                     master_key_update: None,
-                    dedicated_sib1_delivery: None,
+                    dedicated_sib_1_delivery: None,
                     dedicated_system_information_delivery: None,
                     other_config: None,
                     non_critical_extension: None,

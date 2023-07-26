@@ -786,11 +786,43 @@ impl SupportedPlmnsItem {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut Allocator::new_codec_data();
+        if let Some(x) = &self.npn_support_info {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 110, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.extended_slice_support_list {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 125, false)?;
+            Criticality::Reject.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.extended_nr_cgi_support_list {
+            let ie = &mut Allocator::new_codec_data();
+            x.encode(ie)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 135, false)?;
+            Criticality::Ignore.encode(ies)?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
         let mut optionals = BitString::new();
         optionals.push(self.slice_support_list.is_some());
         optionals.push(self.nr_cgi_support_list.is_some());
         optionals.push(self.qos_parameters_support_list.is_some());
-        optionals.push(false);
+        optionals.push(num_ies != 0);
 
         encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
@@ -803,7 +835,10 @@ impl SupportedPlmnsItem {
         if let Some(x) = &self.qos_parameters_support_list {
             x.encode(data)?;
         }
-
+        if num_ies != 0 {
+            encode::encode_length_determinent(data, Some(1), Some(65535), false, num_ies)?;
+            data.append_aligned(ies);
+        }
         Ok(())
     }
 }
