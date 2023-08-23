@@ -97,10 +97,11 @@ fn served_cell_to_activated(
     sib_2: Vec<u8>,
 ) -> CellsToBeActivatedListItem {
     let served_cell_information = &served_cell.served_cell_information;
+    let nr_pci = Some(served_cell_information.nr_pci);
 
     CellsToBeActivatedListItem {
         nr_cgi: served_cell_information.nr_cgi.clone(),
-        nr_pci: Some(NrPci(4)),
+        nr_pci,
         gnb_cu_system_information: Some(GnbCuSystemInformation {
             sib_type_to_be_updated_list: nonempty![SibTypeToBeUpdatedListItem {
                 sib_type: 2,
