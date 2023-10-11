@@ -22,4 +22,4 @@ log = "0.4.3"
 futures-core = "0.3.19"
 slog-envlogger = "2.2.0"
 stop-token = "0.7.0"
-
+net = { path = "../5g-asn1-protos/net" }                      # this is just for ShutdownHandle

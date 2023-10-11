@@ -7,33 +7,33 @@ edition = "2021"
 doctest = false
 
 [dependencies]
-net = { path = "../net" }
-asn1-per = { path = "../asn1-per" }
+net = { path = "../5g-asn1-protos/net" }
+asn1-per = { path = "../5g-asn1-protos/asn1-per" }
 stop-token = "0.7.0"
-async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
+async-std = { version = "1.10.0", features = ["attributes", "tokio1"] }
 slog = "2.7.0"
 anyhow = "1.0.52"
 common = { path = "../common" }
-e1ap = {path = "../e1ap" }
-f1ap = {path = "../f1ap" }
-xxap = {path = "../xxap" }
-ngap = {path = "../ngap" }
-rrc = {path = "../rrc" }
-pdcp = {path = "../pdcp" }
+e1ap = { path = "../5g-asn1-protos/e1ap" }
+f1ap = { path = "../5g-asn1-protos/f1ap" }
+xxap = { path = "../5g-asn1-protos/xxap" }
+ngap = { path = "../5g-asn1-protos/ngap" }
+rrc = { path = "../5g-asn1-protos/rrc" }
+pdcp = { path = "../pdcp" }
 connection-api = { path = "../connection-api", features = ["server"] }
 coordination-api = { path = "../coordination-api", features = ["client"] }
-coordinator = {path = "../gnb-cu-cp-coordinator", package = "gnb-cu-cp-coordinator" }  # for standalone single worker mode
+coordinator = { path = "../gnb-cu-cp-coordinator", package = "gnb-cu-cp-coordinator" } # for standalone single worker mode
 async-trait = "0.1.68"
 bitvec = "1.0.1"
 async-channel = "1.6.1"
 rand = "0.8.5"
-redis = {version = "0.22.3", features = ["async-std-comp"]}
+redis = { version = "0.22.3", features = ["async-std-comp"] }
 speedy = "0.8.2"
 swagger = { version = "6.1", features = ["serdejson", "server", "client"] }
-hyper = {version = "0.14", features = ["full"]}
-serde_ignored = {version = "0.1.1"}
-url = {version = "2.1"}
-uuid = {version = "1.3", features = ["serde", "v4"]}
+hyper = { version = "0.14", features = ["full"] }
+serde_ignored = { version = "0.1.1" }
+url = { version = "2.1" }
+uuid = { version = "1.3", features = ["serde", "v4"] }
 clap = { version = "4.1.6", features = ["derive"] }
 dashmap = "5.4.0"
 futures-lite = "1.13.0"

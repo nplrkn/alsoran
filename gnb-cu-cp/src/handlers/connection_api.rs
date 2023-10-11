@@ -2,12 +2,12 @@
 
 use anyhow::Result;
 use async_trait::async_trait;
-use common::ShutdownHandle;
 use connection_api::models::ConnectionInfo;
 use connection_api::models::OperationType;
 use connection_api::server::MakeService;
 use connection_api::AddConnectionResponse;
 use connection_api::Api;
+use net::ShutdownHandle;
 use slog::{debug, error, warn, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;

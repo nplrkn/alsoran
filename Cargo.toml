@@ -1,17 +1,15 @@
 [workspace]
-
+resolver = "1"
 members = [
-    "asn1-per",
     "mock-5gc",
     "common",
-    "sctp",
-    "net",
+    "5g-asn1-protos/sctp",
     "mocks",
-    "ngap",
-    "f1ap",
-    "e1ap",
-    "xxap",
-    "rrc",
+    "5g-asn1-protos/ngap",
+    "5g-asn1-protos/f1ap",
+    "5g-asn1-protos/e1ap",
+    "5g-asn1-protos/xxap",
+    "5g-asn1-protos/rrc",
     "pdcp",
     "gnb-cu",
     "gnb-cu-cp",
@@ -20,5 +18,5 @@ members = [
     "coordination-api",
     "gnb-cu-cp-coordinator",
     "mock-du",
-    "integration-tests"
+    "integration-tests",
 ]

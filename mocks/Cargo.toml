@@ -7,20 +7,20 @@ edition = "2021"
 doctest = false
 
 [dependencies]
-net = { path = "../net" }
+net = { path = "../5g-asn1-protos/net" }
 #asn1-per = { path = "../asn1-per" }
-f1ap = {path = "../f1ap" }
-e1ap = {path = "../e1ap" }
-ngap = {path = "../ngap" }
-xxap = {path = "../xxap" }
-rrc = {path = "../rrc" }
-pdcp = {path = "../pdcp" }
+f1ap = { path = "../5g-asn1-protos/f1ap" }
+e1ap = { path = "../5g-asn1-protos/e1ap" }
+ngap = { path = "../5g-asn1-protos/ngap" }
+xxap = { path = "../5g-asn1-protos/xxap" }
+rrc = { path = "../5g-asn1-protos/rrc" }
+asn1-per = { path = "../5g-asn1-protos/asn1-per" }
+pdcp = { path = "../pdcp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.68"
 slog = "2.7.0"
 stop-token = "0.7.0"
 async-channel = "1.6.1"
 anyhow = "1.0.52"
-asn1-per = { path = "../asn1-per" }
 rand = "0.8.5"
 async-net = "1.6.1"

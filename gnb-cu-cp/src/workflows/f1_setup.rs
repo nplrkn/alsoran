@@ -8,8 +8,9 @@ use bitvec::prelude::*;
 use f1ap::*;
 use net::{RequestError, ResponseAction};
 use rrc::{
-    CellReselectionInfoCommon, CellReselectionPriority, CellReselectionServingFreqInfo,
-    IntraFreqCellReselectionInfo, QHyst, QRxLevMin,
+    BcchDlSchMessage, BcchDlSchMessageType, CellReselectionInfoCommon, CellReselectionPriority,
+    CellReselectionServingFreqInfo, CriticalExtensions30, IntraFreqCellReselectionInfo, QHyst,
+    QRxLevMin, SibTypeAndInfo, SystemInformation, SystemInformationIEs, C1,
 };
 use slog::info;
 
@@ -31,9 +32,13 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Activate all served cells in the setup response.
         // TODO: store information about served cells for use later.
-        let sib2 = build_sib2().into_bytes()?;
+        let sib2_message = build_sib2_message().into_bytes()?;
         let cells_to_be_activated_list = r.gnb_du_served_cells_list.map(|cells| {
-            CellsToBeActivatedList(cells.0.map(|x| served_cell_to_activated(x, sib2.clone())))
+            CellsToBeActivatedList(
+                cells
+                    .0
+                    .map(|x| served_cell_to_activated(x, sib2_message.clone())),
+            )
         });
 
         self.log_message("<< F1SetupResponse");
@@ -57,8 +62,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     }
 }
 
-fn build_sib2() -> rrc::Sib2 {
-    rrc::Sib2 {
+fn build_sib2_message() -> BcchDlSchMessage {
+    let sib2 = rrc::Sib2 {
         cell_reselection_info_common: CellReselectionInfoCommon {
             nrof_ss_blocks_to_average: None,
             abs_thresh_ss_blocks_consolidation: None,
@@ -89,6 +94,14 @@ fn build_sib2() -> rrc::Sib2 {
             ssb_to_measure: None,
             derive_ssb_index_from_cell: true,
         },
+    };
+    rrc::BcchDlSchMessage {
+        message: BcchDlSchMessageType::C1(C1::SystemInformation(SystemInformation {
+            critical_extensions: CriticalExtensions30::SystemInformation(SystemInformationIEs {
+                sib_type_and_info: nonempty![SibTypeAndInfo::Sib2(sib2)],
+                late_non_critical_extension: None,
+            }),
+        })),
     }
 }
 

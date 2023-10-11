@@ -9,15 +9,15 @@ edition = "2021"
 slog = "2.7.0"
 anyhow = "1.0.52"
 common = { path = "../common" }
-async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
+async-std = { version = "1.10.0", features = ["attributes", "tokio1"] }
 async-trait = "0.1.68"
 stop-token = "0.7.0"
-xxap = {path = "../xxap" }
-e1ap = {path = "../e1ap" }
-net = { path = "../net" }
+xxap = { path = "../5g-asn1-protos/xxap" }
+e1ap = { path = "../5g-asn1-protos/e1ap" }
+net = { path = "../5g-asn1-protos/net" }
 futures = "0.3"
 bitvec = "1.0.1"
-asn1-per = { path = "../asn1-per" }
+asn1-per = { path = "../5g-asn1-protos/asn1-per" }
 async-net = "1.6.1"
 dashmap = "5.4.0"
 rand = "0.8.5"

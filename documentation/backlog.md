@@ -1,8 +1,12 @@
 # OpenAirInterface interop
-- F1 Setup Response not matching
+- Failed to decode BCCH_DLSCH_MESSAGE.
+  -  Got this working but Wireshark thinks its wrong.  
+  -  Pulled a new build of OAI and am rebuilding.
+  -  What does the spec say?
+     - 38.473, 9.3.1.42
+     - "SIB as defined in subclause 6.3.1 in TS 38.331"
 
 # NEXT UP
-- Open Air Interface interop
 - intermittent CI failure in two_workers_f1_before_e1 
    Jul 21 06:48:34.444 INFO f705b4a4-de48-4a18-81a4-7287bf2974b7 to get added to F1 interface
 amf: 1
