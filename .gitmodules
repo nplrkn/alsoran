@@ -1,0 +1,3 @@
+[submodule "5g-asn1-protos"]
+	path = 5g-asn1-protos
+	url = git@github.com:nplrkn/5g-asn1-protos.git
