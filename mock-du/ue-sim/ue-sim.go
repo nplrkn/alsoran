@@ -121,7 +121,7 @@ func provisionUeInFree5GC(ue *RanUeContext) {
 	}()
 	select {
 	case <-time.After(1 * time.Second):
-		log.Fatal("Timed out trying to provision Ue in MongoDb")
+		log.Print("Timed out trying to provision Ue in MongoDb - carry on")
 	case <-done:
 		return
 	}
