@@ -3,6 +3,7 @@
 use super::common::*;
 use super::ies::*;
 use asn1_per::{aper::*, *};
+use xxap::*;
 #[allow(unused_imports)]
 use xxap::{GtpTunnel, PduSessionId, TransportLayerAddress};
 
@@ -31,15 +32,15 @@ impl Reset {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 4 => reset_type = Some(ResetType::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
-        let reset_type = reset_type.ok_or(PerCodecError::new(format!(
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
+        let reset_type = reset_type.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE reset_type"
         )))?;
         Ok(Self {
@@ -109,7 +110,7 @@ impl ResetType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::E1Interface(ResetAll::decode(data)?)),
@@ -121,12 +122,12 @@ impl ResetType {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -160,21 +161,25 @@ impl PerCodec for ResetType {
 }
 // ResetAll
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
-#[repr(u8)]
+#[repr(u32)]
 pub enum ResetAll {
     ResetAll,
 }
 
 impl ResetAll {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
-        if extended {
-            return Err(PerCodecError::new("Extended enum not implemented"));
-        }
-        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
+        let (idx, _extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        Self::try_from(idx as u32).map_err(|_| per_codec_error_new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
+        encode::encode_enumerated(
+            data,
+            Some(0),
+            Some(0),
+            true,
+            *self as i128,
+            (*self as u32) >= 1,
+        )
     }
 }
 
@@ -276,11 +281,11 @@ impl ResetAcknowledge {
                         Some(UeAssociatedLogicalE1ConnectionListResAck::decode(data)?)
                 }
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -426,11 +431,11 @@ impl ErrorIndication {
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -555,20 +560,20 @@ impl GnbCuUpE1SetupRequest {
                 64 => gnb_cu_up_capacity = Some(GnbCuUpCapacity::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 130 => extended_gnb_cu_up_name = Some(ExtendedGnbCuUpName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_up_id = gnb_cu_up_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_id = gnb_cu_up_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_id"
         )))?;
-        let cn_support = cn_support.ok_or(PerCodecError::new(format!(
+        let cn_support = cn_support.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE cn_support"
         )))?;
-        let supported_plmns = supported_plmns.ok_or(PerCodecError::new(format!(
+        let supported_plmns = supported_plmns.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE supported_plmns"
         )))?;
         Ok(Self {
@@ -886,11 +891,11 @@ impl GnbCuUpE1SetupResponse {
                 9 => gnb_cu_cp_name = Some(GnbCuCpName::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 129 => extended_gnb_cu_cp_name = Some(ExtendedGnbCuCpName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -992,14 +997,14 @@ impl GnbCuUpE1SetupFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 12 => time_to_wait = Some(TimeToWait::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -1097,11 +1102,11 @@ impl GnbCuCpE1SetupRequest {
                 9 => gnb_cu_cp_name = Some(GnbCuCpName::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 129 => extended_gnb_cu_cp_name = Some(ExtendedGnbCuCpName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -1215,20 +1220,20 @@ impl GnbCuCpE1SetupResponse {
                 64 => gnb_cu_up_capacity = Some(GnbCuUpCapacity::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 130 => extended_gnb_cu_up_name = Some(ExtendedGnbCuUpName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_up_id = gnb_cu_up_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_id = gnb_cu_up_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_id"
         )))?;
-        let cn_support = cn_support.ok_or(PerCodecError::new(format!(
+        let cn_support = cn_support.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE cn_support"
         )))?;
-        let supported_plmns = supported_plmns.ok_or(PerCodecError::new(format!(
+        let supported_plmns = supported_plmns.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE supported_plmns"
         )))?;
         Ok(Self {
@@ -1368,14 +1373,14 @@ impl GnbCuCpE1SetupFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 12 => time_to_wait = Some(TimeToWait::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -1485,14 +1490,14 @@ impl GnbCuUpConfigurationUpdate {
                 73 => gnb_cu_up_tnla_to_remove_list = Some(GnbCuUpTnlaToRemoveList::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 130 => extended_gnb_cu_up_name = Some(ExtendedGnbCuUpName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_up_id = gnb_cu_up_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_id = gnb_cu_up_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_id"
         )))?;
         Ok(Self {
@@ -1672,11 +1677,11 @@ impl GnbCuUpConfigurationUpdateAcknowledge {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -1767,14 +1772,14 @@ impl GnbCuUpConfigurationUpdateFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 12 => time_to_wait = Some(TimeToWait::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -1881,11 +1886,11 @@ impl GnbCuCpConfigurationUpdate {
                 29 => gnb_cu_cp_tnla_to_update_list = Some(GnbCuCpTnlaToUpdateList::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 129 => extended_gnb_cu_cp_name = Some(ExtendedGnbCuCpName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -2143,11 +2148,11 @@ impl GnbCuCpConfigurationUpdateAcknowledge {
                         Some(GnbCuCpTnlaFailedToSetupList::decode(data)?)
                 }
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -2338,14 +2343,14 @@ impl GnbCuCpConfigurationUpdateFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 12 => time_to_wait = Some(TimeToWait::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -2437,14 +2442,14 @@ impl E1ReleaseRequest {
             match id {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -2511,11 +2516,11 @@ impl E1ReleaseResponse {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self { transaction_id })
@@ -2631,28 +2636,28 @@ impl BearerContextSetupRequest {
                         Some(DirectForwardingPathAvailability::decode(data)?)
                 }
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let security_information = security_information.ok_or(PerCodecError::new(format!(
+        let security_information = security_information.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE security_information"
         )))?;
         let ue_dl_aggregate_maximum_bit_rate =
-            ue_dl_aggregate_maximum_bit_rate.ok_or(PerCodecError::new(format!(
+            ue_dl_aggregate_maximum_bit_rate.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE ue_dl_aggregate_maximum_bit_rate"
             )))?;
-        let serving_plmn = serving_plmn.ok_or(PerCodecError::new(format!(
+        let serving_plmn = serving_plmn.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE serving_plmn"
         )))?;
-        let activity_notification_level = activity_notification_level.ok_or(PerCodecError::new(
-            format!("Missing mandatory IE activity_notification_level"),
-        ))?;
+        let activity_notification_level = activity_notification_level.ok_or(
+            per_codec_error_new(format!("Missing mandatory IE activity_notification_level")),
+        )?;
         let system_bearer_context_setup_request =
-            system_bearer_context_setup_request.ok_or(PerCodecError::new(format!(
+            system_bearer_context_setup_request.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE system_bearer_context_setup_request"
             )))?;
         Ok(Self {
@@ -2881,7 +2886,7 @@ impl SystemBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranBearerContextSetupRequest(
@@ -2895,12 +2900,12 @@ impl SystemBearerContextSetupRequest {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2961,18 +2966,18 @@ impl BearerContextSetupResponse {
                     system_bearer_context_setup_response =
                         Some(SystemBearerContextSetupResponse::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         let system_bearer_context_setup_response =
-            system_bearer_context_setup_response.ok_or(PerCodecError::new(format!(
+            system_bearer_context_setup_response.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE system_bearer_context_setup_response"
             )))?;
         Ok(Self {
@@ -3042,7 +3047,7 @@ impl SystemBearerContextSetupResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranBearerContextSetupResponse(
@@ -3056,12 +3061,12 @@ impl SystemBearerContextSetupResponse {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -3121,14 +3126,14 @@ impl BearerContextSetupFailure {
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id,
@@ -3261,14 +3266,14 @@ impl BearerContextModificationRequest {
                 76 => ran_ue_id = Some(RanUeId::decode(data)?),
                 77 => gnb_du_id = Some(GnbDuId::decode(data)?),
                 23 => activity_notification_level = Some(ActivityNotificationLevel::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         Ok(Self {
@@ -3450,7 +3455,7 @@ impl SystemBearerContextModificationRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranBearerContextModificationRequest(
@@ -3464,12 +3469,12 @@ impl SystemBearerContextModificationRequest {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -3534,14 +3539,14 @@ impl BearerContextModificationResponse {
                     system_bearer_context_modification_response =
                         Some(SystemBearerContextModificationResponse::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         Ok(Self {
@@ -3613,7 +3618,7 @@ impl SystemBearerContextModificationResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranBearerContextModificationResponse(
@@ -3627,12 +3632,12 @@ impl SystemBearerContextModificationResponse {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -3694,17 +3699,17 @@ impl BearerContextModificationFailure {
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id,
@@ -3802,18 +3807,18 @@ impl BearerContextModificationRequired {
                     system_bearer_context_modification_required =
                         Some(SystemBearerContextModificationRequired::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         let system_bearer_context_modification_required =
-            system_bearer_context_modification_required.ok_or(PerCodecError::new(format!(
+            system_bearer_context_modification_required.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE system_bearer_context_modification_required"
             )))?;
         Ok(Self {
@@ -3884,7 +3889,7 @@ impl SystemBearerContextModificationRequired {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranBearerContextModificationRequired(
@@ -3898,12 +3903,12 @@ impl SystemBearerContextModificationRequired {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -3967,14 +3972,14 @@ impl BearerContextModificationConfirm {
                     system_bearer_context_modification_confirm =
                         Some(SystemBearerContextModificationConfirm::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         Ok(Self {
@@ -4046,7 +4051,7 @@ impl SystemBearerContextModificationConfirm {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranBearerContextModificationConfirm(
@@ -4060,12 +4065,12 @@ impl SystemBearerContextModificationConfirm {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -4124,17 +4129,17 @@ impl BearerContextReleaseCommand {
                 2 => gnb_cu_cp_ue_e1ap_id = Some(GnbCuCpUeE1apId::decode(data)?),
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id,
@@ -4222,14 +4227,14 @@ impl BearerContextReleaseComplete {
                     retainability_measurements_info =
                         Some(RetainabilityMeasurementsInfo::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         Ok(Self {
@@ -4329,17 +4334,17 @@ impl BearerContextReleaseRequest {
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 22 => drb_status_list = Some(DrbStatusList::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id,
@@ -4471,17 +4476,17 @@ impl BearerContextInactivityNotification {
                 2 => gnb_cu_cp_ue_e1ap_id = Some(GnbCuCpUeE1apId::decode(data)?),
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 24 => activity_information = Some(ActivityInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let activity_information = activity_information.ok_or(PerCodecError::new(format!(
+        let activity_information = activity_information.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE activity_information"
         )))?;
         Ok(Self {
@@ -4568,14 +4573,14 @@ impl DlDataNotification {
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 63 => ppi = Some(Ppi::decode(data)?),
                 67 => pdu_session_to_notify_list = Some(PduSessionToNotifyList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         Ok(Self {
@@ -4672,17 +4677,17 @@ impl UlDataNotification {
                 2 => gnb_cu_cp_ue_e1ap_id = Some(GnbCuCpUeE1apId::decode(data)?),
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 67 => pdu_session_to_notify_list = Some(PduSessionToNotifyList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let pdu_session_to_notify_list = pdu_session_to_notify_list.ok_or(PerCodecError::new(
+        let pdu_session_to_notify_list = pdu_session_to_notify_list.ok_or(per_codec_error_new(
             format!("Missing mandatory IE pdu_session_to_notify_list"),
         ))?;
         Ok(Self {
@@ -4766,17 +4771,17 @@ impl DataUsageReport {
                 2 => gnb_cu_cp_ue_e1ap_id = Some(GnbCuCpUeE1apId::decode(data)?),
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 25 => data_usage_report_list = Some(DataUsageReportList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let data_usage_report_list = data_usage_report_list.ok_or(PerCodecError::new(format!(
+        let data_usage_report_list = data_usage_report_list.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE data_usage_report_list"
         )))?;
         Ok(Self {
@@ -4864,18 +4869,18 @@ impl GnbCuUpCounterCheckRequest {
                     system_gnb_cu_up_counter_check_request =
                         Some(SystemGnbCuUpCounterCheckRequest::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         let system_gnb_cu_up_counter_check_request =
-            system_gnb_cu_up_counter_check_request.ok_or(PerCodecError::new(format!(
+            system_gnb_cu_up_counter_check_request.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE system_gnb_cu_up_counter_check_request"
             )))?;
         Ok(Self {
@@ -4945,7 +4950,7 @@ impl SystemGnbCuUpCounterCheckRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranGnbCuUpCounterCheckRequest(
@@ -4959,12 +4964,12 @@ impl SystemGnbCuUpCounterCheckRequest {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             }
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -5020,15 +5025,15 @@ impl GnbCuUpStatusIndication {
                 65 => {
                     gnb_cu_up_overload_information = Some(GnbCuUpOverloadInformation::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         let gnb_cu_up_overload_information =
-            gnb_cu_up_overload_information.ok_or(PerCodecError::new(format!(
+            gnb_cu_up_overload_information.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE gnb_cu_up_overload_information"
             )))?;
         Ok(Self {
@@ -5108,18 +5113,18 @@ impl GnbCuCpMeasurementResultsInformation {
                     drb_measurement_results_information_list =
                         Some(DrbMeasurementResultsInformationList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         let drb_measurement_results_information_list = drb_measurement_results_information_list
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE drb_measurement_results_information_list"
             )))?;
         Ok(Self {
@@ -5207,18 +5212,18 @@ impl MrdcDataUsageReport {
                     pdu_session_resource_data_usage_list =
                         Some(PduSessionResourceDataUsageList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         let pdu_session_resource_data_usage_list =
-            pdu_session_resource_data_usage_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_data_usage_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_data_usage_list"
             )))?;
         Ok(Self {
@@ -5302,17 +5307,17 @@ impl TraceStart {
                 2 => gnb_cu_cp_ue_e1ap_id = Some(GnbCuCpUeE1apId::decode(data)?),
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 81 => trace_activation = Some(TraceActivation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let trace_activation = trace_activation.ok_or(PerCodecError::new(format!(
+        let trace_activation = trace_activation.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE trace_activation"
         )))?;
         Ok(Self {
@@ -5396,18 +5401,19 @@ impl DeactivateTrace {
                 2 => gnb_cu_cp_ue_e1ap_id = Some(GnbCuCpUeE1apId::decode(data)?),
                 3 => gnb_cu_up_ue_e1ap_id = Some(GnbCuUpUeE1apId::decode(data)?),
                 82 => trace_id = Some(TraceId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let trace_id =
-            trace_id.ok_or(PerCodecError::new(format!("Missing mandatory IE trace_id")))?;
+        let trace_id = trace_id.ok_or(per_codec_error_new(format!(
+            "Missing mandatory IE trace_id"
+        )))?;
         Ok(Self {
             gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id,
@@ -5500,20 +5506,21 @@ impl CellTrafficTrace {
                 }
                 115 => privacy_indicator = Some(PrivacyIndicator::decode(data)?),
                 117 => ur_iaddress = Some(UrIaddress::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
-        let trace_id =
-            trace_id.ok_or(PerCodecError::new(format!("Missing mandatory IE trace_id")))?;
+        let trace_id = trace_id.ok_or(per_codec_error_new(format!(
+            "Missing mandatory IE trace_id"
+        )))?;
         let trace_collection_entity_ip_address =
-            trace_collection_entity_ip_address.ok_or(PerCodecError::new(format!(
+            trace_collection_entity_ip_address.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE trace_collection_entity_ip_address"
             )))?;
         Ok(Self {
@@ -5677,17 +5684,17 @@ impl ResourceStatusRequest {
                 91 => registration_request = Some(RegistrationRequest::decode(data)?),
                 92 => report_characteristics = Some(ReportCharacteristics::decode(data)?),
                 93 => reporting_periodicity = Some(ReportingPeriodicity::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(PerCodecError::new(
+        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(per_codec_error_new(
             format!("Missing mandatory IE gnb_cu_cp_measurement_id"),
         ))?;
-        let registration_request = registration_request.ok_or(PerCodecError::new(format!(
+        let registration_request = registration_request.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE registration_request"
         )))?;
         Ok(Self {
@@ -5820,17 +5827,17 @@ impl ResourceStatusResponse {
                         Some(decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16)
                 }
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(PerCodecError::new(
+        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(per_codec_error_new(
             format!("Missing mandatory IE gnb_cu_cp_measurement_id"),
         ))?;
-        let gnb_cu_up_measurement_id = gnb_cu_up_measurement_id.ok_or(PerCodecError::new(
+        let gnb_cu_up_measurement_id = gnb_cu_up_measurement_id.ok_or(per_codec_error_new(
             format!("Missing mandatory IE gnb_cu_up_measurement_id"),
         ))?;
         Ok(Self {
@@ -5951,17 +5958,17 @@ impl ResourceStatusFailure {
                 }
                 0 => cause = Some(Cause::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(PerCodecError::new(
+        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(per_codec_error_new(
             format!("Missing mandatory IE gnb_cu_cp_measurement_id"),
         ))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             gnb_cu_cp_measurement_id,
@@ -6087,17 +6094,17 @@ impl ResourceStatusUpdate {
                         Some(TnlAvailableCapacityIndicator::decode(data)?)
                 }
                 95 => hw_capacity_indicator = Some(HwCapacityIndicator::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(PerCodecError::new(
+        let gnb_cu_cp_measurement_id = gnb_cu_cp_measurement_id.ok_or(per_codec_error_new(
             format!("Missing mandatory IE gnb_cu_cp_measurement_id"),
         ))?;
-        let hw_capacity_indicator = hw_capacity_indicator.ok_or(PerCodecError::new(format!(
+        let hw_capacity_indicator = hw_capacity_indicator.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE hw_capacity_indicator"
         )))?;
         Ok(Self {
@@ -6210,11 +6217,11 @@ impl IabUpTnlAddressUpdate {
                     dl_up_tnl_address_to_update_list =
                         Some(DlUpTnlAddressToUpdateList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -6333,11 +6340,11 @@ impl IabUpTnlAddressUpdateAcknowledge {
                     ul_up_tnl_address_to_update_list =
                         Some(UlUpTnlAddressToUpdateList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
@@ -6467,14 +6474,14 @@ impl IabUpTnlAddressUpdateFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 12 => time_to_wait = Some(TimeToWait::decode(data)?),
                 1 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
+        let transaction_id = transaction_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -6573,18 +6580,18 @@ impl EarlyForwardingSnTransfer {
                     drbs_subject_to_early_forwarding_list =
                         Some(DrbsSubjectToEarlyForwardingList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_cp_ue_e1ap_id = gnb_cu_cp_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_cp_ue_e1ap_id"
         )))?;
-        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(PerCodecError::new(format!(
+        let gnb_cu_up_ue_e1ap_id = gnb_cu_up_ue_e1ap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE gnb_cu_up_ue_e1ap_id"
         )))?;
         let drbs_subject_to_early_forwarding_list =
-            drbs_subject_to_early_forwarding_list.ok_or(PerCodecError::new(format!(
+            drbs_subject_to_early_forwarding_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE drbs_subject_to_early_forwarding_list"
             )))?;
         Ok(Self {
@@ -6671,11 +6678,11 @@ impl EutranBearerContextSetupRequest {
                 84 => {
                     additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let drb_to_setup_list_eutran = drb_to_setup_list_eutran.ok_or(PerCodecError::new(
+        let drb_to_setup_list_eutran = drb_to_setup_list_eutran.ok_or(per_codec_error_new(
             format!("Missing mandatory IE drb_to_setup_list_eutran"),
         ))?;
         Ok(Self {
@@ -6758,12 +6765,12 @@ impl NgRanBearerContextSetupRequest {
                     pdu_session_resource_to_setup_list =
                         Some(PduSessionResourceToSetupList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
         let pdu_session_resource_to_setup_list =
-            pdu_session_resource_to_setup_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_to_setup_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_to_setup_list"
             )))?;
         Ok(Self {
@@ -6824,11 +6831,11 @@ impl EutranBearerContextSetupResponse {
             match id {
                 37 => drb_setup_list_eutran = Some(DrbSetupListEutran::decode(data)?),
                 38 => drb_failed_list_eutran = Some(DrbFailedListEutran::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let drb_setup_list_eutran = drb_setup_list_eutran.ok_or(PerCodecError::new(format!(
+        let drb_setup_list_eutran = drb_setup_list_eutran.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE drb_setup_list_eutran"
         )))?;
         Ok(Self {
@@ -6906,12 +6913,12 @@ impl NgRanBearerContextSetupResponse {
                     pdu_session_resource_failed_list =
                         Some(PduSessionResourceFailedList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
         let pdu_session_resource_setup_list =
-            pdu_session_resource_setup_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_setup_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_setup_list"
             )))?;
         Ok(Self {
@@ -6996,7 +7003,7 @@ impl EutranBearerContextModificationRequest {
                 84 => {
                     additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7119,7 +7126,7 @@ impl NgRanBearerContextModificationRequest {
                     pdu_session_resource_to_remove_list =
                         Some(PduSessionResourceToRemoveList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7220,7 +7227,7 @@ impl EutranBearerContextModificationResponse {
                     retainability_measurements_info =
                         Some(RetainabilityMeasurementsInfo::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7357,7 +7364,7 @@ impl NgRanBearerContextModificationResponse {
                     retainability_measurements_info =
                         Some(RetainabilityMeasurementsInfo::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7473,7 +7480,7 @@ impl EutranBearerContextModificationRequired {
                     drb_required_to_remove_list_eutran =
                         Some(DrbRequiredToRemoveListEutran::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7559,7 +7566,7 @@ impl NgRanBearerContextModificationRequired {
                     pdu_session_resource_to_remove_list =
                         Some(PduSessionResourceToRemoveList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7636,7 +7643,7 @@ impl EutranBearerContextModificationConfirm {
                     drb_confirm_modified_list_eutran =
                         Some(DrbConfirmModifiedListEutran::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7704,7 +7711,7 @@ impl NgRanBearerContextModificationConfirm {
                     pdu_session_resource_confirm_modified_list =
                         Some(PduSessionResourceConfirmModifiedList::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -7770,12 +7777,12 @@ impl EutranGnbCuUpCounterCheckRequest {
                     drbs_subject_to_counter_check_list_eutran =
                         Some(DrbsSubjectToCounterCheckListEutran::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
         let drbs_subject_to_counter_check_list_eutran = drbs_subject_to_counter_check_list_eutran
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
             "Missing mandatory IE drbs_subject_to_counter_check_list_eutran"
         )))?;
         Ok(Self {
@@ -7838,12 +7845,12 @@ impl NgRanGnbCuUpCounterCheckRequest {
                     drbs_subject_to_counter_check_list_ng_ran =
                         Some(DrbsSubjectToCounterCheckListNgRan::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
         let drbs_subject_to_counter_check_list_ng_ran = drbs_subject_to_counter_check_list_ng_ran
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
             "Missing mandatory IE drbs_subject_to_counter_check_list_ng_ran"
         )))?;
         Ok(Self {

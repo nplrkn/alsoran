@@ -6,6 +6,7 @@ use anyhow::Result;
 use asn1_per::{aper::*, *};
 use async_trait::async_trait;
 use slog::Logger;
+use xxap::*;
 
 // NgapPdu
 #[derive(Clone, Debug)]
@@ -19,7 +20,7 @@ impl NgapPdu {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, true)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"));
+            return Err(per_codec_error_new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::InitiatingMessage(InitiatingMessage::decode(data)?)),
@@ -27,7 +28,7 @@ impl NgapPdu {
             2 => Ok(Self::UnsuccessfulOutcome(UnsuccessfulOutcome::decode(
                 data,
             )?)),
-            _ => Err(PerCodecError::new("Unknown choice idx")),
+            _ => Err(per_codec_error_new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2181,7 +2182,7 @@ impl InitiatingMessage {
                 DownlinkRimInformationTransfer::decode(data)?,
             )),
             x => {
-                return Err(PerCodecError::new(format!(
+                return Err(per_codec_error_new(format!(
                     "Unrecognised procedure code {}",
                     x
                 )))
@@ -3208,7 +3209,7 @@ impl SuccessfulOutcome {
                 WriteReplaceWarningResponse::decode(data)?,
             )),
             x => {
-                return Err(PerCodecError::new(format!(
+                return Err(per_codec_error_new(format!(
                     "Unrecognised procedure code {}",
                     x
                 )))
@@ -3579,7 +3580,7 @@ impl UnsuccessfulOutcome {
                 UeContextSuspendFailure::decode(data)?,
             )),
             x => {
-                return Err(PerCodecError::new(format!(
+                return Err(per_codec_error_new(format!(
                     "Unrecognised procedure code {}",
                     x
                 )))

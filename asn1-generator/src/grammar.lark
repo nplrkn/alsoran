@@ -55,6 +55,7 @@ object_def.0:           IDENTIFIER _IDENTIFIER "::=" ies
 
 _comma_separated{x}:    x ("," x)* ","?
 _items{x}:              "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
+_enum_items{x}:         "{" _comma_separated{x}? (extension_marker _comma_separated{x}?)? "}" 
 extended_items{x}:      _comma_separated{_bracketed_group{x}}
 _bracketed_group{x}:    ("[[" _comma_separated{x} "]]") | x
 
@@ -67,7 +68,7 @@ field.1:                _identifier _field_type
 _empty_sequence.3:       "SEQUENCE" "{}"
 empty_sequence_field.1:  _identifier _empty_sequence
 
-enumerated.1:             "ENUMERATED" _items{enum_field}
+enumerated.1:             "ENUMERATED" _enum_items{enum_field}
 enum_field:              _identifier
 
 choice:                 "CHOICE" _items{_choice_item}

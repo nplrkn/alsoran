@@ -3,6 +3,7 @@
 use super::common::*;
 use super::ies::*;
 use asn1_per::{aper::*, *};
+use xxap::*;
 #[allow(unused_imports)]
 use xxap::{GtpTunnel, PduSessionId, TransportLayerAddress};
 
@@ -46,18 +47,18 @@ impl PduSessionResourceSetupRequest {
                 110 => {
                     ue_aggregate_maximum_bit_rate = Some(UeAggregateMaximumBitRate::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_setup_list_su_req =
-            pdu_session_resource_setup_list_su_req.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_setup_list_su_req.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_setup_list_su_req"
             )))?;
         Ok(Self {
@@ -190,14 +191,14 @@ impl PduSessionResourceSetupResponse {
                         Some(PduSessionResourceFailedToSetupListSuRes::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -316,18 +317,18 @@ impl PduSessionResourceReleaseCommand {
                     pdu_session_resource_to_release_list_rel_cmd =
                         Some(PduSessionResourceToReleaseListRelCmd::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_to_release_list_rel_cmd =
-            pdu_session_resource_to_release_list_rel_cmd.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_to_release_list_rel_cmd.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_to_release_list_rel_cmd"
             )))?;
         Ok(Self {
@@ -445,18 +446,18 @@ impl PduSessionResourceReleaseResponse {
                 }
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_released_list_rel_res = pdu_session_resource_released_list_rel_res
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_released_list_rel_res"
             )))?;
         Ok(Self {
@@ -570,18 +571,18 @@ impl PduSessionResourceModifyRequest {
                     pdu_session_resource_modify_list_mod_req =
                         Some(PduSessionResourceModifyListModReq::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_modify_list_mod_req = pdu_session_resource_modify_list_mod_req
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_modify_list_mod_req"
             )))?;
         Ok(Self {
@@ -696,14 +697,14 @@ impl PduSessionResourceModifyResponse {
                 }
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -835,14 +836,14 @@ impl PduSessionResourceNotify {
                         Some(PduSessionResourceReleasedListNot::decode(data)?)
                 }
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -958,18 +959,18 @@ impl PduSessionResourceModifyIndication {
                         Some(PduSessionResourceModifyListModInd::decode(data)?)
                 }
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_modify_list_mod_ind = pdu_session_resource_modify_list_mod_ind
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_modify_list_mod_ind"
             )))?;
         Ok(Self {
@@ -1081,14 +1082,14 @@ impl PduSessionResourceModifyConfirm {
                         Some(PduSessionResourceFailedToModifyListModCfm::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -1338,24 +1339,24 @@ impl InitialContextSetupRequest {
                 }
                 254 => management_based_mdt_plmn_list = Some(MdtPlmnList::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let guami = guami.ok_or(PerCodecError::new(format!("Missing mandatory IE guami")))?;
-        let allowed_nssai = allowed_nssai.ok_or(PerCodecError::new(format!(
+        let guami = guami.ok_or(per_codec_error_new(format!("Missing mandatory IE guami")))?;
+        let allowed_nssai = allowed_nssai.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE allowed_nssai"
         )))?;
-        let ue_security_capabilities = ue_security_capabilities.ok_or(PerCodecError::new(
+        let ue_security_capabilities = ue_security_capabilities.ok_or(per_codec_error_new(
             format!("Missing mandatory IE ue_security_capabilities"),
         ))?;
-        let security_key = security_key.ok_or(PerCodecError::new(format!(
+        let security_key = security_key.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE security_key"
         )))?;
         Ok(Self {
@@ -1823,14 +1824,14 @@ impl InitialContextSetupResponse {
                         Some(PduSessionResourceFailedToSetupListCxtRes::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -1950,17 +1951,17 @@ impl InitialContextSetupFailure {
                 }
                 15 => cause = Some(Cause::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -2071,17 +2072,17 @@ impl UeContextReleaseRequest {
                         Some(PduSessionResourceListCxtRelReq::decode(data)?)
                 }
                 15 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -2171,14 +2172,14 @@ impl UeContextReleaseCommand {
             match id {
                 114 => ue_ngap_i_ds = Some(UeNgapIDs::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ue_ngap_i_ds = ue_ngap_i_ds.ok_or(PerCodecError::new(format!(
+        let ue_ngap_i_ds = ue_ngap_i_ds.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ue_ngap_i_ds"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             ue_ngap_i_ds,
             cause,
@@ -2276,14 +2277,14 @@ impl UeContextReleaseComplete {
                     paging_assis_datafor_c_ecapab_ue =
                         Some(PagingAssisDataforCEcapabUe::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -2448,17 +2449,17 @@ impl UeContextResumeRequest {
                     paging_assis_datafor_c_ecapab_ue =
                         Some(PagingAssisDataforCEcapabUe::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let rrc_resume_cause = rrc_resume_cause.ok_or(PerCodecError::new(format!(
+        let rrc_resume_cause = rrc_resume_cause.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE rrc_resume_cause"
         )))?;
         Ok(Self {
@@ -2623,14 +2624,14 @@ impl UeContextResumeResponse {
                 236 => suspend_response_indication = Some(SuspendResponseIndication::decode(data)?),
                 206 => extended_connected_time = Some(ExtendedConnectedTime::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -2774,17 +2775,17 @@ impl UeContextResumeFailure {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -2897,14 +2898,14 @@ impl UeContextSuspendRequest {
                     pdu_session_resource_suspend_list_sus_req =
                         Some(PduSessionResourceSuspendListSusReq::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -3015,14 +3016,14 @@ impl UeContextSuspendResponse {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 93 => security_context = Some(SecurityContext::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -3122,17 +3123,17 @@ impl UeContextSuspendFailure {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -3311,14 +3312,14 @@ impl UeContextModificationRequest {
                     rg_level_wireline_access_characteristics =
                         Some(RgLevelWirelineAccessCharacteristics::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -3619,14 +3620,14 @@ impl UeContextModificationResponse {
                 92 => rrc_state = Some(RrcState::decode(data)?),
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -3737,17 +3738,17 @@ impl UeContextModificationFailure {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -3843,20 +3844,20 @@ impl RrcInactiveTransitionReport {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 92 => rrc_state = Some(RrcState::decode(data)?),
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let rrc_state = rrc_state.ok_or(PerCodecError::new(format!(
+        let rrc_state = rrc_state.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE rrc_state"
         )))?;
-        let user_location_information = user_location_information.ok_or(PerCodecError::new(
+        let user_location_information = user_location_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE user_location_information"),
         ))?;
         Ok(Self {
@@ -3943,11 +3944,11 @@ impl RetrieveUeInformation {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 26 => five_g_s_tmsi = Some(FiveGSTmsi::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let five_g_s_tmsi = five_g_s_tmsi.ok_or(PerCodecError::new(format!(
+        let five_g_s_tmsi = five_g_s_tmsi.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE five_g_s_tmsi"
         )))?;
         Ok(Self { five_g_s_tmsi })
@@ -4020,11 +4021,11 @@ impl UeInformationTransfer {
                 148 => snssai = Some(Snssai::decode(data)?),
                 0 => allowed_nssai = Some(AllowedNssai::decode(data)?),
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let five_g_s_tmsi = five_g_s_tmsi.ok_or(PerCodecError::new(format!(
+        let five_g_s_tmsi = five_g_s_tmsi.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE five_g_s_tmsi"
         )))?;
         Ok(Self {
@@ -4151,21 +4152,21 @@ impl RancpRelocationIndication {
                 25 => eutra_cgi = Some(EutraCgi::decode(data)?),
                 213 => tai = Some(Tai::decode(data)?),
                 211 => ul_cp_security_information = Some(UlCpSecurityInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let five_g_s_tmsi = five_g_s_tmsi.ok_or(PerCodecError::new(format!(
+        let five_g_s_tmsi = five_g_s_tmsi.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE five_g_s_tmsi"
         )))?;
-        let eutra_cgi = eutra_cgi.ok_or(PerCodecError::new(format!(
+        let eutra_cgi = eutra_cgi.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE eutra_cgi"
         )))?;
-        let tai = tai.ok_or(PerCodecError::new(format!("Missing mandatory IE tai")))?;
-        let ul_cp_security_information = ul_cp_security_information.ok_or(PerCodecError::new(
+        let tai = tai.ok_or(per_codec_error_new(format!("Missing mandatory IE tai")))?;
+        let ul_cp_security_information = ul_cp_security_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE ul_cp_security_information"),
         ))?;
         Ok(Self {
@@ -4293,29 +4294,29 @@ impl HandoverRequired {
                     source_to_target_transparent_container =
                         Some(SourceToTargetTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let handover_type = handover_type.ok_or(PerCodecError::new(format!(
+        let handover_type = handover_type.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE handover_type"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
-        let target_id = target_id.ok_or(PerCodecError::new(format!(
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
+        let target_id = target_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE target_id"
         )))?;
         let pdu_session_resource_list_ho_rqd =
-            pdu_session_resource_list_ho_rqd.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_list_ho_rqd.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_list_ho_rqd"
             )))?;
         let source_to_target_transparent_container =
-            source_to_target_transparent_container.ok_or(PerCodecError::new(format!(
+            source_to_target_transparent_container.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE source_to_target_transparent_container"
             )))?;
         Ok(Self {
@@ -4476,21 +4477,21 @@ impl HandoverCommand {
                         Some(TargetToSourceTransparentContainer::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let handover_type = handover_type.ok_or(PerCodecError::new(format!(
+        let handover_type = handover_type.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE handover_type"
         )))?;
         let target_to_source_transparent_container =
-            target_to_source_transparent_container.ok_or(PerCodecError::new(format!(
+            target_to_source_transparent_container.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE target_to_source_transparent_container"
             )))?;
         Ok(Self {
@@ -4639,17 +4640,17 @@ impl HandoverPreparationFailure {
                     targetto_source_failure_transparent_container =
                         Some(TargettoSourceFailureTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -4881,39 +4882,39 @@ impl HandoverRequest {
                 254 => management_based_mdt_plmn_list = Some(MdtPlmnList::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 206 => extended_connected_time = Some(ExtendedConnectedTime::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let handover_type = handover_type.ok_or(PerCodecError::new(format!(
+        let handover_type = handover_type.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE handover_type"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         let ue_aggregate_maximum_bit_rate =
-            ue_aggregate_maximum_bit_rate.ok_or(PerCodecError::new(format!(
+            ue_aggregate_maximum_bit_rate.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE ue_aggregate_maximum_bit_rate"
             )))?;
-        let ue_security_capabilities = ue_security_capabilities.ok_or(PerCodecError::new(
+        let ue_security_capabilities = ue_security_capabilities.ok_or(per_codec_error_new(
             format!("Missing mandatory IE ue_security_capabilities"),
         ))?;
-        let security_context = security_context.ok_or(PerCodecError::new(format!(
+        let security_context = security_context.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE security_context"
         )))?;
         let pdu_session_resource_setup_list_ho_req =
-            pdu_session_resource_setup_list_ho_req.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_setup_list_ho_req.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_setup_list_ho_req"
             )))?;
-        let allowed_nssai = allowed_nssai.ok_or(PerCodecError::new(format!(
+        let allowed_nssai = allowed_nssai.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE allowed_nssai"
         )))?;
         let source_to_target_transparent_container =
-            source_to_target_transparent_container.ok_or(PerCodecError::new(format!(
+            source_to_target_transparent_container.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE source_to_target_transparent_container"
             )))?;
-        let guami = guami.ok_or(PerCodecError::new(format!("Missing mandatory IE guami")))?;
+        let guami = guami.ok_or(per_codec_error_new(format!("Missing mandatory IE guami")))?;
         Ok(Self {
             amf_ue_ngap_id,
             handover_type,
@@ -5344,22 +5345,22 @@ impl HandoverRequestAcknowledge {
                         Some(TargetToSourceTransparentContainer::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_admitted_list =
-            pdu_session_resource_admitted_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_admitted_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_admitted_list"
             )))?;
         let target_to_source_transparent_container =
-            target_to_source_transparent_container.ok_or(PerCodecError::new(format!(
+            target_to_source_transparent_container.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE target_to_source_transparent_container"
             )))?;
         Ok(Self {
@@ -5483,14 +5484,14 @@ impl HandoverFailure {
                     targetto_source_failure_transparent_container =
                         Some(TargettoSourceFailureTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             cause,
@@ -5588,17 +5589,17 @@ impl HandoverNotify {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
                 269 => notify_source_ngran_node = Some(NotifySourceNgranNode::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let user_location_information = user_location_information.ok_or(PerCodecError::new(
+        let user_location_information = user_location_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE user_location_information"),
         ))?;
         Ok(Self {
@@ -5716,24 +5717,24 @@ impl PathSwitchRequest {
                         Some(PduSessionResourceFailedToSetupListPsReq::decode(data)?)
                 }
                 237 => rrc_resume_cause = Some(RrcEstablishmentCause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let source_amf_ue_ngap_id = source_amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let source_amf_ue_ngap_id = source_amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE source_amf_ue_ngap_id"
         )))?;
-        let user_location_information = user_location_information.ok_or(PerCodecError::new(
+        let user_location_information = user_location_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE user_location_information"),
         ))?;
-        let ue_security_capabilities = ue_security_capabilities.ok_or(PerCodecError::new(
+        let ue_security_capabilities = ue_security_capabilities.ok_or(per_codec_error_new(
             format!("Missing mandatory IE ue_security_capabilities"),
         ))?;
         let pdu_session_resource_to_be_switched_dl_list =
-            pdu_session_resource_to_be_switched_dl_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_to_be_switched_dl_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_to_be_switched_dl_list"
             )))?;
         Ok(Self {
@@ -5954,24 +5955,24 @@ impl PathSwitchRequestAcknowledge {
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
                 234 => ue_up_c_iot_support = Some(UeUpCIotSupport::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let security_context = security_context.ok_or(PerCodecError::new(format!(
+        let security_context = security_context.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE security_context"
         )))?;
         let pdu_session_resource_switched_list =
-            pdu_session_resource_switched_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_switched_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_switched_list"
             )))?;
-        let allowed_nssai = allowed_nssai.ok_or(PerCodecError::new(format!(
+        let allowed_nssai = allowed_nssai.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE allowed_nssai"
         )))?;
         Ok(Self {
@@ -6301,18 +6302,18 @@ impl PathSwitchRequestFailure {
                         Some(PduSessionResourceReleasedListPsFail::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_released_list_ps_fail = pdu_session_resource_released_list_ps_fail
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_released_list_ps_fail"
             )))?;
         Ok(Self {
@@ -6407,17 +6408,17 @@ impl HandoverCancel {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -6499,14 +6500,14 @@ impl HandoverCancelAcknowledge {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -6589,14 +6590,14 @@ impl HandoverSuccess {
             match id {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -6676,18 +6677,18 @@ impl UplinkRanEarlyStatusTransfer {
                     early_status_transfer_transparent_container =
                         Some(EarlyStatusTransferTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let early_status_transfer_transparent_container =
-            early_status_transfer_transparent_container.ok_or(PerCodecError::new(format!(
+            early_status_transfer_transparent_container.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE early_status_transfer_transparent_container"
             )))?;
         Ok(Self {
@@ -6777,18 +6778,18 @@ impl DownlinkRanEarlyStatusTransfer {
                     early_status_transfer_transparent_container =
                         Some(EarlyStatusTransferTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let early_status_transfer_transparent_container =
-            early_status_transfer_transparent_container.ok_or(PerCodecError::new(format!(
+            early_status_transfer_transparent_container.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE early_status_transfer_transparent_container"
             )))?;
         Ok(Self {
@@ -6878,18 +6879,18 @@ impl UplinkRanStatusTransfer {
                     ran_status_transfer_transparent_container =
                         Some(RanStatusTransferTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let ran_status_transfer_transparent_container = ran_status_transfer_transparent_container
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_status_transfer_transparent_container"
         )))?;
         Ok(Self {
@@ -6978,18 +6979,18 @@ impl DownlinkRanStatusTransfer {
                     ran_status_transfer_transparent_container =
                         Some(RanStatusTransferTransparentContainer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let ran_status_transfer_transparent_container = ran_status_transfer_transparent_container
-            .ok_or(PerCodecError::new(format!(
+            .ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_status_transfer_transparent_container"
         )))?;
         Ok(Self {
@@ -7107,14 +7108,14 @@ impl Paging {
                 208 => wus_assistance_information = Some(WusAssistanceInformation::decode(data)?),
                 223 => paginge_drx_information = Some(PagingeDrxInformation::decode(data)?),
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ue_paging_identity = ue_paging_identity.ok_or(PerCodecError::new(format!(
+        let ue_paging_identity = ue_paging_identity.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ue_paging_identity"
         )))?;
-        let tai_list_for_paging = tai_list_for_paging.ok_or(PerCodecError::new(format!(
+        let tai_list_for_paging = tai_list_for_paging.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE tai_list_for_paging"
         )))?;
         Ok(Self {
@@ -7354,18 +7355,19 @@ impl InitialUeMessage {
                 227 => edt_session = Some(EdtSession::decode(data)?),
                 245 => authenticated_indication = Some(AuthenticatedIndication::decode(data)?),
                 259 => npn_access_information = Some(NpnAccessInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let nas_pdu = nas_pdu.ok_or(PerCodecError::new(format!("Missing mandatory IE nas_pdu")))?;
-        let user_location_information = user_location_information.ok_or(PerCodecError::new(
+        let nas_pdu =
+            nas_pdu.ok_or(per_codec_error_new(format!("Missing mandatory IE nas_pdu")))?;
+        let user_location_information = user_location_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE user_location_information"),
         ))?;
-        let rrc_establishment_cause = rrc_establishment_cause.ok_or(PerCodecError::new(
+        let rrc_establishment_cause = rrc_establishment_cause.ok_or(per_codec_error_new(
             format!("Missing mandatory IE rrc_establishment_cause"),
         ))?;
         Ok(Self {
@@ -7639,17 +7641,18 @@ impl DownlinkNasTransport {
                 228 => ue_capability_info_request = Some(UeCapabilityInfoRequest::decode(data)?),
                 226 => end_indication = Some(EndIndication::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let nas_pdu = nas_pdu.ok_or(PerCodecError::new(format!("Missing mandatory IE nas_pdu")))?;
+        let nas_pdu =
+            nas_pdu.ok_or(per_codec_error_new(format!("Missing mandatory IE nas_pdu")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -7917,18 +7920,19 @@ impl UplinkNasTransport {
                     twif_identity_information =
                         Some(decode::decode_octetstring(data, None, None, false)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let nas_pdu = nas_pdu.ok_or(PerCodecError::new(format!("Missing mandatory IE nas_pdu")))?;
-        let user_location_information = user_location_information.ok_or(PerCodecError::new(
+        let nas_pdu =
+            nas_pdu.ok_or(per_codec_error_new(format!("Missing mandatory IE nas_pdu")))?;
+        let user_location_information = user_location_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE user_location_information"),
         ))?;
         Ok(Self {
@@ -8057,18 +8061,19 @@ impl NasNonDeliveryIndication {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 38 => nas_pdu = Some(NasPdu::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let nas_pdu = nas_pdu.ok_or(PerCodecError::new(format!("Missing mandatory IE nas_pdu")))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let nas_pdu =
+            nas_pdu.ok_or(per_codec_error_new(format!("Missing mandatory IE nas_pdu")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -8173,17 +8178,17 @@ impl RerouteNasRequest {
                     source_to_target_amf_information_reroute =
                         Some(SourceToTargetAmfInformationReroute::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let ngap_message = ngap_message.ok_or(PerCodecError::new(format!(
+        let ngap_message = ngap_message.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ngap_message"
         )))?;
-        let amf_set_id = amf_set_id.ok_or(PerCodecError::new(format!(
+        let amf_set_id = amf_set_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_set_id"
         )))?;
         Ok(Self {
@@ -8312,17 +8317,17 @@ impl NgSetupRequest {
                 147 => ue_retention_information = Some(UeRetentionInformation::decode(data)?),
                 204 => nb_iot_default_paging_drx = Some(NbIotDefaultPagingDrx::decode(data)?),
                 273 => extended_ran_node_name = Some(ExtendedRanNodeName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let global_ran_node_id = global_ran_node_id.ok_or(PerCodecError::new(format!(
+        let global_ran_node_id = global_ran_node_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE global_ran_node_id"
         )))?;
-        let supported_ta_list = supported_ta_list.ok_or(PerCodecError::new(format!(
+        let supported_ta_list = supported_ta_list.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE supported_ta_list"
         )))?;
-        let default_paging_drx = default_paging_drx.ok_or(PerCodecError::new(format!(
+        let default_paging_drx = default_paging_drx.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE default_paging_drx"
         )))?;
         Ok(Self {
@@ -8465,19 +8470,20 @@ impl NgSetupResponse {
                 147 => ue_retention_information = Some(UeRetentionInformation::decode(data)?),
                 200 => iab_supported = Some(IabSupported::decode(data)?),
                 274 => extended_amf_name = Some(ExtendedAmfName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_name =
-            amf_name.ok_or(PerCodecError::new(format!("Missing mandatory IE amf_name")))?;
-        let served_guami_list = served_guami_list.ok_or(PerCodecError::new(format!(
+        let amf_name = amf_name.ok_or(per_codec_error_new(format!(
+            "Missing mandatory IE amf_name"
+        )))?;
+        let served_guami_list = served_guami_list.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE served_guami_list"
         )))?;
-        let relative_amf_capacity = relative_amf_capacity.ok_or(PerCodecError::new(format!(
+        let relative_amf_capacity = relative_amf_capacity.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE relative_amf_capacity"
         )))?;
-        let plmn_support_list = plmn_support_list.ok_or(PerCodecError::new(format!(
+        let plmn_support_list = plmn_support_list.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE plmn_support_list"
         )))?;
         Ok(Self {
@@ -8614,11 +8620,11 @@ impl NgSetupFailure {
                 15 => cause = Some(Cause::decode(data)?),
                 107 => time_to_wait = Some(TimeToWait::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             cause,
             time_to_wait,
@@ -8720,7 +8726,7 @@ impl RanConfigurationUpdate {
                 }
                 204 => nb_iot_default_paging_drx = Some(NbIotDefaultPagingDrx::decode(data)?),
                 273 => extended_ran_node_name = Some(ExtendedRanNodeName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -8849,7 +8855,7 @@ impl RanConfigurationUpdateAcknowledge {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -8918,11 +8924,11 @@ impl RanConfigurationUpdateFailure {
                 15 => cause = Some(Cause::decode(data)?),
                 107 => time_to_wait = Some(TimeToWait::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             cause,
             time_to_wait,
@@ -9032,7 +9038,7 @@ impl AmfConfigurationUpdate {
                         Some(AmfTnlAssociationToUpdateList::decode(data)?)
                 }
                 274 => extended_amf_name = Some(ExtendedAmfName::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -9183,7 +9189,7 @@ impl AmfConfigurationUpdateAcknowledge {
                         Some(TnlAssociationList::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -9274,11 +9280,11 @@ impl AmfConfigurationUpdateFailure {
                 15 => cause = Some(Cause::decode(data)?),
                 107 => time_to_wait = Some(TimeToWait::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             cause,
             time_to_wait,
@@ -9358,11 +9364,11 @@ impl AmfStatusIndication {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 120 => unavailable_guami_list = Some(UnavailableGuamiList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let unavailable_guami_list = unavailable_guami_list.ok_or(PerCodecError::new(format!(
+        let unavailable_guami_list = unavailable_guami_list.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE unavailable_guami_list"
         )))?;
         Ok(Self {
@@ -9425,12 +9431,12 @@ impl NgReset {
             match id {
                 15 => cause = Some(Cause::decode(data)?),
                 88 => reset_type = Some(ResetType::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
-        let reset_type = reset_type.ok_or(PerCodecError::new(format!(
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
+        let reset_type = reset_type.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE reset_type"
         )))?;
         Ok(Self { cause, reset_type })
@@ -9504,7 +9510,7 @@ impl NgResetAcknowledge {
                         Some(UeAssociatedLogicalNgConnectionList::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -9590,7 +9596,7 @@ impl ErrorIndication {
                 15 => cause = Some(Cause::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 26 => five_g_s_tmsi = Some(FiveGSTmsi::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -9707,7 +9713,7 @@ impl OverloadStart {
                         Some(TrafficLoadReductionIndication::decode(data)?)
                 }
                 49 => overload_start_nssai_list = Some(OverloadStartNssaiList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -9787,7 +9793,7 @@ impl OverloadStop {
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
         }
         Ok(Self {})
@@ -9851,7 +9857,7 @@ impl UplinkRanConfigurationTransfer {
                     intersystem_son_configuration_transfer_ul =
                         Some(IntersystemSonConfigurationTransfer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -9950,7 +9956,7 @@ impl DownlinkRanConfigurationTransfer {
                     intersystem_son_configuration_transfer_dl =
                         Some(IntersystemSonConfigurationTransfer::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -10071,21 +10077,21 @@ impl WriteReplaceWarningRequest {
                         Some(ConcurrentWarningMessageInd::decode(data)?)
                 }
                 141 => warning_area_coordinates = Some(WarningAreaCoordinates::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
+        let message_identifier = message_identifier.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE message_identifier"
         )))?;
-        let serial_number = serial_number.ok_or(PerCodecError::new(format!(
+        let serial_number = serial_number.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE serial_number"
         )))?;
-        let repetition_period = repetition_period.ok_or(PerCodecError::new(format!(
+        let repetition_period = repetition_period.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE repetition_period"
         )))?;
         let number_of_broadcasts_requested =
-            number_of_broadcasts_requested.ok_or(PerCodecError::new(format!(
+            number_of_broadcasts_requested.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE number_of_broadcasts_requested"
             )))?;
         Ok(Self {
@@ -10260,14 +10266,14 @@ impl WriteReplaceWarningResponse {
                     broadcast_completed_area_list = Some(BroadcastCompletedAreaList::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
+        let message_identifier = message_identifier.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE message_identifier"
         )))?;
-        let serial_number = serial_number.ok_or(PerCodecError::new(format!(
+        let serial_number = serial_number.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE serial_number"
         )))?;
         Ok(Self {
@@ -10367,14 +10373,14 @@ impl PwsCancelRequest {
                 95 => serial_number = Some(SerialNumber::decode(data)?),
                 122 => warning_area_list = Some(WarningAreaList::decode(data)?),
                 14 => cancel_all_warning_messages = Some(CancelAllWarningMessages::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
+        let message_identifier = message_identifier.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE message_identifier"
         )))?;
-        let serial_number = serial_number.ok_or(PerCodecError::new(format!(
+        let serial_number = serial_number.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE serial_number"
         )))?;
         Ok(Self {
@@ -10476,14 +10482,14 @@ impl PwsCancelResponse {
                     broadcast_cancelled_area_list = Some(BroadcastCancelledAreaList::decode(data)?)
                 }
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let message_identifier = message_identifier.ok_or(PerCodecError::new(format!(
+        let message_identifier = message_identifier.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE message_identifier"
         )))?;
-        let serial_number = serial_number.ok_or(PerCodecError::new(format!(
+        let serial_number = serial_number.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE serial_number"
         )))?;
         Ok(Self {
@@ -10586,17 +10592,17 @@ impl PwsRestartIndication {
                     emergency_area_id_list_for_restart =
                         Some(EmergencyAreaIdListForRestart::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let cell_id_list_for_restart = cell_id_list_for_restart.ok_or(PerCodecError::new(
+        let cell_id_list_for_restart = cell_id_list_for_restart.ok_or(per_codec_error_new(
             format!("Missing mandatory IE cell_id_list_for_restart"),
         ))?;
-        let global_ran_node_id = global_ran_node_id.ok_or(PerCodecError::new(format!(
+        let global_ran_node_id = global_ran_node_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE global_ran_node_id"
         )))?;
-        let tai_list_for_restart = tai_list_for_restart.ok_or(PerCodecError::new(format!(
+        let tai_list_for_restart = tai_list_for_restart.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE tai_list_for_restart"
         )))?;
         Ok(Self {
@@ -10688,14 +10694,14 @@ impl PwsFailureIndication {
             match id {
                 81 => pws_failed_cell_id_list = Some(PwsFailedCellIdList::decode(data)?),
                 27 => global_ran_node_id = Some(GlobalRanNodeId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let pws_failed_cell_id_list = pws_failed_cell_id_list.ok_or(PerCodecError::new(
+        let pws_failed_cell_id_list = pws_failed_cell_id_list.ok_or(per_codec_error_new(
             format!("Missing mandatory IE pws_failed_cell_id_list"),
         ))?;
-        let global_ran_node_id = global_ran_node_id.ok_or(PerCodecError::new(format!(
+        let global_ran_node_id = global_ran_node_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE global_ran_node_id"
         )))?;
         Ok(Self {
@@ -10773,20 +10779,20 @@ impl DownlinkUeAssociatedNrPPaTransport {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 89 => routing_id = Some(RoutingId::decode(data)?),
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let routing_id = routing_id.ok_or(PerCodecError::new(format!(
+        let routing_id = routing_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(PerCodecError::new(format!(
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
@@ -10882,20 +10888,20 @@ impl UplinkUeAssociatedNrPPaTransport {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 89 => routing_id = Some(RoutingId::decode(data)?),
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let routing_id = routing_id.ok_or(PerCodecError::new(format!(
+        let routing_id = routing_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(PerCodecError::new(format!(
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
@@ -10985,14 +10991,14 @@ impl DownlinkNonUeAssociatedNrPPaTransport {
             match id {
                 89 => routing_id = Some(RoutingId::decode(data)?),
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let routing_id = routing_id.ok_or(PerCodecError::new(format!(
+        let routing_id = routing_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(PerCodecError::new(format!(
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
@@ -11064,14 +11070,14 @@ impl UplinkNonUeAssociatedNrPPaTransport {
             match id {
                 89 => routing_id = Some(RoutingId::decode(data)?),
                 46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let routing_id = routing_id.ok_or(PerCodecError::new(format!(
+        let routing_id = routing_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(PerCodecError::new(format!(
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
@@ -11146,17 +11152,17 @@ impl TraceStart {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 108 => trace_activation = Some(TraceActivation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let trace_activation = trace_activation.ok_or(PerCodecError::new(format!(
+        let trace_activation = trace_activation.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE trace_activation"
         )))?;
         Ok(Self {
@@ -11243,20 +11249,20 @@ impl TraceFailureIndication {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 44 => ngran_trace_id = Some(NgranTraceId::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let ngran_trace_id = ngran_trace_id.ok_or(PerCodecError::new(format!(
+        let ngran_trace_id = ngran_trace_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ngran_trace_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -11347,17 +11353,17 @@ impl DeactivateTrace {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 44 => ngran_trace_id = Some(NgranTraceId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let ngran_trace_id = ngran_trace_id.ok_or(PerCodecError::new(format!(
+        let ngran_trace_id = ngran_trace_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ngran_trace_id"
         )))?;
         Ok(Self {
@@ -11455,24 +11461,24 @@ impl CellTrafficTrace {
                 }
                 256 => privacy_indicator = Some(PrivacyIndicator::decode(data)?),
                 257 => trace_collection_entity_uri = Some(UriAddress::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let ngran_trace_id = ngran_trace_id.ok_or(PerCodecError::new(format!(
+        let ngran_trace_id = ngran_trace_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ngran_trace_id"
         )))?;
-        let ngran_cgi = ngran_cgi.ok_or(PerCodecError::new(format!(
+        let ngran_cgi = ngran_cgi.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ngran_cgi"
         )))?;
         let trace_collection_entity_ip_address =
-            trace_collection_entity_ip_address.ok_or(PerCodecError::new(format!(
+            trace_collection_entity_ip_address.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE trace_collection_entity_ip_address"
             )))?;
         Ok(Self {
@@ -11599,18 +11605,18 @@ impl LocationReportingControl {
                     location_reporting_request_type =
                         Some(LocationReportingRequestType::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let location_reporting_request_type =
-            location_reporting_request_type.ok_or(PerCodecError::new(format!(
+            location_reporting_request_type.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE location_reporting_request_type"
             )))?;
         Ok(Self {
@@ -11694,17 +11700,17 @@ impl LocationReportingFailureIndication {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 15 => cause = Some(Cause::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let cause = cause.ok_or(PerCodecError::new(format!("Missing mandatory IE cause")))?;
+        let cause = cause.ok_or(per_codec_error_new(format!("Missing mandatory IE cause")))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -11798,21 +11804,21 @@ impl LocationReport {
                     location_reporting_request_type =
                         Some(LocationReportingRequestType::decode(data)?)
                 }
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let user_location_information = user_location_information.ok_or(PerCodecError::new(
+        let user_location_information = user_location_information.ok_or(per_codec_error_new(
             format!("Missing mandatory IE user_location_information"),
         ))?;
         let location_reporting_request_type =
-            location_reporting_request_type.ok_or(PerCodecError::new(format!(
+            location_reporting_request_type.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE location_reporting_request_type"
             )))?;
         Ok(Self {
@@ -11913,14 +11919,14 @@ impl UeTnlaBindingReleaseRequest {
             match id {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -12003,17 +12009,17 @@ impl UeRadioCapabilityInfoIndication {
                     ue_radio_capability_for_paging = Some(UeRadioCapabilityForPaging::decode(data)?)
                 }
                 265 => ue_radio_capability_eutra_format = Some(UeRadioCapability::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let ue_radio_capability = ue_radio_capability.ok_or(PerCodecError::new(format!(
+        let ue_radio_capability = ue_radio_capability.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ue_radio_capability"
         )))?;
         Ok(Self {
@@ -12122,14 +12128,14 @@ impl UeRadioCapabilityCheckRequest {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 117 => ue_radio_capability = Some(UeRadioCapability::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -12229,19 +12235,19 @@ impl UeRadioCapabilityCheckResponse {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 30 => ims_voice_support_indicator = Some(ImsVoiceSupportIndicator::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
-        let ims_voice_support_indicator = ims_voice_support_indicator.ok_or(PerCodecError::new(
-            format!("Missing mandatory IE ims_voice_support_indicator"),
-        ))?;
+        let ims_voice_support_indicator = ims_voice_support_indicator.ok_or(
+            per_codec_error_new(format!("Missing mandatory IE ims_voice_support_indicator")),
+        )?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
@@ -12379,18 +12385,18 @@ impl SecondaryRatDataUsageReport {
                 }
                 143 => handover_flag = Some(HandoverFlag::decode(data)?),
                 121 => user_location_information = Some(UserLocationInformation::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         let pdu_session_resource_secondary_rat_usage_list =
-            pdu_session_resource_secondary_rat_usage_list.ok_or(PerCodecError::new(format!(
+            pdu_session_resource_secondary_rat_usage_list.ok_or(per_codec_error_new(format!(
                 "Missing mandatory IE pdu_session_resource_secondary_rat_usage_list"
             )))?;
         Ok(Self {
@@ -12491,7 +12497,7 @@ impl UplinkRimInformationTransfer {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 175 => rim_information_transfer = Some(RimInformationTransfer::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -12554,7 +12560,7 @@ impl DownlinkRimInformationTransfer {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 175 => rim_information_transfer = Some(RimInformationTransfer::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
@@ -12652,14 +12658,14 @@ impl ConnectionEstablishmentIndication {
                 }
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -12838,11 +12844,11 @@ impl UeRadioCapabilityIdMappingRequest {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ue_radio_capability_id = ue_radio_capability_id.ok_or(PerCodecError::new(format!(
+        let ue_radio_capability_id = ue_radio_capability_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ue_radio_capability_id"
         )))?;
         Ok(Self {
@@ -12908,14 +12914,14 @@ impl UeRadioCapabilityIdMappingResponse {
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
                 117 => ue_radio_capability = Some(UeRadioCapability::decode(data)?),
                 19 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let ue_radio_capability_id = ue_radio_capability_id.ok_or(PerCodecError::new(format!(
+        let ue_radio_capability_id = ue_radio_capability_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ue_radio_capability_id"
         )))?;
-        let ue_radio_capability = ue_radio_capability.ok_or(PerCodecError::new(format!(
+        let ue_radio_capability = ue_radio_capability.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ue_radio_capability"
         )))?;
         Ok(Self {
@@ -13004,14 +13010,14 @@ impl AmfcpRelocationIndication {
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 148 => snssai = Some(Snssai::decode(data)?),
                 0 => allowed_nssai = Some(AllowedNssai::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
-        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE ran_ue_ngap_id"
         )))?;
         Ok(Self {

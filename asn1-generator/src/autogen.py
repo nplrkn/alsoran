@@ -14,6 +14,7 @@ use xxap::{GtpTunnel, TransportLayerAddress, PduSessionId};
 """
 USE_ASN1_APER = """\
 use asn1_per::{{aper::*, *}};
+use xxap::*;
 """
 USE_ASN1_UPER = """\
 use asn1_per::{{uper::*, *}};

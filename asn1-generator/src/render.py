@@ -272,16 +272,14 @@ class EnumFields(Interpreter):
         self.extensible = False
 
     def enum_field(self, tree):
-        self.variants += 1
+        if not self.extensible:
+            self.variants += 1
         self.enum_fields += f"""\
     {tree.children[0]},
 """
 
     def extension_marker(self, _tree):
         self.extensible = True
-
-    def extended_items(self, _tree):
-        pass
 
 
 class ChoiceFields(Interpreter):
@@ -387,7 +385,7 @@ class ChoiceFieldsFrom(Interpreter):
                     {type_info.code} => Ok(Self::{type_info.rust_type}({type_info.rust_type}::decode(data)?)),
 """
         self.fields_from += f"""\
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {{}}", x))),
                 }};
                 data.decode_align()?;
                 result
@@ -411,7 +409,7 @@ class ChoiceFieldsFrom(Interpreter):
 
     def empty_sequence_field(self, tree):
         self.fields_from += f"""\
-            {self.field_index} => Err(PerCodecError::new("Choice extension container not implemented")),
+            {self.field_index} => Err(per_codec_error_new("Choice extension container not implemented")),
 """
         self.field_index += 1
 
@@ -478,7 +476,7 @@ class IeFields(Interpreter):
 """
         self.num_mandatory_fields += 1
         self.mandatory += f"""\
-        let {name} = {name}.ok_or(PerCodecError::new(format!(
+        let {name} = {name}.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE {name}"
         )))?;
 """
@@ -552,7 +550,7 @@ class IeFieldsFrom(Interpreter):
         name = self.common(tree)
         self.num_mandatory_fields += 1
         self.mandatory += f"""\
-        let {name} = {name}.ok_or(PerCodecError::new(format!(
+        let {name} = {name}.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE {name}"
         )))?;
 """
@@ -732,7 +730,7 @@ impl {name} {{
         let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {{
 {decode_matches}\
-            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {{}}", x)))
+            x => return Err(per_codec_error_new(format!("Unrecognised procedure code {{}}", x)))
         }}
     }}
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
@@ -876,21 +874,18 @@ impl Indication for {p.name} {{
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+# [repr(u32)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
 
 impl {name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
-        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
-        if extended {{
-            return Err(PerCodecError::new("Extended enum not implemented"));
-        }}
-        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
+        let (idx, _extended) = decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
+        Self::try_from(idx as u32).map_err(|_| per_codec_error_new("Unknown enum variant"))
     }}
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
-        encode::encode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)}, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)}, *self as i128, (*self as u32) >= {field_interpreter.variants})
     }}
 }}
 
@@ -921,11 +916,11 @@ impl {name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         let (idx, extended) = decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }}
         match idx {{
 {fields_from_interpreter.fields_from}\
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }}
     }}
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
@@ -1017,7 +1012,7 @@ impl {orig_name} {{
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x)))
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {{}}", x)))
             }}\
 {decode_align}
         }}
@@ -1253,7 +1248,7 @@ impl InitiatingMessage {
         match id {
             0 => Ok(Self::AmfConfigurationUpdate(AmfConfigurationUpdate::decode(data)?)),
             11 => Ok(Self::HandoverNotify(HandoverNotify::decode(data)?)),
-            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
+            x => return Err(per_codec_error_new(format!("Unrecognised procedure code {}", x)))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1301,7 +1296,7 @@ impl SuccessfulOutcome {
         let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {
             0 => Ok(Self::AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge::decode(data)?)),
-            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
+            x => return Err(per_codec_error_new(format!("Unrecognised procedure code {}", x)))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1341,7 +1336,7 @@ impl UnsuccessfulOutcome {
         let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {
             0 => Ok(Self::AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure::decode(data)?)),
-            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
+            x => return Err(per_codec_error_new(format!("Unrecognised procedure code {}", x)))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1406,7 +1401,7 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
 
 // TriggeringMessage
 # [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+# [repr(u32)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -1415,14 +1410,11 @@ pub enum TriggeringMessage {
 
 impl TriggeringMessage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(2), false)?;
-        if extended {
-            return Err(PerCodecError::new("Extended enum not implemented"));
-        }
-        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
+        let (idx, _extended) = decode::decode_enumerated(data, Some(0), Some(2), false)?;
+        Self::try_from(idx as u32).map_err(|_| per_codec_error_new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, (*self as u32) >= 3)
     }
 }
 
@@ -1515,21 +1507,19 @@ impl PerCodec for WlanMeasurementConfiguration {
 }
 // WlanRtt
 # [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+# [repr(u32)]
 pub enum WlanRtt {
     Thing1,
+    Thing2,
 }
 
 impl WlanRtt {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
-        if extended {
-            return Err(PerCodecError::new("Extended enum not implemented"));
-        }
-        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
+        let (idx, _extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        Self::try_from(idx as u32).map_err(|_| per_codec_error_new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, (*self as u32) >= 1)
     }
 }
 
@@ -1670,28 +1660,27 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
 	bitrate64kbs,
 	maximum-UE-rate,
 	...
+    fooVariant
 }
 """
         output = """\
 
 // MaximumIntegrityProtectedDataRate
 # [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+# [repr(u32)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
+    FooVariant,
 }
 
 impl MaximumIntegrityProtectedDataRate {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(1), true)?;
-        if extended {
-            return Err(PerCodecError::new("Extended enum not implemented"));
-        }
-        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
+        let (idx, _extended) = decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        Self::try_from(idx as u32).map_err(|_| per_codec_error_new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, (*self as u32) >= 2)
     }
 }
 
@@ -1728,14 +1717,14 @@ impl EventTrigger {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::OutOfCoverage(OutOfCoverage::decode(data)?)),
             1 => Ok(Self::EventL1LoggedMdtConfig),
             2 => Ok(Self::ShortMacroEnbId(decode::decode_bitstring(data, Some(18), Some(18), false)?)),
-            3 => Err(PerCodecError::new("Choice extension container not implemented")),
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            3 => Err(per_codec_error_new("Choice extension container not implemented")),
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1758,21 +1747,18 @@ impl EventTrigger {
 
 // OutOfCoverage
 # [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+# [repr(u32)]
 pub enum OutOfCoverage {
     True,
 }
 
 impl OutOfCoverage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
-        if extended {
-            return Err(PerCodecError::new("Extended enum not implemented"));
-        }
-        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
+        let (idx, _extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        Self::try_from(idx as u32).map_err(|_| per_codec_error_new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, (*self as u32) >=)
     }
 }
 
@@ -1814,11 +1800,11 @@ impl PduSessionResourceSetupRequest {
             match id {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 83 => ran_paging_priority = Some(decode::decode_octetstring(data, Some(1), Some(1), false)?.try_into().unwrap()),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x)))
             }
             data.decode_align()?;
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -1887,7 +1873,7 @@ impl GnbId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::GnbId(decode::decode_bitstring(data, Some(22), Some(32), false)?)),
@@ -1896,12 +1882,12 @@ impl GnbId {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             },
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -1943,12 +1929,12 @@ impl PrivateIeId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::Local(decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16)),
             1 => Ok(Self::Global(decode::decode_octetstring(data, None, None, false)?)),
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2246,7 +2232,7 @@ impl BapMappingConfiguration {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 283 => bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x)))
             }
             data.decode_align()?;
         }
@@ -2440,12 +2426,12 @@ impl SbcchSlBchMessageType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::C1(C1::decode(data)?)),
-            1 => Err(PerCodecError::new("Choice extension container not implemented")),
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            1 => Err(per_codec_error_new("Choice extension container not implemented")),
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2478,12 +2464,12 @@ impl C1 {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::MasterInformationBlockSidelink(MasterInformationBlockSidelink::decode(data)?)),
             1 => Ok(Self::Spare1),
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2538,7 +2524,7 @@ impl OverloadStop {
             let _ = Criticality::decode(data)?;
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x)))
             }
         }
         Ok(Self {
@@ -2738,12 +2724,12 @@ impl SibTypeAndInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, true)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::Sib2(Sib2::decode(data)?)),
             1 => Ok(Self::Sib3(Sib3::decode(data)?)),
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2898,7 +2884,7 @@ impl SystemBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::EutranBearerContextSetupRequest(EutranBearerContextSetupRequest::decode(data)?)),
@@ -2908,12 +2894,12 @@ impl SystemBearerContextSetupRequest {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             },
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -2957,7 +2943,7 @@ impl EutranBearerContextSetupRequest {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 43 => subscriber_profile_i_dfor_rfp = Some(decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x)))
             }
             data.decode_align()?;
         }
@@ -3012,11 +2998,11 @@ impl NgRanBearerContextSetupRequest {
             let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 321 => pdu_session_resource_to_setup_list = Some(PduSessionResourceToSetupList::decode(data)?),
-                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(per_codec_error_new(format!("Unrecognised IE type {}", x)))
             }
             data.decode_align()?;
         }
-        let pdu_session_resource_to_setup_list = pdu_session_resource_to_setup_list.ok_or(PerCodecError::new(format!(
+        let pdu_session_resource_to_setup_list = pdu_session_resource_to_setup_list.ok_or(per_codec_error_new(format!(
             "Missing mandatory IE pdu_session_resource_to_setup_list"
         )))?;
         Ok(Self {
@@ -3076,7 +3062,7 @@ impl QosInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::EutranQos(EutranQos::decode(data)?)),
@@ -3087,12 +3073,12 @@ impl QosInformation {
                 let result = match id {
                     164 => Ok(Self::DrbInformation(DrbInformation::decode(data)?)),
                     156 => Ok(Self::AnOtherType(AnOtherType::decode(data)?)),
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             },
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
@@ -3165,7 +3151,7 @@ impl UpTransportLayerInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(PerCodecError::new("CHOICE additions not implemented"))
+            return Err(per_codec_error_new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::GtpTunnel(GtpTunnel::decode(data)?)),
@@ -3174,12 +3160,12 @@ impl UpTransportLayerInformation {
                 let _ = Criticality::decode(data)?;
                 let _ = decode::decode_length_determinent(data, None, None, false)?;
                 let result = match id {
-                    x => Err(PerCodecError::new(format!("Unrecognised IE type {}", x))),
+                    x => Err(per_codec_error_new(format!("Unrecognised IE type {}", x))),
                 };
                 data.decode_align()?;
                 result
             },
-            _ => Err(PerCodecError::new("Unknown choice idx"))
+            _ => Err(per_codec_error_new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {

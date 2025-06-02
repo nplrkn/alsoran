@@ -649,6 +649,7 @@ document
     enumerated
       enum_field\tThing1
       extension_marker
+      enum_field\tThing2
   sequence_def
     N2
     sequence
@@ -687,7 +688,7 @@ document
         sr_configuration
         OctetString\tNone
       optional_field
-        pdcch_config_sib1
+        pdcch_config_sib_1
         OctetString\tNone
       optional_field
         scs_common
@@ -1211,6 +1212,7 @@ document
       choice_field_extension_ies
         extension_marker
 """)
+
 
 
 if __name__ == '__main__':

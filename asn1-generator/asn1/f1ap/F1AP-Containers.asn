@@ -1,3 +1,4 @@
+-- ASN1START 
 -- **************************************************************
 --
 -- Container definitions
@@ -182,3 +183,4 @@ PrivateIE-Field {F1AP-PRIVATE-IES : IEsSetParam} ::= SEQUENCE {
 }
 
 END
+-- ASN1STOP 

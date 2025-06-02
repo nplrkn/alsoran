@@ -1,3 +1,4 @@
+-- ASN1START 
 -- **************************************************************
 --
 -- Elementary Procedure definitions
@@ -119,7 +120,68 @@ FROM F1AP-CommonDataTypes
 	E-CIDMeasurementInitiationFailure,
 	E-CIDMeasurementFailureIndication,
 	E-CIDMeasurementReport,
-	E-CIDMeasurementTerminationCommand
+	E-CIDMeasurementTerminationCommand,
+	BroadcastContextSetupRequest,
+	BroadcastContextSetupResponse,
+	BroadcastContextSetupFailure,
+	BroadcastContextReleaseCommand,
+	BroadcastContextReleaseComplete,
+	BroadcastContextReleaseRequest,
+	BroadcastContextModificationRequest,
+	BroadcastContextModificationResponse,
+	BroadcastContextModificationFailure,
+	MulticastGroupPaging,
+	MulticastContextSetupRequest,
+	MulticastContextSetupResponse,
+	MulticastContextSetupFailure,
+	MulticastContextReleaseCommand,
+	MulticastContextReleaseComplete,
+	MulticastContextReleaseRequest,
+	MulticastContextModificationRequest,
+	MulticastContextModificationResponse,
+	MulticastContextModificationFailure,
+	MulticastDistributionSetupRequest,
+	MulticastDistributionSetupResponse,
+	MulticastDistributionSetupFailure,
+	MulticastDistributionReleaseCommand,
+	MulticastDistributionReleaseComplete,
+	PDCMeasurementInitiationRequest,
+	PDCMeasurementInitiationResponse,
+	PDCMeasurementInitiationFailure,
+	PDCMeasurementReport,
+	PDCMeasurementTerminationCommand,
+	PDCMeasurementFailureIndication,
+	PRSConfigurationRequest,
+	PRSConfigurationResponse,
+	PRSConfigurationFailure,
+	MeasurementPreconfigurationRequired,
+	MeasurementPreconfigurationConfirm,
+	MeasurementPreconfigurationRefuse,
+	MeasurementActivation,
+	QoEInformationTransfer,
+	PosSystemInformationDeliveryCommand,
+	DUCUCellSwitchNotification,
+	CUDUCellSwitchNotification,
+	DUCUTAInformationTransfer,
+	CUDUTAInformationTransfer,
+	QoEInformationTransferControl,
+	RachIndication,
+	TimingSynchronisationStatusRequest,
+	TimingSynchronisationStatusResponse,
+	TimingSynchronisationStatusFailure,
+	TimingSynchronisationStatusReport,
+	MIABF1SetupTriggering,
+	MIABF1SetupOutcomeNotification,
+	MulticastContextNotificationIndication,
+	MulticastContextNotificationConfirm,
+	MulticastContextNotificationRefuse,
+	MulticastCommonConfigurationRequest,
+	MulticastCommonConfigurationResponse,
+	MulticastCommonConfigurationRefuse,
+	BroadcastTransportResourceRequest,
+	DUCUAccessAndMobilityIndication,
+	SRSInformationReservationNotification
+
 
 
 
@@ -132,6 +194,7 @@ FROM F1AP-PDU-Contents
 	id-UEContextRelease,
 	id-UEContextModification,
 	id-UEContextModificationRequired,
+	id-DUCUAccessAndMobilityIndication,
 	id-ErrorIndication, 
 	id-UEContextReleaseRequest,
 	id-DLRRCMessageTransfer,
@@ -181,7 +244,44 @@ FROM F1AP-PDU-Contents
 	id-E-CIDMeasurementInitiation,
 	id-E-CIDMeasurementFailureIndication,
 	id-E-CIDMeasurementReport,
-	id-E-CIDMeasurementTermination
+	id-E-CIDMeasurementTermination,
+	id-BroadcastContextSetup,
+	id-BroadcastContextRelease,
+	id-BroadcastContextReleaseRequest,
+	id-BroadcastContextModification,
+	id-MulticastGroupPaging,
+	id-MulticastContextSetup,
+	id-MulticastContextRelease,
+	id-MulticastContextReleaseRequest,
+	id-MulticastContextModification,
+	id-MulticastDistributionSetup,
+	id-MulticastDistributionRelease,
+	id-PDCMeasurementInitiation,
+	id-PDCMeasurementTerminationCommand,
+	id-PDCMeasurementFailureIndication,
+	id-PDCMeasurementReport,
+	id-pRSConfigurationExchange,
+	id-measurementPreconfiguration,
+	id-measurementActivation,
+	id-QoEInformationTransfer,
+	id-PosSystemInformationDeliveryCommand,
+	id-DUCUCellSwitchNotification,
+	id-CUDUCellSwitchNotification,
+	id-DUCUTAInformationTransfer,
+	id-CUDUTAInformationTransfer,
+	id-QoEInformationTransferControl,
+	id-RachIndication,
+	id-TimingSynchronisationStatus,
+	id-TimingSynchronisationStatusReport,
+	id-MIABF1SetupTriggering,
+	id-MIABF1SetupOutcomeNotification,
+	id-MulticastContextNotification,
+	id-MulticastCommonConfiguration,
+	id-BroadcastTransportResourceRequest,
+	id-SRSInformationReservationNotification
+
+
+
 
 
 FROM F1AP-Constants
@@ -271,7 +371,7 @@ F1AP-ELEMENTARY-PROCEDURES-CLASS-1 F1AP-ELEMENTARY-PROCEDURE ::= {
 	uEContextModification			|
 	uEContextModificationRequired	|
 	writeReplaceWarning				|
-	pWSCancel					|
+	pWSCancel						|
 	gNBDUResourceCoordination		|
 	f1Removal						|
 	bAPMappingConfiguration			|
@@ -283,7 +383,21 @@ F1AP-ELEMENTARY-PROCEDURES-CLASS-1 F1AP-ELEMENTARY-PROCEDURE ::= {
 	tRPInformationExchange			|
 	positioningInformationExchange	|
 	positioningActivation			|
-	e-CIDMeasurementInitiation,
+	e-CIDMeasurementInitiation		|
+	broadcastContextSetup			|
+	broadcastContextRelease			|
+	broadcastContextModification	|
+	multicastContextSetup			|
+	multicastContextRelease			|
+	multicastContextModification	|
+	multicastDistributionSetup		|
+	multicastDistributionRelease	|
+	pDCMeasurementInitiation		|
+	pRSConfigurationExchange		|
+	measurementPreconfiguration	|
+	timingSynchronisationStatus	|
+	multicastContextNotification	|
+	multicastCommonConfiguration	,
 	...
 }
 
@@ -323,7 +437,28 @@ F1AP-ELEMENTARY-PROCEDURES-CLASS-2 F1AP-ELEMENTARY-PROCEDURE ::= {
 	e-CIDMeasurementFailureIndication			|
 	e-CIDMeasurementReport						|
 	e-CIDMeasurementTermination					|
-	positioningInformationUpdate,
+	positioningInformationUpdate				|
+	multicastGroupPaging						|
+	broadcastContextReleaseRequest				|
+	multicastContextReleaseRequest				|
+	pDCMeasurementReport						|
+	pDCMeasurementTerminationCommand			|
+	pDCMeasurementFailureIndication				|
+	measurementActivation						|
+	qoEInformationTransfer						|
+	posSystemInformationDelivery					|
+	dUCUCellSwitchNotification					|
+	cUDUCellSwitchNotification					|
+	dUCUTAInformationTransfer					|
+	cUDUTAInformationTransfer					|
+	qoEInformationTransferControl					|
+	rachIndication								|
+	timingSynchronisationStatusReport				|
+	mIABF1SetupTriggering						|
+	mIABF1SetupOutcomeNotification				|
+	broadcastTransportResourceRequest			|
+	dUCUAccessAndMobilityIndication			|
+	sRSInformationReservationNotification,
 	...
 }
 -- **************************************************************
@@ -725,5 +860,246 @@ positioningInformationUpdate F1AP-ELEMENTARY-PROCEDURE ::= {
 	CRITICALITY				ignore
 }
 
+broadcastContextSetup F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		BroadcastContextSetupRequest
+	SUCCESSFUL OUTCOME		BroadcastContextSetupResponse
+	UNSUCCESSFUL OUTCOME	BroadcastContextSetupFailure
+	PROCEDURE CODE			id-BroadcastContextSetup
+	CRITICALITY				reject
+}
+
+broadcastContextRelease F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		BroadcastContextReleaseCommand
+	SUCCESSFUL OUTCOME		BroadcastContextReleaseComplete
+	PROCEDURE CODE			id-BroadcastContextRelease
+	CRITICALITY				reject
+}
+
+broadcastContextReleaseRequest F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		BroadcastContextReleaseRequest
+	PROCEDURE CODE			id-BroadcastContextReleaseRequest
+	CRITICALITY				reject
+}
+
+broadcastContextModification F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		BroadcastContextModificationRequest
+	SUCCESSFUL OUTCOME		BroadcastContextModificationResponse
+	UNSUCCESSFUL OUTCOME	BroadcastContextModificationFailure
+	PROCEDURE CODE			id-BroadcastContextModification
+	CRITICALITY				reject
+}
+
+multicastGroupPaging F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastGroupPaging
+	PROCEDURE CODE			id-MulticastGroupPaging
+	CRITICALITY				ignore
+}
+
+
+multicastContextSetup F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastContextSetupRequest
+	SUCCESSFUL OUTCOME		MulticastContextSetupResponse
+	UNSUCCESSFUL OUTCOME	MulticastContextSetupFailure
+	PROCEDURE CODE			id-MulticastContextSetup
+	CRITICALITY				reject
+}
+
+multicastContextRelease F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastContextReleaseCommand
+	SUCCESSFUL OUTCOME		MulticastContextReleaseComplete
+	PROCEDURE CODE			id-MulticastContextRelease
+	CRITICALITY				reject
+}
+
+multicastContextReleaseRequest F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastContextReleaseRequest
+	PROCEDURE CODE			id-MulticastContextReleaseRequest
+	CRITICALITY				reject
+}
+
+multicastContextModification F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastContextModificationRequest
+	SUCCESSFUL OUTCOME		MulticastContextModificationResponse
+	UNSUCCESSFUL OUTCOME	MulticastContextModificationFailure
+	PROCEDURE CODE			id-MulticastContextModification
+	CRITICALITY				reject
+}
+
+multicastDistributionSetup F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastDistributionSetupRequest
+	SUCCESSFUL OUTCOME		MulticastDistributionSetupResponse
+	UNSUCCESSFUL OUTCOME	MulticastDistributionSetupFailure
+	PROCEDURE CODE			id-MulticastDistributionSetup
+	CRITICALITY				reject
+}
+
+multicastDistributionRelease F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastDistributionReleaseCommand
+	SUCCESSFUL OUTCOME		MulticastDistributionReleaseComplete
+	PROCEDURE CODE			id-MulticastDistributionRelease
+	CRITICALITY				reject
+}
+
+
+pDCMeasurementInitiation F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		PDCMeasurementInitiationRequest
+	SUCCESSFUL OUTCOME		PDCMeasurementInitiationResponse
+	UNSUCCESSFUL OUTCOME	PDCMeasurementInitiationFailure
+	PROCEDURE CODE			id-PDCMeasurementInitiation
+	CRITICALITY				reject
+}
+
+pDCMeasurementReport F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		PDCMeasurementReport
+	PROCEDURE CODE			id-PDCMeasurementReport
+	CRITICALITY				ignore
+}
+
+pDCMeasurementTerminationCommand F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		PDCMeasurementTerminationCommand
+	PROCEDURE CODE			id-PDCMeasurementTerminationCommand
+	CRITICALITY				ignore
+}
+
+pDCMeasurementFailureIndication F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		PDCMeasurementFailureIndication
+	PROCEDURE CODE			id-PDCMeasurementFailureIndication
+	CRITICALITY				ignore
+}
+
+pRSConfigurationExchange F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		PRSConfigurationRequest
+	SUCCESSFUL OUTCOME		PRSConfigurationResponse
+	UNSUCCESSFUL OUTCOME	PRSConfigurationFailure
+	PROCEDURE CODE			id-pRSConfigurationExchange
+	CRITICALITY				reject
+}
+
+measurementPreconfiguration F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MeasurementPreconfigurationRequired
+	SUCCESSFUL OUTCOME		MeasurementPreconfigurationConfirm
+	UNSUCCESSFUL OUTCOME	MeasurementPreconfigurationRefuse
+	PROCEDURE CODE			id-measurementPreconfiguration
+	CRITICALITY				reject
+}
+ 
+
+measurementActivation		F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MeasurementActivation
+	PROCEDURE CODE			id-measurementActivation
+	CRITICALITY				ignore
+}
+
+qoEInformationTransfer F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		QoEInformationTransfer
+	PROCEDURE CODE			id-QoEInformationTransfer 
+	CRITICALITY				ignore
+}
+
+posSystemInformationDelivery F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		PosSystemInformationDeliveryCommand
+	PROCEDURE CODE			id-PosSystemInformationDeliveryCommand
+	CRITICALITY				ignore
+}
+
+dUCUCellSwitchNotification 	F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		DUCUCellSwitchNotification
+	PROCEDURE CODE			id-DUCUCellSwitchNotification
+	CRITICALITY				ignore
+}
+
+cUDUCellSwitchNotification 	F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		CUDUCellSwitchNotification
+	PROCEDURE CODE			id-CUDUCellSwitchNotification
+	CRITICALITY				ignore
+}
+
+
+dUCUTAInformationTransfer 	F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		DUCUTAInformationTransfer
+	PROCEDURE CODE			id-DUCUTAInformationTransfer
+	CRITICALITY				ignore
+}
+
+cUDUTAInformationTransfer 	F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		CUDUTAInformationTransfer
+	PROCEDURE CODE			id-CUDUTAInformationTransfer
+	CRITICALITY				ignore
+}
+
+qoEInformationTransferControl F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		QoEInformationTransferControl
+	PROCEDURE CODE			id-QoEInformationTransferControl
+	CRITICALITY				ignore
+}
+
+rachIndication F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		RachIndication
+	PROCEDURE CODE			id-RachIndication 
+	CRITICALITY				ignore
+}
+
+timingSynchronisationStatus F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		TimingSynchronisationStatusRequest
+	SUCCESSFUL OUTCOME		TimingSynchronisationStatusResponse
+	UNSUCCESSFUL OUTCOME	TimingSynchronisationStatusFailure
+	PROCEDURE CODE			id-TimingSynchronisationStatus
+	CRITICALITY				reject
+}
+
+timingSynchronisationStatusReport F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		TimingSynchronisationStatusReport
+	PROCEDURE CODE			id-TimingSynchronisationStatusReport
+	CRITICALITY				ignore
+}
+
+mIABF1SetupTriggering F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MIABF1SetupTriggering
+	PROCEDURE CODE			id-MIABF1SetupTriggering
+	CRITICALITY				ignore
+}
+
+mIABF1SetupOutcomeNotification F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MIABF1SetupOutcomeNotification
+	PROCEDURE CODE			id-MIABF1SetupOutcomeNotification
+	CRITICALITY				ignore
+}
+
+multicastContextNotification F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastContextNotificationIndication
+	SUCCESSFUL OUTCOME		MulticastContextNotificationConfirm
+	UNSUCCESSFUL OUTCOME	MulticastContextNotificationRefuse
+	PROCEDURE CODE			id-MulticastContextNotification
+	CRITICALITY				reject
+}
+
+multicastCommonConfiguration F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		MulticastCommonConfigurationRequest
+	SUCCESSFUL OUTCOME		MulticastCommonConfigurationResponse
+	UNSUCCESSFUL OUTCOME	MulticastCommonConfigurationRefuse
+	PROCEDURE CODE			id-MulticastCommonConfiguration
+	CRITICALITY				reject
+}
+
+
+broadcastTransportResourceRequest F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		BroadcastTransportResourceRequest
+	PROCEDURE CODE			id-BroadcastTransportResourceRequest
+	CRITICALITY				reject
+}
+
+dUCUAccessAndMobilityIndication F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		DUCUAccessAndMobilityIndication
+	PROCEDURE CODE			id-DUCUAccessAndMobilityIndication
+	CRITICALITY				ignore
+}
+
+sRSInformationReservationNotification F1AP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		SRSInformationReservationNotification
+	PROCEDURE CODE			id-SRSInformationReservationNotification
+	CRITICALITY				reject
+}
+
 
 END
+-- ASN1STOP 
