@@ -1,5 +1,7 @@
 # Alsoran
 
+*** This project is no longer active, but much of it lives on in [QCore](http://www.github.com/nplrkn/qcore) ***
+  
 Alsoran is a Rust implementation of the gNodeB Centralized Unit (gNB-CU) of the 5G Radio Access Network (RAN).
 
 The gNodeB is the component that manages the radio access of 5G User Equipment (UEs) and connects them to a 5G Core. 
